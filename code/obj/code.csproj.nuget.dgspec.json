@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "F:\\VS\\Bc. 3. rok\\TIS\\git\\vlaky\\code\\code.csproj": {}
+    "C:\\Users\\kekino2468\\Desktop\\CEVALOGISTICS\\vlaky\\code\\code.csproj": {}
   },
   "projects": {
-    "F:\\VS\\Bc. 3. rok\\TIS\\git\\vlaky\\code\\code.csproj": {
+    "C:\\Users\\kekino2468\\Desktop\\CEVALOGISTICS\\vlaky\\code\\code.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\VS\\Bc. 3. rok\\TIS\\git\\vlaky\\code\\code.csproj",
+        "projectUniqueName": "C:\\Users\\kekino2468\\Desktop\\CEVALOGISTICS\\vlaky\\code\\code.csproj",
         "projectName": "code",
-        "projectPath": "F:\\VS\\Bc. 3. rok\\TIS\\git\\vlaky\\code\\code.csproj",
-        "packagesPath": "C:\\Users\\pia66\\.nuget\\packages\\",
-        "outputPath": "F:\\VS\\Bc. 3. rok\\TIS\\git\\vlaky\\code\\obj\\",
+        "projectPath": "C:\\Users\\kekino2468\\Desktop\\CEVALOGISTICS\\vlaky\\code\\code.csproj",
+        "packagesPath": "C:\\Users\\kekino2468\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\kekino2468\\Desktop\\CEVALOGISTICS\\vlaky\\code\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\pia66\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\kekino2468\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
