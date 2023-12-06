@@ -1,7 +1,15 @@
+using code.Components;
+using code.Models;
+using code.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+builder.Services.AddTransient<TestUsers>();
+builder.Services.AddTransient<AccountManager>();
+builder.Services.AddTransient<Account>();
+builder.Services.AddServerSideBlazor();
 
 var app = builder.Build();
 
@@ -21,5 +29,38 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapRazorPages();
+app.MapBlazorHub();
 
 app.Run();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

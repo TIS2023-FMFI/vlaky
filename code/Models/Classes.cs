@@ -1,27 +1,53 @@
+
+
 using System;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.SignalR;
 
 namespace code.Models
 {
-    public abstract class Account{
+    public class Account{
+
+        [JsonPropertyName("Id")]
         public int Id{get;set;}
-        public abstract string Type();
+
+        [JsonPropertyName("Type")]
+        public string Type{get;set;}
 
     }
 
-    public class AdminAccount:Account{
-        public override string Type()
-        {
-            return "Admin";
+    public class AccountManager{
+        List<Account>Accounts = new List<Account>();
+        public AccountManager(){
+            //nacitame Accounts do listu
         }
+        public bool Empty{get;set;}
+        public void AddAccount(Account n){
+            Accounts.Add(n);
+            //update db
+        }
+        public void RemoveAccount(int id){
+            foreach(var u in Accounts){
+                if(u.Id==id){
+                    Accounts.Remove(u);
+                }
+            }
+            //update db
+        }
+        public void RemoveAll(){
+            Accounts.Clear();
+            //update db
+        }
+        public List<Account> GetAccounts(){
+            return Accounts;
+        }
+
+        // public List<BlackBoardNote> SortedNotes(){
+          
+        // }
+
     }
 
-    public class UserAccount:Account{
-        public override string Type()
-        {
-            return "User";
-        }
-    }
 
     public class Note{
         public int id;
