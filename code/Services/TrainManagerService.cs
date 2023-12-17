@@ -6,9 +6,10 @@ namespace code.Services
 {
 	public class TrainManagerService
 	{
-		public TrainManagerService()
+		SQLService s;
+		public TrainManagerService(SQLService s, DbConnectionService connectionService)
 		{
-			
+			this.s = s;
 		}
 
 		public void AddTrain(Train trn)
@@ -16,17 +17,17 @@ namespace code.Services
 			
 			string sql = "INSERT INTO trains (name, destination, state, date, coll, n_wagons, max_lenght, lenght) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)";
 			
-			NpgsqlParameter param1 = new NpgsqlParameter("name", trn.GetName());
-			NpgsqlParameter param2 = new NpgsqlParameter("destination", trn.GetDestination());
-			NpgsqlParameter param3 = new NpgsqlParameter("state", trn.getStatus());
-			NpgsqlParameter param4 = new NpgsqlParameter("date", trn.GetLeavingTime());
-			NpgsqlParameter param5 = new NpgsqlParameter("coll", trn.GetDutiable());
-			NpgsqlParameter param6 = new NpgsqlParameter("n_wagons", trn.GetWagonsCount());
-			NpgsqlParameter param7 = new NpgsqlParameter("max_lenght", trn.GetMaxLenght());
-			NpgsqlParameter param8 = new NpgsqlParameter("lenght", trn.GetLenght());
+			IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
+			parameters.Append(new NpgsqlParameter("name", trn.Name));
+			parameters.Append(new NpgsqlParameter("destination", trn.Destination));
+			parameters.Append(new NpgsqlParameter("state", trn.Status));
+			parameters.Append(new NpgsqlParameter("date", trn.Date));
+			parameters.Append(new NpgsqlParameter("coll", trn.Coll));
+			parameters.Append(new NpgsqlParameter("n_wagons", trn. trn.Wagons.Count));
+			parameters.Append(new NpgsqlParameter("max_lenght", trn.MaxLength));
+			parameters.Append(new NpgsqlParameter("lenght", trn.Lenght));
 			
-			NpgsqlParameter[] parameters = new[] {param1,param2,param3,param4,param5,param6,param7,param8};
-			NpgsqlDataReader reader = sqlCommand(sql,parameters);
+			NpgsqlDataReader reader = s.sqlCommand(sql,parameters);
 			reader.Close();
 			
 		}
@@ -35,25 +36,25 @@ namespace code.Services
 		{
 			
 			string sql = "SELECT * from trains WHERE date BETWEEN ($1) AND ($2)";
-			
-			NpgsqlParameter param1 = new NpgsqlParameter("date", from);
-			NpgsqlParameter param2 = new NpgsqlParameter("date", to);
-			
-			NpgsqlParameter[] parameters = new[] {param1,param2};
-			NpgsqlDataReader reader = sqlCommand(sql,parameters);
+
+			IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
+			parameters.Append(new NpgsqlParameter("date", from));
+			parameters.Append(new NpgsqlParameter("date", to));
+
+			NpgsqlDataReader reader = s.sqlCommand(sql,parameters);
 
 			List<Train> trains = new List<Train>();
 			while(reader.Read())
 			{
 				Train temp = new Train(reader[0]);
-				temp.SetName(reader[1]);
-				temp.SetDestination(reader[2]);
-				temp.SetStatus(reader[3]);
-				temp.SetLeavingTime(reader[4]);
-				temp.SetDutiable(reader[5]);
-				temp.SetWagonsCount(reader[6]);
-				temp.SetMaxLenght(reader[7]);
-				temp.SetLenght(reader[8]);
+				temp.Name = (string)reader[1];
+				temp.Destination = (string)reader[2];
+				temp.Status = (int)reader[3];
+				temp.Date = (DateTime)reader[4];
+				temp.Coll =(bool)reader[5];
+				// WagonManagerService GetWagonsByTrainId
+				temp.MaxLength=(int)reader[7];
+				temp.Lenght = (double)reader[8];
 				
 				trains.Add(temp);
 			}
@@ -62,15 +63,36 @@ namespace code.Services
 			return trains;
 		}
 
-		public void UpdateTrainState(int trnid, string trnstate)
+		public void UpdateTrain(Train trn)
 		{
-			string sql = "UDPATE trains SET state = ($1) WHERE id = ($2)";
+			string sql = "UDPATE trains SET name = ($2), destination = ($3), state = ($4), date = ($5), " 
+													+ "n_wagons = ($6), max_lenght = ($7), lenght = ($8) "
+																						+ "WHERE id = ($1)";
 
-			NpgsqlParameter param1 = new NpgsqlParameter("state", trnstate);
-			NpgsqlParameter param2 = new NpgsqlParameter("id", trnid);
-			
-			NpgsqlParameter[] parameters = new[] {param1,param2};
-			NpgsqlDataReader reader = sqlCommand(sql,parameters);
+			IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
+			parameters.Append(new NpgsqlParameter("id", trn.Id));
+			parameters.Append(new NpgsqlParameter("name", trn.Name));
+			parameters.Append(new NpgsqlParameter("destination", trn.Destination));
+			parameters.Append(new NpgsqlParameter("state", trn.Status));
+			parameters.Append(new NpgsqlParameter("date", trn.Date));
+			parameters.Append(new NpgsqlParameter("coll", trn.Coll));
+			parameters.Append(new NpgsqlParameter("n_wagons", trn.Wagons.Count));
+			parameters.Append(new NpgsqlParameter("max_lenght", trn.MaxLength));
+			parameters.Append(new NpgsqlParameter("lenght", trn.Lenght));
+		
+			NpgsqlDataReader reader = s.sqlCommand(sql,parameters);
+
+			reader.Close();
+		}
+
+		public void DeleteTrain(Train trn)
+		{
+			string sql = "DELETE FROM trains WHERE id = ($1)";
+
+			IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
+			parameters.Append(new NpgsqlParameter("id", trn.Id));
+
+			NpgsqlDataReader reader = s.sqlCommand(sql,parameters);
 
 			reader.Close();
 		}
