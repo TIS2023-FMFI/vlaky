@@ -7,6 +7,7 @@ builder.Services.AddRazorPages();
 DbConnectionService.configureService(builder.Configuration);
 builder.Services.AddSingleton<DbConnectionService>();
 builder.Services.AddTransient<SQLService>();
+builder.Services.AddTransient<TrainManagerService>();
 
 var app = builder.Build();
 
