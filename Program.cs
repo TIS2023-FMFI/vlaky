@@ -10,8 +10,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.s
 builder.Services.AddRazorPages();
 builder.Services.AddRazorPages().AddSessionStateTempDataProvider();
-builder.Services.AddTransient<Account>();
-builder.Services.AddTransient<AccountManager>();
+builder.Services.AddTransient<AccountManagerService>();
+builder.Services.AddTransient<BlackBoardService>();
 
 builder.Services.AddServerSideBlazor();
 
