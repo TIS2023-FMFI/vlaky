@@ -32,7 +32,7 @@ namespace code.Services
 			
 		}
 
-		public List<Train> GetTrainsByDate(string from, string to)
+		public List<Train> GetTrainsByDate(DateTime from, DateTime to)
 		{
 			
 			string sql = "SELECT * from trains WHERE date BETWEEN ($1) AND ($2)";
