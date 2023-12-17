@@ -15,7 +15,7 @@ namespace code.Services
 		public void AddTrain(Train trn)
 		{
 			
-			string sql = "INSERT INTO trains (name, destination, state, date, coll, n_wagons, max_lenght, lenght) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)";
+			string sql = "INSERT INTO trains (name, destination, state, date, coll, n_wagons, max_lenght, lenght) VALUES (($1),($2),($3),($4),($5),($6),($7),($8))";
 			
 			IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
 			parameters.Append(new NpgsqlParameter("name", trn.Name));
