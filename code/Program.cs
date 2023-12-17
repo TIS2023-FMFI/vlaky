@@ -1,9 +1,20 @@
 using code.Services;
+using code.Models;
+using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+
+
+
+// Add services to the container.s
 builder.Services.AddRazorPages();
+builder.Services.AddRazorPages().AddSessionStateTempDataProvider();
+builder.Services.AddTransient<AccountManagerService>();
+builder.Services.AddTransient<BlackBoardService>();
+
+builder.Services.AddServerSideBlazor();
+
 DbConnectionService.configureService(builder.Configuration);
 builder.Services.AddSingleton<DbConnectionService>();
 builder.Services.AddTransient<SQLService>();
@@ -26,5 +37,6 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapRazorPages();
+app.MapBlazorHub();
 
 app.Run();
