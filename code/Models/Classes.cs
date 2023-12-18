@@ -14,6 +14,11 @@ namespace code.Models
         public string Mail{get;set;}
         public int Privileges{get;set;}
         public string Pass{get;set;}
+        public void DeleteSelf(SQLService s){
+            List<NpgsqlParameter> parameters = [new NpgsqlParameter("id",Id)];
+            NpgsqlDataReader reader = s.sqlCommand("DELETE FROM users WHERE id = ($1)", parameters);
+            reader.Close();
+        }
 
     }
 
@@ -30,19 +35,19 @@ namespace code.Models
         public TrainNote(){}
         
         public override void DeleteSelf(SQLService s){
-            IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
-            parameters.Append(new NpgsqlParameter("user_id",UserId));
-            parameters.Append(new NpgsqlParameter("train_id",TrainId));
+            List<NpgsqlParameter> parameters = [new NpgsqlParameter("user_id",UserId), new NpgsqlParameter("train_id",TrainId)];
             NpgsqlDataReader reader = s.sqlCommand("DELETE FROM train_comments WHERE user_id = ($1) AND train_id = ($2)", parameters);
             reader.Close();
         }
 
         public override void UpdateText(string new_text,SQLService s)
         {
-            IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
-            parameters.Append(new NpgsqlParameter("text",new_text));
-            parameters.Append(new NpgsqlParameter("user_id",UserId));
-            parameters.Append(new NpgsqlParameter("train_id",TrainId));
+            List<NpgsqlParameter> parameters =
+            [
+                new NpgsqlParameter("text",new_text),
+                new NpgsqlParameter("user_id",UserId),
+                new NpgsqlParameter("train_id",TrainId),
+            ];
             NpgsqlDataReader reader = s.sqlCommand("UPDATE train_comments SET text = ($1) WHERE user_id = ($2) AND train_id = ($3)", parameters);
             reader.Close();
         }
@@ -51,18 +56,18 @@ namespace code.Models
         public int WagonId{get;set;}
         public WagonNote(){}
         public override void DeleteSelf(SQLService s){
-            IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
-            parameters.Append(new NpgsqlParameter("user_id",UserId));
-            parameters.Append(new NpgsqlParameter("wagon_id",WagonId));
+            List<NpgsqlParameter> parameters = [new NpgsqlParameter("user_id",UserId), new NpgsqlParameter("wagon_id",WagonId)];
             NpgsqlDataReader reader = s.sqlCommand("DELETE FROM wagon_comments WHERE user_id = ($1) AND wagon_id = ($2)", parameters);
             reader.Close();
         }
         public override void UpdateText(string new_text,SQLService s)
         {
-            IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
-            parameters.Append(new NpgsqlParameter("text",new_text));
-            parameters.Append(new NpgsqlParameter("user_id",UserId));
-            parameters.Append(new NpgsqlParameter("wagon_id",WagonId));
+            List<NpgsqlParameter> parameters =
+            [
+                new NpgsqlParameter("text",new_text),
+                new NpgsqlParameter("user_id",UserId),
+                new NpgsqlParameter("wagon_id",WagonId),
+            ];
             NpgsqlDataReader reader = s.sqlCommand("UPDATE wagon_comments SET text = ($1) WHERE user_id = ($2) AND wagon_id = ($3)", parameters);
             reader.Close();
         }
@@ -79,30 +84,31 @@ namespace code.Models
 
         public override void DeleteSelf(SQLService s)
         {
-            IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
-            parameters.Append(new NpgsqlParameter("user_id",UserId));
-            parameters.Append(new NpgsqlParameter("id",Id));
+            List<NpgsqlParameter> parameters = [new NpgsqlParameter("user_id",UserId), new NpgsqlParameter("id",Id)];
             NpgsqlDataReader reader = s.sqlCommand("DELETE FROM board_comments WHERE user_id = ($1) AND id = ($2)", parameters);
             reader.Close();
         }
 
         public void SetPriority(int np,SQLService s){
-            IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
-            parameters.Append(new NpgsqlParameter("priority",np));
-            parameters.Append(new NpgsqlParameter("user_id",UserId));
-            parameters.Append(new NpgsqlParameter("id",Id));
+            List<NpgsqlParameter> parameters =
+            [
+                new NpgsqlParameter("priority",np),
+                new NpgsqlParameter("user_id",UserId),
+                new NpgsqlParameter("id",Id),
+            ];
             NpgsqlDataReader reader = s.sqlCommand("UPDATE board_comments SET priority = ($1) WHERE user_id = ($2) AND id = ($3)", parameters);
             reader.Close();
         }
 
         public override void UpdateText(string new_text,SQLService s)
         {
-            IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
-            parameters.Append(new NpgsqlParameter("text",new_text));
-            parameters.Append(new NpgsqlParameter("date",DateTime.Now));
-            Date = DateTime.Now;
-            parameters.Append(new NpgsqlParameter("user_id",UserId));
-            parameters.Append(new NpgsqlParameter("id",Id));
+            List<NpgsqlParameter> parameters =
+            [
+                new NpgsqlParameter("text",new_text),
+                new NpgsqlParameter("date",DateTime.Now),
+                new NpgsqlParameter("user_id",UserId),
+                new NpgsqlParameter("id",Id),
+            ];
             Date = DateTime.Now;
             NpgsqlDataReader reader = s.sqlCommand("UPDATE board_comments SET text = ($1),date = ($2) WHERE user_id = ($3) AND id = ($4)", parameters);
             reader.Close();
@@ -118,20 +124,24 @@ namespace code.Models
         public Wagon(){}
         public void setNOrder(int no,SQLService s){
             NOrder = no;
-            IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
-            parameters.Append(new NpgsqlParameter("n_order",no));
-            parameters.Append(new NpgsqlParameter("train_id",TrainId));
-            parameters.Append(new NpgsqlParameter("id",Id));
+            List<NpgsqlParameter> parameters =
+            [
+                new NpgsqlParameter("n_order",no),
+                new NpgsqlParameter("train_id",TrainId),
+                new NpgsqlParameter("id",Id),
+            ];
             NpgsqlDataReader reader = s.sqlCommand("UPDATE wagons SET n_order = ($1) WHERE train_id = ($2) AND id = ($3)", parameters);
             reader.Close();
         }
 
         public void setState(int nstatus,SQLService s){
             State = nstatus;
-            IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
-            parameters.Append(new NpgsqlParameter("state",nstatus));
-            parameters.Append(new NpgsqlParameter("train_id",TrainId));
-            parameters.Append(new NpgsqlParameter("id",Id));
+            List<NpgsqlParameter> parameters =
+            [
+                new NpgsqlParameter("state",nstatus),
+                new NpgsqlParameter("train_id",TrainId),
+                new NpgsqlParameter("id",Id),
+            ];
             NpgsqlDataReader reader = s.sqlCommand("UPDATE wagons SET state = ($1) WHERE train_id = ($2) AND id = ($3)", parameters);
             reader.Close();
         }
@@ -145,18 +155,12 @@ namespace code.Models
         public string Destination{get;set;}
         public TrainTemplate(){}
         public void SetName(string nn,SQLService s){
-            IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
-            parameters = new List<NpgsqlParameter>();
-            parameters.Append(new NpgsqlParameter("name",nn));
-            parameters.Append(new NpgsqlParameter("id",Id));
+            List<NpgsqlParameter> parameters = [new NpgsqlParameter("name",nn), new NpgsqlParameter("id",Id)];
             NpgsqlDataReader reader = s.sqlCommand("UPDATE templates SET name = ($1) WHERE id = ($2)", parameters);
             reader.Close();
         }
         public void SetMaxLength(double nl,SQLService s){
-            IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
-            parameters = new List<NpgsqlParameter>();
-            parameters.Append(new NpgsqlParameter("max_leanght",nl));
-            parameters.Append(new NpgsqlParameter("id",Id));
+            List<NpgsqlParameter> parameters = [new NpgsqlParameter("max_leanght",nl), new NpgsqlParameter("id",Id)];
             NpgsqlDataReader reader = s.sqlCommand("UPDATE templates SET max_leanght = ($1) WHERE id = ($2)", parameters);
             reader.Close();
         }
@@ -181,66 +185,45 @@ namespace code.Models
         }
         public void SeColl(bool nd,SQLService s){
             Coll = nd;
-            IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
-            parameters = new List<NpgsqlParameter>();
-            parameters.Append(new NpgsqlParameter("coll",nd));
-            parameters.Append(new NpgsqlParameter("id",Id));
+            List<NpgsqlParameter> parameters = [new NpgsqlParameter("coll",nd), new NpgsqlParameter("id",Id)];
             NpgsqlDataReader reader = s.sqlCommand("UPDATE trains SET coll = ($1) WHERE id = ($2)", parameters);
             reader.Close();
         }
         public void SetDestination(string nd,SQLService s){
             Destination = nd;
-            IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
-            parameters = new List<NpgsqlParameter>();
-            parameters.Append(new NpgsqlParameter("destination",nd));
-            parameters.Append(new NpgsqlParameter("id",Id));
+            List<NpgsqlParameter> parameters = [new NpgsqlParameter("destination",nd), new NpgsqlParameter("id",Id)];
             NpgsqlDataReader reader = s.sqlCommand("UPDATE trains SET destination = ($1) WHERE id = ($2)", parameters);
             reader.Close();
         }
         public void SetDate(DateTime nl,SQLService s){
             Date = nl;
-            IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
-            parameters = new List<NpgsqlParameter>();
-            parameters.Append(new NpgsqlParameter("date",nl));
-            parameters.Append(new NpgsqlParameter("id",Id));
+            List<NpgsqlParameter> parameters = [new NpgsqlParameter("date",nl), new NpgsqlParameter("id",Id)];
             NpgsqlDataReader reader = s.sqlCommand("UPDATE trains SET date = ($1) WHERE id = ($2)", parameters);
             reader.Close();
         }
         public void SetStatus(int ns,SQLService s){
             Status = ns;
-            IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
-            parameters = new List<NpgsqlParameter>();
-            parameters.Append(new NpgsqlParameter("state",ns));
-            parameters.Append(new NpgsqlParameter("id",Id));
+            List<NpgsqlParameter> parameters = [new NpgsqlParameter("state",ns), new NpgsqlParameter("id",Id)];
             NpgsqlDataReader reader = s.sqlCommand("UPDATE trains SET state = ($1) WHERE id = ($2)", parameters);
             reader.Close();
         }
         public void SetName(string nn,SQLService s){
             Name = nn;
-            IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
-            parameters = new List<NpgsqlParameter>();
-            parameters.Append(new NpgsqlParameter("name",nn));
-            parameters.Append(new NpgsqlParameter("id",Id));
+            List<NpgsqlParameter> parameters = [new NpgsqlParameter("name",nn), new NpgsqlParameter("id",Id)];
             NpgsqlDataReader reader = s.sqlCommand("UPDATE trains SET name = ($1) WHERE id = ($2)", parameters);
             reader.Close();
         }
 
         public void SetMaxLenght(double nl,SQLService s){
             MaxLength = nl;
-            IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
-            parameters = new List<NpgsqlParameter>();
-            parameters.Append(new NpgsqlParameter("max_leanght",nl));
-            parameters.Append(new NpgsqlParameter("id",Id));
+            List<NpgsqlParameter> parameters = [new NpgsqlParameter("max_leanght",nl), new NpgsqlParameter("id",Id)];
             NpgsqlDataReader reader = s.sqlCommand("UPDATE trains SET max_leanght = ($1) WHERE id = ($2)", parameters);
             reader.Close();
         }
 
         public void SetLenght(double nl,SQLService s){
             Lenght = nl;
-            IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
-            parameters = new List<NpgsqlParameter>();
-            parameters.Append(new NpgsqlParameter("leanght",nl));
-            parameters.Append(new NpgsqlParameter("id",Id));
+            List<NpgsqlParameter> parameters = [new NpgsqlParameter("leanght",nl), new NpgsqlParameter("id",Id)];
             NpgsqlDataReader reader = s.sqlCommand("UPDATE trains SET leanght = ($1) WHERE id = ($2)", parameters);
             reader.Close();
         }
