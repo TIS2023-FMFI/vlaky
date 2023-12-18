@@ -8,6 +8,7 @@ DbConnectionService.configureService(builder.Configuration);
 builder.Services.AddSingleton<DbConnectionService>();
 builder.Services.AddTransient<SQLService>();
 builder.Services.AddTransient<TrainManagerService>();
+builder.Services.AddTransient<WagonManagerService>();
 
 var app = builder.Build();
 
