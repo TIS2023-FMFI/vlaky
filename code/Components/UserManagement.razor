@@ -1,0 +1,312 @@
+@using code.Models;
+@using code.Services;
+@using Microsoft.AspNetCore.Components.Web
+
+@inject AccountManagerService manager
+
+<style>
+.user-list{
+    background-color: gray;
+    color: white;
+    border: 2px solid black;
+    margin: 20px;
+    padding: 20px;
+}
+.user-tab{
+    background-color: lightgray;
+    color: black;
+    border: 2px solid black;
+    margin: 20px;
+    padding: 20px;
+}
+.modal-body{
+    background-color: gray;
+    color: white;
+    border: 2px solid black;
+    margin: 20px;
+    padding: 20px;
+}
+.inputs{
+    background-color: lightgray;
+    color: black;
+    border: 2px solid black;
+    margin: 20px;
+    padding: 20px;
+}
+</style>
+
+<div class="user-list">
+
+<div class="add-button">
+    @if(Nevyplnil){
+        <h6>Nevyplnili ste vsetky polozky, pouzivatel nebol pridany</h6>
+    }
+    <button @onclick="e => AddAccount()"
+        data-toggle="modal" data-target="#productModal" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productModal">
+        Add User
+    </button>
+</div>
+
+
+
+@foreach(var a in manager.GetAccounts()){
+    <div class="user-tab">
+        <div class="user-info">
+            @a.Name;
+            @a.Mail;
+        </div>
+        <small class="text-muted">
+            <button @onclick="e => ModifyPriviliges(a.Id)"
+                data-toggle="modal" data-target="#productModal" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productModal">
+                Modify user privileges
+            </button>
+            <button @onclick="e => ChangePassword(a.Id)"
+                data-toggle="modal" data-target="#productModal" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productModal">
+                Change user password
+            </button>
+            <button @onclick="e => ChangeMail(a.Id)"
+                data-toggle="modal" data-target="#productModal" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productModal">
+                Change user email
+            </button>
+            <button @onclick="e => SelectAccountForDeletion(a.Id)"
+                data-toggle="modal" data-target="#productModal" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productModal">
+                Delete User
+            </button>
+        </small>
+    </div>
+}
+</div>
+
+<div class="modal fade" id="productModal" tabindex="-1" role="dialog" aria-labelledby="productTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+    @if(DeleteAcc){
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productTitle">Zmazanie učtu</h5>
+                <button @onclick="e => nullAll()" type="button" class="close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Ste si istý, že chcete zmatať účet používateľa @Acc.Name?
+            </div>
+            <button @onclick="e => DeleteSelectedAccount()"
+                class="btn btn-success" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
+                Áno
+            </button>
+            <button class="btn btn-danger" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
+                Nie
+            </button>
+        </div>
+    }
+    @if(AddAcc){
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productTitle">Pridanie učtu</h5>
+                <button @onclick="e => nullAll()" type="button" class="close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class = "inputs">
+                    Name:
+                    <input type="text" id="name" name="name" @bind="name"><br>
+                </div>
+                <div class = "inputs">
+                    Mail:
+                    <input type="text" id="mail" name="mail" @bind="mail"><br>
+                </div>
+                <div class = "inputs">
+                    Privilege to manage users:
+                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[0]"><br>
+                    Privilege to manage notes:
+                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[1]"><br>
+                    Privilege to create templates:
+                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[2]"><br>
+                    Privilege to manage trains:
+                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[3]"><br>
+                    Privilege to comment trains:
+                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[4]"><br>
+                    Privilege to write on blackboard:
+                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[5]"><br>
+                    Privilege to log into the site:
+                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[6]"><br>
+                </div>
+                <div class = "inputs">
+                    Pass:
+                    <input type="text" id="pass" name="pass" @bind="pass"><br>
+                </div>
+            </div>
+            <button @onclick="e => SubmitNewAccount()"
+                class="btn btn-success" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
+                Add User
+            </button>
+        </div>
+    }
+    @if(PrivAcc){
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productTitle">Zmena privilegii</h5>
+                <button @onclick="e => nullAll()" type="button" class="close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class = "inputs">
+                    Privilege to manage users:
+                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[0]"><br>
+                    Privilege to manage notes:
+                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[1]"><br>
+                    Privilege to create templates:
+                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[2]"><br>
+                    Privilege to manage trains:
+                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[3]"><br>
+                    Privilege to comment trains:
+                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[4]"><br>
+                    Privilege to write on blackboard:
+                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[5]"><br>
+                    Privilege to log into the site:
+                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[6]"><br>
+                </div>
+            </div>
+            <button @onclick="e => SavePrivileges()"
+                class="btn btn-success" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
+                Confirm changes
+            </button>
+        </div>
+    }
+    @if(MailAcc){
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productTitle">Zmena mailu</h5>
+                <button @onclick="e => nullAll()" type="button" class="close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class = "inputs">
+                    Mail:
+                    <input type="text" id="mail" name="mail" @bind="mail"><br>
+                </div>
+            </div>
+            <button @onclick="e => ChangeEmail()"
+                class="btn btn-success" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
+                Confirm changes
+            </button>
+        </div>
+    }
+    @if(PassAcc){
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productTitle">Zmena hesla</h5>
+                <button @onclick="e => nullAll()" type="button" class="close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class = "inputs">
+                    Password:
+                    <input type="text" id="mail" name="mail" @bind="pass"><br>
+                </div>
+            </div>
+            <button @onclick="e => SubmitNewAccount()"
+                class="btn btn-success" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
+                Confirm changes
+            </button>
+        </div>
+    }
+    </div>
+</div>
+    
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+
+
+ @code{
+    bool DeleteAcc;
+    Account? Acc;
+    SQLService s = new SQLService(new DbConnectionService());
+    bool AddAcc = false;
+    bool PrivAcc = false;
+    bool PassAcc = false;
+    bool MailAcc = false;
+    bool Nevyplnil = false;
+    string name;
+    string mail;
+    bool[] privileges = new bool[7];
+    string pass;
+
+    void nullAll(){
+        DeleteAcc = false;
+        PrivAcc = false;
+        PassAcc = false;
+        MailAcc = false;
+        AddAcc = false;
+    }
+
+    void SelectAccountForDeletion(int AccountId)
+    {
+        Acc = manager.GetAccounts().First(x => x.Id == AccountId);
+        DeleteAcc = true;
+    }
+
+    void DeleteSelectedAccount(){
+        Acc.DeleteSelf(s);
+        Acc = null;
+    }
+
+    void AddAccount(){
+        Nevyplnil = false;
+        AddAcc = true;
+    }
+
+    void SubmitNewAccount(){
+        if(name==null || mail==null || pass==null){
+            Nevyplnil = true;
+            return;
+        }
+        Acc = null;
+        AddAcc = false;
+        //manager.AddAccount(new Account(manager.GetAccounts().Count,name,mail,1,pass));
+        name = mail = pass = null;
+    }
+
+
+    void ModifyPriviliges(int selectedAccountId){
+        Acc = manager.GetAccounts().First(x => x.Id == selectedAccountId);
+        PrivAcc = true;
+    }
+    void SavePrivileges(){
+        PrivAcc = false;
+        Acc = null;
+    }
+
+    void ChangePassword(int selectedAccountId){
+        Acc = manager.GetAccounts().First(x => x.Id == selectedAccountId);
+        PassAcc = true;
+    }
+
+    void ChangePass(){
+        Acc.UpdatePassWord(pass,s);
+        Acc = null;
+        PassAcc = false;
+    }
+    void ChangeMail(int selectedAccountId){
+        Acc = manager.GetAccounts().First(x => x.Id == selectedAccountId);
+        mail = Acc.Mail;
+        MailAcc = true;
+    }
+
+    void ChangeEmail(){
+        Acc.UpdateMail(mail,s);
+        Acc = null;
+        MailAcc = false;
+    }
+
+
+ }
+
+
+
+
