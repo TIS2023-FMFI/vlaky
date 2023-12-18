@@ -54,7 +54,7 @@ namespace code.Services
 					Status = (int)reader[3];
 					Date = (DateTime)reader[4];
 					Coll = (bool)reader[5];
-					Wagons = WMService.GetWagonsByTrainId((int)reader[0]);
+					//Wagons = WMService.GetWagonsByTrainId((int)reader[0]);
 					MaxLength=(int)reader[7];
 					Lenght = (double)reader[8];
 				}
