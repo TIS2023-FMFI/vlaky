@@ -17,9 +17,9 @@ namespace code.Services
             string sql = "INSERT INTO wagons (train_id, n_order, state) VALUES (($1),($2),($3))";
 			
 			IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
-			parameters.Append(new NpgsqlParameter("train_id", w.TrainId));
-			parameters.Append(new NpgsqlParameter("n_order", w.NOrder));
-			parameters.Append(new NpgsqlParameter("state", w.State));
+			parameters.Add(new NpgsqlParameter("train_id", w.TrainId));
+			parameters.Add(new NpgsqlParameter("n_order", w.NOrder));
+			parameters.Add(new NpgsqlParameter("state", w.State));
 			
 			NpgsqlDataReader reader = s.sqlCommand(sql,parameters);
 			reader.Close();
@@ -31,7 +31,7 @@ namespace code.Services
 			string sql = "SELECT * from wagons WHERE train_id = ($1)";
 
 			IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
-			parameters.Append(new NpgsqlParameter("train_id", tid));
+			parameters.Add(new NpgsqlParameter("train_id", tid));
 
 			NpgsqlDataReader reader = s.sqlCommand(sql,parameters);
 
@@ -57,10 +57,10 @@ namespace code.Services
 			string sql = "UDPATE wagons SET train_id = ($2), n_order = ($3), state = ($4) WHERE id = ($1)";
 
 			IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
-            parameters.Append(new NpgsqlParameter("id", w.Id));
-			parameters.Append(new NpgsqlParameter("train_id", w.TrainId));
-			parameters.Append(new NpgsqlParameter("n_order", w.NOrder));
-			parameters.Append(new NpgsqlParameter("state", w.State));
+            parameters.Add(new NpgsqlParameter("id", w.Id));
+			parameters.Add(new NpgsqlParameter("train_id", w.TrainId));
+			parameters.Add(new NpgsqlParameter("n_order", w.NOrder));
+			parameters.Add(new NpgsqlParameter("state", w.State));
 		
 			NpgsqlDataReader reader = s.sqlCommand(sql,parameters);
 
@@ -73,7 +73,7 @@ namespace code.Services
 			string sql = "DELETE FROM wagons WHERE id = ($1)";
 
 			IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
-			parameters.Append(new NpgsqlParameter("id", w.Id));
+			parameters.Add(new NpgsqlParameter("id", w.Id));
 
 			NpgsqlDataReader reader = s.sqlCommand(sql,parameters);
 
