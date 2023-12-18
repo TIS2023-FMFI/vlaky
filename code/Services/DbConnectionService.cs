@@ -12,6 +12,10 @@ namespace code.Services
         {
             dataSource = NpgsqlDataSource.Create(CONNECTION_STRING);
         }
+        public DbConnectionService(string connectionString) 
+        {
+            dataSource = NpgsqlDataSource.Create(connectionString);
+        }
 
         public static void configureService(ConfigurationManager conf) 
         {
