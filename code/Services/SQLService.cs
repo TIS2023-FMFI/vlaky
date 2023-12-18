@@ -1,43 +1,22 @@
-using System.Transactions;
-using Microsoft.VisualBasic;
 using Npgsql;
-using NpgsqlTypes;
 
 namespace code.Services
 {
     public class SQLService
     {
-        private readonly DbConnectionService connectionService;
-        private NpgsqlConnection connection = null;
-        private NpgsqlTransaction transaction = null;
+        private DbConnectionService DbService;
+        private NpgsqlConnection connection;
         
-        public SQLService(DbConnectionService connectionService) 
+        public SQLService(DbConnectionService DbService) 
         {
-            this.connectionService = connectionService;
+            this.DbService = DbService;
+            connection = DbService.getConnection();
         }
 
-        private void getConnection() 
+        ~SQLService()
         {
-            if (connection == null) 
-            {
-                connection = connectionService.getConnection();
-            }
-        }
-
-        public void transactionBegin()
-        {
-            if (transaction == null) 
-            {
-                transaction = connection.BeginTransaction();
-            }
-        }
-
-        public void transactionEnd()
-        {
-            if (transaction != null)
-            {
-                transaction.Commit();
-            }
+                connection.Dispose();
+                connection = null;
         }
 
         /**
@@ -45,28 +24,28 @@ namespace code.Services
             a x zacina od 1 a inkrementuje, samotne parametre premenit na NpgsqlParameter nasledovne:
                 NpgsqlParameter param = new NpgsqlParameter("column_name", value);
             a poslat v zozname do parameters
+            vystup vyberte nasledovne:
+            NpgsqlDataReader reader = await sqlCommand(sql, parameters)
         */
-        public NpgsqlDataReader sqlCommand(string sql, IEnumerable<NpgsqlParameter> parameters)
+        public async Task<NpgsqlDataReader> sqlCommand(string sql, IEnumerable<NpgsqlParameter> parameters)
         {
-            getConnection();
-            bool oneTimeTransaction = false;
-            if (transaction == null) {
-                transactionBegin();
-                oneTimeTransaction = true;
+            Task<NpgsqlDataReader> reader = null;
+
+            while (reader == null || reader.IsFaulted) {
+                reader = sqlExecuteCommandAsync(sql, parameters);
             }
 
-            NpgsqlCommand cmd = new NpgsqlCommand(sql, connection, transaction);
+            return await reader;
+        }
+
+        private async Task<NpgsqlDataReader> sqlExecuteCommandAsync(string sql, IEnumerable<NpgsqlParameter> parameters)
+        {
+            NpgsqlCommand cmd = new NpgsqlCommand(sql, connection);
             foreach (var parameter in parameters)
             {
                 cmd.Parameters.Add(parameter);
             }
-            NpgsqlDataReader reader =  cmd.ExecuteReader();
-
-            if (oneTimeTransaction) {
-                transactionEnd();
-            }
-
-            return reader;
+            return await cmd.ExecuteReaderAsync();
         }
     }
 }
