@@ -15,7 +15,7 @@ namespace code.Services
 		public void AddTrain(Train trn)
 		{
 			
-			string sql = "INSERT INTO trains (name, destination, state, date, coll, n_wagons, max_lenght, lenght) VALUES (($1),($2),($3),($4),($5),($6),($7),($8))";
+			string sql = "INSERT INTO trains (name, destination, state, date, coll, n_wagons, max_lenght, lenght) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)";
 			
 			IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
 			parameters.Append(new NpgsqlParameter("name", trn.Name));
@@ -32,9 +32,9 @@ namespace code.Services
 			
 		}
 
-		public List<Train> GetTrainsByDate(DateTime from, DateTime to)
+		public List<Train> GetTrainsByDate(string from, string to)
 		{
-			
+			WagonManagerService WMService = new WagonManagerService(s);
 			string sql = "SELECT * from trains WHERE date BETWEEN ($1) AND ($2)";
 
 			IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
@@ -46,15 +46,18 @@ namespace code.Services
 			List<Train> trains = new List<Train>();
 			while(reader.Read())
 			{
-				Train temp = new Train(reader[0]);
-				temp.Name = (string)reader[1];
-				temp.Destination = (string)reader[2];
-				temp.Status = (int)reader[3];
-				temp.Date = (DateTime)reader[4];
-				temp.Coll =(bool)reader[5];
-				// WagonManagerService GetWagonsByTrainId
-				temp.MaxLength=(int)reader[7];
-				temp.Lenght = (double)reader[8];
+				var temp = new Train
+				{
+					Id = (int)reader[0];
+					Name = (string)reader[1];
+					Destination = (string)reader[2];
+					Status = (int)reader[3];
+					Date = (DateTime)reader[4];
+					Coll = (bool)reader[5];
+					Wagons = WMService.GetWagonsByTrainId((int)reader[0]);
+					MaxLength=(int)reader[7];
+					Lenght = (double)reader[8];
+				}
 				
 				trains.Add(temp);
 			}
