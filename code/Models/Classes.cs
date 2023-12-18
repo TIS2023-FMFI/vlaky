@@ -9,6 +9,13 @@ namespace code.Models
 {
     public class Account{
         public Account(){}
+        public Account(int id,string name,string mail, int privileges,string pass){
+            Id = id;
+            Name = name;
+            Mail = mail;
+            Privileges = privileges;
+            Pass = pass;
+        }
         public int Id{get;set;}
         public string Name{get;set;}
         public string Mail{get;set;}
@@ -17,6 +24,18 @@ namespace code.Models
         public void DeleteSelf(SQLService s){
             List<NpgsqlParameter> parameters = [new NpgsqlParameter("id",Id)];
             NpgsqlDataReader reader = s.sqlCommand("DELETE FROM users WHERE id = ($1)", parameters);
+            reader.Close();
+        }
+        public void UpdatePassWord(string new_passs,SQLService s)
+        {
+            List<NpgsqlParameter> parameters = [new NpgsqlParameter("pass",new_passs),new NpgsqlParameter("id",Id)];
+            NpgsqlDataReader reader = s.sqlCommand("UPDATE users SET pass = sha256(($1)) WHERE id = ($2)", parameters);
+            reader.Close();
+        }
+        public void UpdateMail(string new_mail,SQLService s)
+        {
+            List<NpgsqlParameter> parameters = [new NpgsqlParameter("pass",new_mail),new NpgsqlParameter("id",Id)];
+            NpgsqlDataReader reader = s.sqlCommand("UPDATE users SET mail = ($1) WHERE id = ($2)", parameters);
             reader.Close();
         }
 
