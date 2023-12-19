@@ -1,0 +1,20 @@
+@page
+@model ManageModel
+@using code.Components
+@{
+    ViewData["Title"] = "Management";
+}
+
+
+@if(Model.Curr.Privileges==1){
+    @(await Html.RenderComponentAsync<UserManagement>(RenderMode.ServerPrerendered))
+}
+
+@if(Model.Curr.Privileges!=1){
+    <h4>Niesi admin chod prec</h4>
+}
+
+
+
+
+<script src="_framework/blazor.server.js"></script> 
