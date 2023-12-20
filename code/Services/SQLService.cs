@@ -20,9 +20,9 @@ namespace code.Services
         }
 
         /**
-            sql sa musi rovnat celemu spravnemu prikazu kde parametre(konkretne hodnoty) su nahradene "($x)"
+            sql sa musi rovnat celemu spravnemu prikazu kde parametre(konkretne hodnoty) su nahradene "(@px)"
             a x zacina od 1 a inkrementuje, samotne parametre premenit na NpgsqlParameter nasledovne:
-                NpgsqlParameter param = new NpgsqlParameter("column_name", value);
+                NpgsqlParameter param = new NpgsqlParameter("px", value);
             a poslat v zozname do parameters
             vystup vyberte nasledovne:
             NpgsqlDataReader reader = await sqlCommand(sql, parameters)
@@ -31,7 +31,7 @@ namespace code.Services
         {
             Task<NpgsqlDataReader> reader = null;
 
-            while (reader == null || reader.IsFaulted) {
+            while (reader == null || (reader.IsFaulted && reader.Exception.InnerException.GetType() == typeof(NpgsqlException))) {
                 reader = sqlExecuteCommandAsync(sql, parameters);
             }
 
