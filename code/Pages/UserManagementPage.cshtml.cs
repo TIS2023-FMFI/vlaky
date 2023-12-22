@@ -33,11 +33,6 @@ public class ManageModel : PageModel
         {
             await HttpContext.ChallengeAsync();
         }
-        var a = HttpContext.User.Claims.First(x => x.Type=="Privileges");
-        var b = AuthRequirementHandler.isBitSet(a.Value,1);//index od nuly
-        if(b){
-            allow = true;
-        }
 
     }
 

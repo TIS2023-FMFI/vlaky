@@ -6,11 +6,8 @@
     ViewData["Title"] = "Management";
 }
 
-@if(Model.allow){
-    @(await Html.RenderComponentAsync<UserManagement>(RenderMode.ServerPrerendered))
-}else{
-    <h4>Niesi admin chod prec</h4>
-}
+
+@(await Html.RenderComponentAsync<UserManagement>(RenderMode.ServerPrerendered))
 
 
 <script src="_framework/blazor.server.js"></script> 
