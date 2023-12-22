@@ -1,8 +1,10 @@
 @using code.Models;
 @using code.Services;
-@using Microsoft.AspNetCore.Components.Web
+@using code.Auth;
+@using Microsoft.AspNetCore.Components.Web;
 
 @inject AccountManagerService manager
+@inject NavigationManager uriHelper
 
 <style>
 .user-list{
@@ -46,34 +48,35 @@
         Add User
     </button>
 </div>
-
-
-
-@foreach(var a in manager.GetAccounts()){
-    <div class="user-tab">
-        <div class="user-info">
-            @a.Name;
-            @a.Mail;
+@try{
+    @foreach(var a in accounts){
+        <div class="user-tab">
+            <div class="user-info">
+                Name: @a.Name;<br>
+                Mail: @a.Mail;
+            </div>
+            <small class="text-muted">
+                <button @onclick="e => ModifyPriviliges(a.Id)"
+                    data-toggle="modal" data-target="#productModal" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productModal">
+                    Modify user privileges
+                </button>
+                <button @onclick="e => ChangePassword(a.Id)"
+                    data-toggle="modal" data-target="#productModal" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productModal">
+                    Change user password
+                </button>
+                <button @onclick="e => ChangeMail(a.Id)"
+                    data-toggle="modal" data-target="#productModal" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productModal">
+                    Change user email
+                </button>
+                <button @onclick="e => SelectAccountForDeletion(a.Id)"
+                    data-toggle="modal" data-target="#productModal" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productModal">
+                    Delete User
+                </button>
+            </small>
         </div>
-        <small class="text-muted">
-            <button @onclick="e => ModifyPriviliges(a.Id)"
-                data-toggle="modal" data-target="#productModal" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productModal">
-                Modify user privileges
-            </button>
-            <button @onclick="e => ChangePassword(a.Id)"
-                data-toggle="modal" data-target="#productModal" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productModal">
-                Change user password
-            </button>
-            <button @onclick="e => ChangeMail(a.Id)"
-                data-toggle="modal" data-target="#productModal" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productModal">
-                Change user email
-            </button>
-            <button @onclick="e => SelectAccountForDeletion(a.Id)"
-                data-toggle="modal" data-target="#productModal" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productModal">
-                Delete User
-            </button>
-        </small>
-    </div>
+    }
+}catch(System.NullReferenceException){
+    <h5>Loading users from database</h5>
 }
 </div>
 
@@ -153,19 +156,19 @@
             </div>
             <div class="modal-body">
                 <div class = "inputs">
-                    Privilege to manage users:
-                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[0]"><br>
-                    Privilege to manage notes:
-                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[1]"><br>
-                    Privilege to create templates:
-                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[2]"><br>
-                    Privilege to manage trains:
-                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[3]"><br>
-                    Privilege to comment trains:
-                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[4]"><br>
-                    Privilege to write on blackboard:
-                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[5]"><br>
                     Privilege to log into the site:
+                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[0]"><br>
+                    Privilege to manage users:
+                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[1]"><br>
+                    Privilege to manage notes:
+                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[2]"><br>
+                    Privilege to create templates:
+                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[3]"><br>
+                    Privilege to manage trains:
+                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[4]"><br>
+                    Privilege to comment trains:
+                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[5]"><br>
+                    Privilege to write on blackboard:
                     <input type="checkbox" id="privileges" name="privileges" @bind="privileges[6]"><br>
                 </div>
             </div>
@@ -209,7 +212,7 @@
                     <input type="text" id="mail" name="mail" @bind="pass"><br>
                 </div>
             </div>
-            <button @onclick="e => SubmitNewAccount()"
+            <button @onclick="e => ChangePass()"
                 class="btn btn-success" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
                 Confirm changes
             </button>
@@ -225,6 +228,7 @@
 
  @code{
     bool DeleteAcc;
+    bool loading = true;
     Account? Acc;
     SQLService s = new SQLService(new DbConnectionService());
     bool AddAcc = false;
@@ -236,7 +240,12 @@
     string mail;
     bool[] privileges = new bool[7];
     string pass;
+    List<Account>? accounts;
 
+    async Task InitAccounts(){
+        accounts = await manager.GetAccounts();
+        loading = false;
+    }
     void nullAll(){
         DeleteAcc = false;
         PrivAcc = false;
@@ -247,17 +256,22 @@
 
     void SelectAccountForDeletion(int AccountId)
     {
-        Acc = manager.GetAccounts().First(x => x.Id == AccountId);
+        Acc = accounts.First(x => x.Id == AccountId);
         DeleteAcc = true;
     }
 
     void DeleteSelectedAccount(){
         Acc.DeleteSelf(s);
         Acc = null;
+        DeleteAcc = false;
+        uriHelper.NavigateTo(uriHelper.Uri, forceLoad: true);
     }
 
     void AddAccount(){
         Nevyplnil = false;
+        for(int i =0;i<7;i++){
+            privileges[i]=false;
+        }
         AddAcc = true;
     }
 
@@ -268,22 +282,42 @@
         }
         Acc = null;
         AddAcc = false;
-        //manager.AddAccount(new Account(manager.GetAccounts().Count,name,mail,1,pass));
+        int p = 0;
+        for(int i = 0;i<7;i++){
+            if(privileges[i]==true){
+                p = AuthRequirementHandler.setBit(p,i);
+            }
+        }
+        manager.AddAccount(new Account(accounts.Count,name,mail,p,pass));
         name = mail = pass = null;
+        uriHelper.NavigateTo(uriHelper.Uri, forceLoad: true);
     }
 
 
     void ModifyPriviliges(int selectedAccountId){
-        Acc = manager.GetAccounts().First(x => x.Id == selectedAccountId);
+        Acc = accounts.First(x => x.Id == selectedAccountId);
+        for(int i = 0;i<7;i++){
+            if(AuthRequirementHandler.isBitSet(Acc.Privileges,i)){
+                privileges[i] = true;
+            }
+        }
         PrivAcc = true;
     }
     void SavePrivileges(){
         PrivAcc = false;
+        int p = 0;
+        for(int i = 0;i<7;i++){
+            if(privileges[i]==true){
+                p = AuthRequirementHandler.setBit(p,i);
+            }
+        }
+        Acc.UpdatePrivileges(p,s);
         Acc = null;
+        uriHelper.NavigateTo(uriHelper.Uri, forceLoad: true);
     }
 
     void ChangePassword(int selectedAccountId){
-        Acc = manager.GetAccounts().First(x => x.Id == selectedAccountId);
+        Acc = accounts.First(x => x.Id == selectedAccountId);
         PassAcc = true;
     }
 
@@ -291,9 +325,10 @@
         Acc.UpdatePassWord(pass,s);
         Acc = null;
         PassAcc = false;
+        uriHelper.NavigateTo(uriHelper.Uri, forceLoad: true);
     }
     void ChangeMail(int selectedAccountId){
-        Acc = manager.GetAccounts().First(x => x.Id == selectedAccountId);
+        Acc = accounts.First(x => x.Id == selectedAccountId);
         mail = Acc.Mail;
         MailAcc = true;
     }
@@ -302,8 +337,14 @@
         Acc.UpdateMail(mail,s);
         Acc = null;
         MailAcc = false;
+        uriHelper.NavigateTo(uriHelper.Uri, forceLoad: true);
     }
 
+    protected override async Task OnInitializedAsync()
+    {
+        await InitAccounts();
+        await Task.Delay(500);
+    }
 
  }
 

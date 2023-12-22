@@ -12,39 +12,39 @@ namespace code.Services
 			this.s = s;
 		}
 
-        public void AddWagon(Wagon w)
+        public async void AddWagon(Wagon w)
         {
-            string sql = "INSERT INTO wagons (train_id, n_order, state) VALUES (($1),($2),($3))";
+            string sql = "INSERT INTO wagons (train_id, n_order, state) VALUES ((@p1),(@p2),(@p3))";
 			
-			IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
-			parameters.Add(new NpgsqlParameter("train_id", w.TrainId));
-			parameters.Add(new NpgsqlParameter("n_order", w.NOrder));
-			parameters.Add(new NpgsqlParameter("state", w.State));
+			List<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
+			parameters.Add(new NpgsqlParameter("p1", w.TrainId));
+			parameters.Add(new NpgsqlParameter("p2", w.NOrder));
+			parameters.Add(new NpgsqlParameter("p3", w.State));
 			
-			NpgsqlDataReader reader = s.sqlCommand(sql,parameters);
+			NpgsqlDataReader reader = await s.sqlCommand(sql,parameters);
 			reader.Close();
         }
 
-        public List<Wagon> GetWagonsByTrainId(int tid)
+        public async Task<List<Wagon>> GetWagonsByTrainId(int tid)
 		{
 			
-			string sql = "SELECT * from wagons WHERE train_id = ($1)";
+			string sql = "SELECT * from wagons WHERE train_id = (@p1)";
 
-			IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
-			parameters.Add(new NpgsqlParameter("train_id", tid));
+			List<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
+			parameters.Add(new NpgsqlParameter("p1", tid));
 
-			NpgsqlDataReader reader = s.sqlCommand(sql,parameters);
+			NpgsqlDataReader reader = await s.sqlCommand(sql,parameters);
 
 			List<Wagon> wagons = new List<Wagon>();
 			while(reader.Read())
 			{
 				var temp = new Wagon
                 {
-                    Id = (int)reader[0];
-                    TrainId = (int)reader[1];
-                    NOrder = (int)reader[2];
-                    State = (int)reader[3];
-                }
+                    Id = (int)reader[0],
+                    TrainId = (int)reader[1],
+                    NOrder = (int)reader[2],
+                    State = (int)reader[3]
+                };
 				wagons.Add(temp);
 			}
 			reader.Close();
@@ -52,30 +52,30 @@ namespace code.Services
 			return wagons;
 		}
 
-        public void UpdateWagon(Wagon w)
+        public async void UpdateWagon(Wagon w)
 		{
-			string sql = "UDPATE wagons SET train_id = ($2), n_order = ($3), state = ($4) WHERE id = ($1)";
+			string sql = "UDPATE wagons SET train_id = (@p2), n_order = (@p3), state = (@p4) WHERE id = (@p1)";
 
-			IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
-            parameters.Add(new NpgsqlParameter("id", w.Id));
-			parameters.Add(new NpgsqlParameter("train_id", w.TrainId));
-			parameters.Add(new NpgsqlParameter("n_order", w.NOrder));
-			parameters.Add(new NpgsqlParameter("state", w.State));
+			List<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
+            parameters.Add(new NpgsqlParameter("p1", w.Id));
+			parameters.Add(new NpgsqlParameter("p2", w.TrainId));
+			parameters.Add(new NpgsqlParameter("p3", w.NOrder));
+			parameters.Add(new NpgsqlParameter("p4", w.State));
 		
-			NpgsqlDataReader reader = s.sqlCommand(sql,parameters);
+			NpgsqlDataReader reader = await s.sqlCommand(sql,parameters);
 
 			reader.Close();
 		}
 
 
-		public void DeleteWagon(Wagon w)
+		public async void DeleteWagon(Wagon w)
 		{
-			string sql = "DELETE FROM wagons WHERE id = ($1)";
+			string sql = "DELETE FROM wagons WHERE id = (@p1)";
 
-			IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
-			parameters.Add(new NpgsqlParameter("id", w.Id));
+			List<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
+			parameters.Add(new NpgsqlParameter("p1", w.Id));
 
-			NpgsqlDataReader reader = s.sqlCommand(sql,parameters);
+			NpgsqlDataReader reader = await s.sqlCommand(sql,parameters);
 
 			reader.Close();
 		}
