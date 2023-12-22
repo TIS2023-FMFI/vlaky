@@ -2,6 +2,7 @@ using Npgsql;
 using code.Models;
 using code.Services;
 using System.Text;
+using System.Security.Cryptography;
 
 namespace code.Services{
     public class AccountManagerService{
@@ -10,19 +11,24 @@ namespace code.Services{
                 s = ns;
             }
             public async void AddAccount(Account n){
-                IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
-                parameters.Append(new NpgsqlParameter("id",n.Id));
-                parameters.Append(new NpgsqlParameter("name",n.Name));
-                parameters.Append(new NpgsqlParameter("mail",n.Mail));
-                parameters.Append(new NpgsqlParameter("privileges",n.Privileges));
-                parameters.Append(new NpgsqlParameter("pass",n.Pass));
-                NpgsqlDataReader reader = await s.sqlCommand("INSERT INTO users (id, name, mail, privileges, pass) VALUES (($1),($2),($3),($4),sha256(($5)))", parameters);
+
+                IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>
+                {
+                    new NpgsqlParameter("p1", n.Name),
+                    new NpgsqlParameter("p2", n.Mail),
+                    new NpgsqlParameter("p3", n.Privileges),
+                    new NpgsqlParameter("p4", n.Pass)
+                };
+
+                NpgsqlDataReader reader = await s.sqlCommand("INSERT INTO users (name, mail, privileges, pass) VALUES ((@p1),(@p2),(@p3),sha256((@p4)::bytea))", parameters);
                 reader.Close();
             }
             public async void RemoveAccount(int id){
-                IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
-                parameters.Append(new NpgsqlParameter("id",id));
-                NpgsqlDataReader reader = await s.sqlCommand("DELETE FROM users WHERE id = ($1)", parameters);
+                IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>
+                {
+                    new NpgsqlParameter("p1", id)
+                };
+                NpgsqlDataReader reader = await s.sqlCommand("DELETE FROM users WHERE id = (@p1)", parameters);
                 reader.Close();
             }
 
