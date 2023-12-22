@@ -22,20 +22,26 @@ namespace code.Models
         public int Privileges{get;set;}
         public string Pass{get;set;}
         public async void DeleteSelf(SQLService s){
-            List<NpgsqlParameter> parameters = [new NpgsqlParameter("id",Id)];
-            NpgsqlDataReader reader = await s.sqlCommand("DELETE FROM users WHERE id = ($1)", parameters);
+            List<NpgsqlParameter> parameters = [new NpgsqlParameter("p1",Id)];
+            NpgsqlDataReader reader = await s.sqlCommand("DELETE FROM users WHERE id = (@p1)", parameters);
             reader.Close();
         }
         public async void UpdatePassWord(string new_passs,SQLService s)
         {
-            List<NpgsqlParameter> parameters = [new NpgsqlParameter("pass",new_passs),new NpgsqlParameter("id",Id)];
-            NpgsqlDataReader reader = await s.sqlCommand("UPDATE users SET pass = sha256(($1)) WHERE id = ($2)", parameters);
+            List<NpgsqlParameter> parameters = [new NpgsqlParameter("p1",new_passs),new NpgsqlParameter("p2",Id)];
+            NpgsqlDataReader reader = await s.sqlCommand("UPDATE users SET pass = sha256((@p1)::bytea) WHERE id = (@p2)", parameters);
             reader.Close();
         }
         public async void UpdateMail(string new_mail,SQLService s)
         {
-            List<NpgsqlParameter> parameters = [new NpgsqlParameter("pass",new_mail),new NpgsqlParameter("id",Id)];
-            NpgsqlDataReader reader = await s.sqlCommand("UPDATE users SET mail = ($1) WHERE id = ($2)", parameters);
+            List<NpgsqlParameter> parameters = [new NpgsqlParameter("p1",new_mail),new NpgsqlParameter("p2",Id)];
+            NpgsqlDataReader reader = await s.sqlCommand("UPDATE users SET mail = (@p1) WHERE id = (@p2)", parameters);
+            reader.Close();
+        }
+        public async void UpdatePrivileges(int privs,SQLService s)
+        {
+            List<NpgsqlParameter> parameters = [new NpgsqlParameter("p1",privs),new NpgsqlParameter("p2",Id)];
+            NpgsqlDataReader reader = await s.sqlCommand("UPDATE users SET privileges = (@p1) WHERE id = (@p2)", parameters);
             reader.Close();
         }
 
@@ -187,7 +193,7 @@ namespace code.Models
     }
 
     public class Train{
-        List<Wagon>Wagons = new List<Wagon>();
+        public List<Wagon>Wagons = new List<Wagon>();
         public int Id{get;set;}
         public string Name{get;set;}
         public bool Coll{get;set;}
