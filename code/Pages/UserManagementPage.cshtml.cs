@@ -6,8 +6,12 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
 using code.Auth;
 using System.Data;
+using Microsoft.AspNetCore.Authorization;
 
 namespace code.Pages;
+
+[Authorize(Policy = "Ban")]
+[Authorize(Policy = "UserManagementPolicy")]
 
 public class ManageModel : PageModel
 {
