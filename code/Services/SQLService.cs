@@ -29,13 +29,15 @@ namespace code.Services
         */
         public async Task<NpgsqlDataReader> sqlCommand(string sql, IEnumerable<NpgsqlParameter> parameters)
         {
-            Task<NpgsqlDataReader> reader = null;
+            Task<NpgsqlDataReader> task = null;
+            NpgsqlDataReader reader = null;
 
-            while (reader == null || (reader.IsFaulted && reader.Exception.InnerException.GetType() == typeof(NpgsqlException))) {
-                reader = sqlExecuteCommandAsync(sql, parameters);
+            while (task == null || (task.IsFaulted && task.Exception.InnerException.GetType() == typeof(NpgsqlException))) {
+                task = sqlExecuteCommandAsync(sql, parameters);
+                reader = await task;
             }
 
-            return await reader;
+            return reader;
         }
 
         private async Task<NpgsqlDataReader> sqlExecuteCommandAsync(string sql, IEnumerable<NpgsqlParameter> parameters)
