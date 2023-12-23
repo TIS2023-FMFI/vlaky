@@ -22,28 +22,40 @@ namespace code.Pages
 
         public string ReturnUrl { get; set; }
 
+        public string ErrorMessage { get; set; }
+
         public class InputModel
         {
             [EmailAddress]
-            public string? Email { get; set; }
+            public string? Email { get; set; } = string.Empty;
 
             [DataType(DataType.Password)]
-            public string? Password { get; set; }
+            public string? Password { get; set; } = string.Empty;
         }
 
         public void OnGet(string returnUrl = null)
         {
-
+                ErrorMessage = null;
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = "/Index") {
             ReturnUrl = returnUrl;
 
-            if (Input.Password == null || Input.Email == null) {
+            if (string.IsNullOrEmpty(Input.Email) || string.IsNullOrEmpty(Input.Password)) 
+            {
+                ErrorMessage = "Nesprávne meno alebo heslo.";
                 return Page();
             }
 
             var account = await accountManager.GetAccount(Input.Email, Input.Password);
+
+            if (account == null) 
+            {
+                Input.Email = null;
+                Input.Password = null;
+                ErrorMessage = "Nesprávne meno alebo heslo.";
+                return Page();
+            }
 
             var claims = new List<Claim>
             {
@@ -67,7 +79,13 @@ namespace code.Pages
                 new ClaimsPrincipal(claimsIdentity),
                 authProperties
             );
+            
+            if (string.IsNullOrEmpty(returnUrl))
+            {
+                return Page();
+            }
 
+            ErrorMessage = null;
             return LocalRedirect(returnUrl);
         }
     }
