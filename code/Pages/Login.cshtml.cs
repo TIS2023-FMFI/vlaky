@@ -79,11 +79,6 @@ namespace code.Pages
                 new ClaimsPrincipal(claimsIdentity),
                 authProperties
             );
-            
-            if (string.IsNullOrEmpty(returnUrl))
-            {
-                return Page();
-            }
 
             ErrorMessage = null;
             return LocalRedirect(returnUrl);

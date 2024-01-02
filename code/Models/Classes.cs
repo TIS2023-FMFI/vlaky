@@ -48,95 +48,87 @@ namespace code.Models
     }
 
     
-    public abstract class Note(){
-        public int UserId{get;set;}
-        public string Text{get;set;}
-        public abstract void UpdateText(string new_text,SQLService s);
-        public abstract void DeleteSelf(SQLService s);
+    public abstract class Note
+    {
+        public int UserId { get; set; }
+        public string Text { get; set; }
+        public abstract Task UpdateText(string new_text, SQLService s);
+        public abstract Task DeleteSelf(SQLService s);
     }
 
-    public class TrainNote:Note{
-        public int TrainId{get;set;}
-        public TrainNote(){}
-        
-        public override async void DeleteSelf(SQLService s){
-            List<NpgsqlParameter> parameters = [new NpgsqlParameter("user_id",UserId), new NpgsqlParameter("train_id",TrainId)];
-            NpgsqlDataReader reader = await s.sqlCommand("DELETE FROM train_comments WHERE user_id = ($1) AND train_id = ($2)", parameters);
-            reader.Close();
+    public class TrainNote : Note
+    {
+        public int TrainId { get; set; }
+
+        public TrainNote() { }
+
+        public override async Task UpdateText(string new_text, SQLService s)
+        {
+            List<NpgsqlParameter> parameters = new List<NpgsqlParameter>
+            {
+                new NpgsqlParameter("text", new_text),
+                new NpgsqlParameter("user_id", UserId),
+                new NpgsqlParameter("train_id", TrainId)
+            };
+            await s.sqlCommand("UPDATE train_comments SET text = @text WHERE user_id = @user_id AND train_id = @train_id", parameters);
         }
 
-        public override async void UpdateText(string new_text,SQLService s)
+        public override async Task DeleteSelf(SQLService s)
         {
-            List<NpgsqlParameter> parameters =
-            [
-                new NpgsqlParameter("text",new_text),
-                new NpgsqlParameter("user_id",UserId),
-                new NpgsqlParameter("train_id",TrainId),
-            ];
-            NpgsqlDataReader reader = await s.sqlCommand("UPDATE train_comments SET text = ($1) WHERE user_id = ($2) AND train_id = ($3)", parameters);
-            reader.Close();
-        }
-    }
-    public class WagonNote:Note{
-        public int WagonId{get;set;}
-        public WagonNote(){}
-        public override async void DeleteSelf(SQLService s){
-            List<NpgsqlParameter> parameters = [new NpgsqlParameter("user_id",UserId), new NpgsqlParameter("wagon_id",WagonId)];
-            NpgsqlDataReader reader = await s.sqlCommand("DELETE FROM wagon_comments WHERE user_id = ($1) AND wagon_id = ($2)", parameters);
-            reader.Close();
-        }
-        public override async void UpdateText(string new_text,SQLService s)
-        {
-            List<NpgsqlParameter> parameters =
-            [
-                new NpgsqlParameter("text",new_text),
-                new NpgsqlParameter("user_id",UserId),
-                new NpgsqlParameter("wagon_id",WagonId),
-            ];
-            NpgsqlDataReader reader = await s.sqlCommand("UPDATE wagon_comments SET text = ($1) WHERE user_id = ($2) AND wagon_id = ($3)", parameters);
-            reader.Close();
+            List<NpgsqlParameter> parameters = new List<NpgsqlParameter>
+            {
+                new NpgsqlParameter("user_id", UserId),
+                new NpgsqlParameter("train_id", TrainId)
+            };
+            await s.sqlCommand("DELETE FROM train_comments WHERE user_id = @user_id AND train_id = @train_id", parameters);
         }
     }
 
 
 
-    public class BlackBoardNote:Note{
-    
-        public DateTime Date{get;set;}
-        public int Id{get;set;}
-        public int Priority{get;set;}
-        public BlackBoardNote(){}
 
-        public override async void DeleteSelf(SQLService s)
+    public class BlackBoardNote : Note
+    {
+        public DateTime Date { get; set; }
+        public int Id { get; set; }
+        public int Priority { get; set; }
+        public string Title { get; set; }
+
+        public BlackBoardNote() { }
+
+        public override async Task UpdateText(string new_text, SQLService s)
         {
-            List<NpgsqlParameter> parameters = [new NpgsqlParameter("user_id",UserId), new NpgsqlParameter("id",Id)];
-            NpgsqlDataReader reader = await s.sqlCommand("DELETE FROM board_comments WHERE user_id = ($1) AND id = ($2)", parameters);
-            reader.Close();
+            List<NpgsqlParameter> parameters = new List<NpgsqlParameter>
+            {
+                new NpgsqlParameter("text", new_text),
+                new NpgsqlParameter("date", DateTime.Now),
+                new NpgsqlParameter("user_id", UserId),
+                new NpgsqlParameter("id", Id),
+            };
+
+            await s.sqlCommand("UPDATE board_comments SET text = @text, date = @date WHERE user_id = @user_id AND id = @id", parameters);
         }
 
-        public async void SetPriority(int np,SQLService s){
-            List<NpgsqlParameter> parameters =
-            [
-                new NpgsqlParameter("priority",np),
-                new NpgsqlParameter("user_id",UserId),
-                new NpgsqlParameter("id",Id),
-            ];
-            NpgsqlDataReader reader = await s.sqlCommand("UPDATE board_comments SET priority = ($1) WHERE user_id = ($2) AND id = ($3)", parameters);
-            reader.Close();
+        public override async Task DeleteSelf(SQLService s)
+        {
+            List<NpgsqlParameter> parameters = new List<NpgsqlParameter>
+            {
+                new NpgsqlParameter("user_id", UserId),
+                new NpgsqlParameter("id", Id)
+            };
+            await s.sqlCommand("DELETE FROM board_comments WHERE user_id = @user_id AND id = @id", parameters);
         }
 
-        public override async void UpdateText(string new_text,SQLService s)
+        public async Task SetPriority(int newPriority, SQLService s)
         {
-            List<NpgsqlParameter> parameters =
-            [
-                new NpgsqlParameter("text",new_text),
-                new NpgsqlParameter("date",DateTime.Now),
-                new NpgsqlParameter("user_id",UserId),
-                new NpgsqlParameter("id",Id),
-            ];
-            Date = DateTime.Now;
-            NpgsqlDataReader reader = await s.sqlCommand("UPDATE board_comments SET text = ($1),date = ($2) WHERE user_id = ($3) AND id = ($4)", parameters);
-            reader.Close();
+            List<NpgsqlParameter> parameters = new List<NpgsqlParameter>
+            {
+                new NpgsqlParameter("priority", newPriority),
+                new NpgsqlParameter("user_id", UserId),
+                new NpgsqlParameter("id", Id),
+            };
+            Priority = newPriority;
+            await s.sqlCommand("UPDATE board_comments SET priority = @priority WHERE user_id = @user_id AND id = @id", parameters);
         }
     }
 

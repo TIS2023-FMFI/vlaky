@@ -1,0 +1,43 @@
+@page
+@model ScheduleModel
+@{
+    ViewData["Title"] = "Train Schedule";
+}
+
+
+
+
+<div class="date-picker-container">
+    <label for="startDate">Od:</label>
+    <input type="date" id="startDate" class="date-input" />
+    <label for="endDate">Do:</label>
+    <input type="date" id="endDate" class="date-input" />
+</div>
+
+
+
+<div class="icons-container">
+    <div class="icon">
+        <img src="~/images/train_naplanovany.svg" alt="Naplánovaný" />
+        <span>Naplánovaný</span>
+    </div>
+    <div class="icon">
+        <img src="~/images/train_vpriprave.svg" alt="V príprave" />
+        <span>V príprave</span>
+    </div>
+    <div class="icon">
+        <img src="~/images/train_pripraveny.svg" alt="Pripravený" />
+        <span>Pripravený</span>
+    </div>
+    <div class="icon">
+        <img src="~/images/train_expedovany.svg" alt="Expedovaný" />
+        <span>Expedovaný</span>
+    </div>
+    <div class="icon">
+        <img src="~/images/train_zruseny.svg" alt="Zrušený" />
+        <span>Zrušený</span>
+    </div>
+</div>
+
+
+
