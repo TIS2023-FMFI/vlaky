@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS public.board_comments
 (
     id serial,
     user_id integer,
+    title text NOT NULL,
     text text NOT NULL,
     date timestamp with time zone,
     priority integer,
