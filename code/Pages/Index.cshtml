@@ -4,10 +4,108 @@
     ViewData["Title"] = "Home page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    @if(HttpContext.User.Identity.IsAuthenticated) {
-        <p>@HttpContext.User.Identity.Name</p>
-    }
-    <p><li><a asp-page="/Login">Sign in</a></li></p>
+<div class="main">
+
+    <div class="navigation">
+        <img src="~/images/logo.png" alt="CEVA Logistics logo" class="nav-logo" />
+        <button class="nav-toggle" aria-label="toggle navigation">
+            <img src="~/images/hamburger-menu-icon.png" alt="icon" class="hamburger-icon" />
+        </button>
+        <nav class="nav">
+            <ul>
+                <li>
+                    <a href="/Index" class="active">Poznámky</a>
+                </li>
+                <li>
+                    <a href="/Schedule">Rozvrh</a>
+                </li>
+                <li>
+                    <a href="/Historia">História</a>
+                </li>
+                <li>
+                    <a href="/Pouzivatelia">Používatelia</a>
+                </li>
+                <li>
+                    <a href="/Logout">Odhlásiť sa</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <div class="notes-container">
+        @foreach (var note in Model.Notes)
+        {
+            <div class="note @GetPriorityClass(note.Priority)">
+                <div class="note-header">
+                    <span class="note-title">@note.Title</span>
+                    <div class="note-controls">
+                    
+                        <form id="deleteNoteForm" asp-controller="Index" asp-action="OnPostDeleteAsync" asp-route-noteId="@note.Id">
+                            @Html.AntiForgeryToken()
+                            <button class="note-delete delete-button" title="Delete" data-note-id="@note.Id" asp-page-handler="OnPostDeleteAsync" asp-route-noteId="@note.Id">
+                                <img src="~/images/delete-icon.png" alt="Delete" />
+                            </button>
+                        </form>
+                        <button class="note-edit" title="Edit" onclick="editNote(@note.Id)">
+                            <img src="~/images/edit-icon.png" alt="Edit" />
+                        </button>
+                    </div>
+                </div>
+                <div class="note-meta">
+                    <span class="note-date">@note.Date</span>
+                    <span class="note-user">@note.User</span>
+                </div>
+                <div class="note-content">
+                    @note.Content
+                </div>
+            </div>
+        }
+    </div>
+
+    <a href="/CreateBoardNote" class="btn btn-primary create-note-button" aria-label="Create new note">
+        Vytvoriť poznámku
+    </a>
 </div>
+
+@functions {
+    string GetPriorityClass(int priority)
+    {
+        switch (priority)
+        {
+            case 5: return "priority-low";
+            case 4: return "priority-medium";
+            case 3: return "priority-high";
+            case 2: return "priority-critical";
+            case 1: return "priority-urgent";
+            default: return "";
+        }
+    }
+}
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $(".note-delete").click(function (e) {
+            e.preventDefault();
+            var noteTitle = $(this).closest('.note').find('.note-title').text();
+            var $note = $(this).closest('.note');
+            var confirmed = confirm("Chcete vymazať poznámku s názvom: " + noteTitle + "?");
+
+            if (confirmed) {
+            // Delete the note from the UI
+                $note.remove();
+
+                // Get the noteId
+                var noteId = $(this).data('note-id');
+
+                // Redirect to the delete action page
+                window.location.href = '/Index?noteId=' + noteId;
+            }
+        });
+    });
+
+    function editNote(noteId) {
+        window.location.href = '/CreateBoardNote?noteId=' + noteId;
+    }
+</script>

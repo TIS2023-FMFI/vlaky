@@ -1,18 +1,25 @@
+/* the whole site */
+
 html {
   font-size: 14px;
 }
 
 body {
-  background-color: #172044;
-  color: #ffffff;
+  background-color: white;
+  color: black;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
   padding: 0;
   height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
+
+.main {
+  display: flex;
+  flex-direction: row;
+  min-height: 100vh;  
+}
+
+/* login page */
 
 .login-form {
   width: 100%;
@@ -73,4 +80,419 @@ body {
   margin: 0 auto;
   justify-content: space-between;
   gap: 20px;
+}
+
+
+/* navigation */
+
+.navigation {
+  position: fixed;
+  width: 200px;
+  max-width: 200px;
+  min-width: 200px;
+  min-height: 100vh;
+  background-color: #172044;
+}
+
+.nav-logo {
+  width: 100%;
+  height: auto;
+}
+
+.navigation ul {
+  width: 100%;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+
+.navigation ul li a {
+  text-decoration: none;
+  color: white;
+  background-color: #172044;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 15px 15px;
+  font-weight: bold;
+
+}
+
+.navigation ul li a:hover {
+  background-color: black;
+}
+
+.navigation ul li a.active {
+  background-color: white;
+  color: black;
+}
+
+.navigation ul li a:hover {
+  background-color: white;
+  color: black;
+}
+
+.nav-toggle {
+  display: none;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+
+@media  (max-width: 1200px) {
+  .navigation {
+    width: 150px;
+    min-width: 150px;
+  }
+  
+  .nav-logo {
+    width: 100%;
+  }
+}
+
+@media (max-width: 800px) {
+  .navigation {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      max-width: none;
+      min-width: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem;
+      z-index: 1000;
+      background-color: #172044;
+      height: 60px;
+      min-height: 60px;
+  }
+
+  .nav-logo {
+    width: 100px;
+  }
+
+  .hamburger-icon {
+    width: 30px;
+    height: auto;
+  }
+
+  .nav-toggle {
+    display: block;
+    width: 50px;
+  }
+
+  .nav {
+      display: none;
+      width: 100%;
+      position: absolute;
+      top: 60px;
+      left: 0;
+      z-index: 999;
+  }
+
+  .nav--visible {
+      display: block;
+  }
+}
+
+/* notes */
+
+.notes-container {
+  column-width: 300px;
+  column-gap: 30px;
+  padding: 10px;
+  margin: 20px;
+  margin-bottom: 70px;
+  margin-left: 220px;
+  break-inside: avoid;
+}
+
+.note {
+  background: #FFD1DC;
+  border-radius: 15px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  padding: 10px;
+  width: 100%;  
+  margin-bottom: 20px;
+  break-inside: avoid;
+}
+
+.note-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.note-title {
+  font-weight: bold;
+  margin-right: 10px;
+  margin-left: 10px;
+  margin-top: 10px;
+  color: #333;
+  word-break: break-word !important;
+}
+
+.note-meta {
+  font-size: 0.8rem;
+  color: black;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.note-controls {
+  display: flex;
+  gap: 5px;
+  margin-top: 10px;
+  align-self: flex-start;
+}
+
+.note-delete,
+.note-edit {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.note-content {
+  white-space: pre-line;
+  color: black;
+  margin-left: 10px;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  word-wrap: break-word;
+}
+
+@media (max-width: 1200px) {
+  .notes-container {
+    margin-left: 170px;
+  }
+}
+
+@media (max-width: 800px) {
+  .notes-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 80px;
+    margin-left: 20px;
+    margin-right: 20px;
+    width: 100%;
+    grid-template-columns: 1fr;
+  }
+
+  .note {
+    width: calc(100% - 40px);
+    max-width: 500px;
+  }
+}
+
+.create-note-button {
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  color: black;
+  background-color: #AFCFFF;
+  border: none;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  cursor: pointer;
+  z-index: 1001;
+}
+
+.create-note-button:hover {
+  background-color: #8fb2ff;
+  color: black;
+}
+
+/* Priority colors for notes, based on a class added dynamically */
+.priority-low, .priority-low .note-content {
+  background-color: #CBE8BA;
+}
+
+.priority-medium, .priority-medium .note-content {
+  background-color: #D4E3FC;
+}
+
+.priority-high, .priority-high .note-content {
+  background-color: #FEF8A0;
+}
+
+.priority-critical, .priority-critical .note-content {
+  background-color: #FFC581;
+}
+
+.priority-urgent, .priority-urgent .note-content {
+  background-color: #FF8A84;
+}
+
+/* create board note*/
+
+.note-creation-section {
+  width: 90%;
+  max-width: 1000px;
+  min-width: 200px;
+  padding: 10px;
+  margin-left: 220px;
+  margin-top: 20px;
+  margin-right: 20px;
+
+}
+
+.note-creation-form {
+  background: lightgray;
+  padding: 20px;
+  border-radius: 15px;
+  max-width: 800px;
+  min-width: 200px;
+  margin-bottom: 20px;
+}
+
+.note-form-group {
+  margin-bottom: 15px;
+  border-radius: 15px;
+}
+
+.note-form-label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #333;
+  border-radius: 15px;
+}
+
+.note-form-input,
+.note-form-select {
+  width: 100%;
+  padding: 10px;
+  border: 15px;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.priority-select {
+  width: 50%;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+.note-form-button:hover {
+  background-color: #0056b3;
+}
+
+.note-form-input {
+  border-radius: 15px;
+}
+
+@media (max-width: 1200px) {
+  .note-creation-section {
+    margin-left: 170px;
+  }
+}
+
+@media (max-width: 800px) {
+  .note-creation-section {
+    margin-left: 20px;
+    margin-top: 80px;
+    margin-right: 20px;
+    width: 100%;
+  }
+}
+
+.note-form-button-group {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.note-form-button {
+  width: 150px;
+  text-align: center;
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  color: black;
+  background-color: #AFCFFF;
+  border: none;
+  cursor: pointer;
+  z-index: 1001;
+  padding: 10px 20px;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.note-form-button:hover {
+  background-color: #8fb2ff;
+  color: black;
+}
+
+
+.note-form-input,
+.note-form-select {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+input,
+textarea {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+
+/* schedule */
+
+
+.date-picker-container {
+  font-family: Arial, sans-serif; /* This should match the font in your example */
+  display: flex;
+  align-items: center;
+}
+
+.date-picker-container label {
+  margin-right: 8px;
+  color: #555; /* Adjust the color to match your design */
+}
+
+.date-input {
+  border: 1px solid #ccc; /* Light grey border */
+  border-radius: 4px; /* Rounded corners */
+  padding: 8px 12px; /* Top and bottom padding with larger side padding */
+  margin-right: 20px; /* Spacing between the elements */
+  font-size: 16px; /* Larger text for readability */
+  color: #333; /* Darker text color */
+  outline: none; /* Remove the default focus outline */
+}
+
+.icons-container {
+  display: flex;
+  justify-content: flex-start; /* Align children to the start of the container */
+  flex-wrap: wrap; /* This ensures that the icons wrap if there's not enough space */
+  padding: 0; /* Reset padding, if any */
+  margin: 0; /* Reset margin, if any */
+  margin-top: 20px;
+}
+
+.icon {
+  display: flex; /* Makes the .icon a flex container */
+  align-items: center; /* Centers the image and text vertically */
+  margin-right: 20px; /* Adjust the space between the icons as needed */
+  margin-bottom: 10px; /* Space between rows if they wrap */
+}
+
+.icon img {
+  width: 40px; /* Or your preferred size */
+  height: auto;
+}
+
+.icon span {
+  margin-left: 5px; /* Add some space between the image and the text */
+  display: inline-block; /* This makes the span align next to the image */
+}
+
+.v_priprave {
+  fill: #FFA834;
 }

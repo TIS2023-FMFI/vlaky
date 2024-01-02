@@ -8,7 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.s
 
-builder.Services.AddRazorPages();
+builder.Services.AddRazorPages();   
 builder.Services.AddControllersWithViews();
 
 // set up authentication
@@ -51,6 +51,8 @@ builder.Services.AddSingleton<LoggerService>();
 DbConnectionService.configureService(builder.Configuration);
 builder.Services.AddSingleton<DbConnectionService>();
 builder.Services.AddTransient<SQLService>();
+builder.Services.AddTransient<BlackBoardService>();
+
 
 builder.Services.AddRazorPages().AddSessionStateTempDataProvider();
 builder.Services.AddServerSideBlazor();
