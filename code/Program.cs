@@ -11,18 +11,23 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();   
 builder.Services.AddControllersWithViews();
 
+// set up authentication
+var authConfig = builder.Configuration.GetSection("AuthenticationOptions");
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
-        options.Cookie.Name = "TrainCookie";
-        options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
+        options.Cookie.Name = authConfig["BrowserCookieName"];
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(Convert.ToDouble(authConfig["CookieExpirationTime"]));
         options.SlidingExpiration = true;
-        options.LoginPath = "/Login/";
-        options.AccessDeniedPath = "/Forbidden/";
+        options.LoginPath = authConfig["DefaultLoginPath"];
+        options.AccessDeniedPath = authConfig["DefaultAccessDeniedPath"];
     });
 
+// set up authorization
 builder.Services.AddAuthorization(options =>
 {
+    options.AddPolicy("Ban", policy =>
+        policy.Requirements.Add(new AuthRequirement(0)));
     options.AddPolicy("UserManagementPolicy", policy =>
         policy.Requirements.Add(new AuthRequirement(1)));
     options.AddPolicy("BlackboardManagementPolicy", policy =>
@@ -37,10 +42,12 @@ builder.Services.AddAuthorization(options =>
         policy.Requirements.Add(new AuthRequirement(6)));
 });
 
+// add other services
 builder.Services.AddSingleton<IAuthorizationHandler, AuthRequirementHandler>();
-
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
+LoggerService.configureService(builder.Configuration);
+builder.Services.AddSingleton<LoggerService>();
 DbConnectionService.configureService(builder.Configuration);
 builder.Services.AddSingleton<DbConnectionService>();
 builder.Services.AddTransient<SQLService>();
@@ -48,9 +55,13 @@ builder.Services.AddTransient<BlackBoardService>();
 
 
 builder.Services.AddRazorPages().AddSessionStateTempDataProvider();
-builder.Services.AddTransient<AccountManagerService>();
-
 builder.Services.AddServerSideBlazor();
+
+builder.Services.AddTransient<AccountManagerService>();
+builder.Services.AddTransient<BlackBoardService>();
+builder.Services.AddTransient<TrainManagerService>();
+builder.Services.AddTransient<WagonManagerService>();
+builder.Services.AddTransient<TemplateManagerService>();
 
 var app = builder.Build();
 

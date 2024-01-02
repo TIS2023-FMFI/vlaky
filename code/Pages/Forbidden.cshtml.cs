@@ -19,6 +19,6 @@ public class ForbiddenModel : PageModel
                 c => c.Type == "Privileges"
             );
 
-        ban = AuthRequirementHandler.isBitSet(claim, 1);
+        ban = !AuthRequirementHandler.isBitSet(claim, 0);
     }
 }
