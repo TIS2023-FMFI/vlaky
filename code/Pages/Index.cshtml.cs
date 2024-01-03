@@ -23,7 +23,8 @@ public class IndexModel : PageModel
 
     public List<NNote> Notes { get; set; }
 
-    public IndexModel(ILogger<IndexModel> logger, BlackBoardService blackBoardService)
+    public IndexModel(ILogger<IndexModel> logger, 
+        BlackBoardService blackBoardService)
     {
         _logger = logger;
         _blackBoardService = blackBoardService;
