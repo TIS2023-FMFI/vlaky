@@ -1,0 +1,131 @@
+.notes-container {
+    column-width: 300px;
+    column-gap: 30px;
+    padding: 10px;
+    margin: 20px;
+    margin-bottom: 70px;
+    margin-left: 220px;
+    break-inside: avoid;
+}
+
+.note {
+    background: #ffd1dc;
+    border-radius: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    width: 100%;
+    margin-bottom: 20px;
+    break-inside: avoid;
+}
+
+.note-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.note-title {
+    font-weight: bold;
+    margin-right: 10px;
+    margin-left: 10px;
+    margin-top: 10px;
+    color: #333;
+    word-break: break-word !important;
+}
+
+.note-meta {
+    font-size: 0.8rem;
+    color: black;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.note-controls {
+    display: flex;
+    gap: 5px;
+    margin-top: 10px;
+    align-self: flex-start;
+}
+
+.note-delete,
+.note-edit {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.note-content {
+    white-space: pre-line;
+    color: black;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    word-wrap: break-word;
+}
+
+@media (max-width: 1200px) {
+    .notes-container {
+        margin-left: 170px;
+    }
+}
+
+@media (max-width: 800px) {
+    .notes-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 80px;
+        margin-left: 20px;
+        margin-right: 20px;
+        width: 100%;
+        grid-template-columns: 1fr;
+    }
+
+    .note {
+        width: calc(100% - 40px);
+        max-width: 500px;
+    }
+}
+
+.create-note-button {
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    color: black;
+    background-color: #afcfff;
+    border: none;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    cursor: pointer;
+    z-index: 1001;
+}
+
+.create-note-button:hover {
+    background-color: #8fb2ff;
+    color: black;
+}
+
+.priority-low,
+.priority-low .note-content {
+    background-color: #cbe8ba;
+}
+
+.priority-medium,
+.priority-medium .note-content {
+    background-color: #d4e3fc;
+}
+
+.priority-high,
+.priority-high .note-content {
+    background-color: #fef8a0;
+}
+
+.priority-critical,
+.priority-critical .note-content {
+    background-color: #ffc581;
+}
+
+.priority-urgent,
+.priority-urgent .note-content {
+    background-color: #ff8a84;
+}

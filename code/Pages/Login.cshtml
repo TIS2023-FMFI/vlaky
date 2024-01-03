@@ -1,13 +1,12 @@
 @page
 @model LoginModel
-
 @{
-    ViewData["Title"] = "CEVA";
+    ViewData["Title"] = "";
 }
 
 <div class="login-form">
     <form method="post" class="login-input-btn">
-    
+
         <img src="~/images/logo.png" alt="CEVA Logistics logo" class="logo">
 
         <div class="login-form-group">
@@ -25,18 +24,15 @@
         }
 
         <div class="login-form-group d-flex justify-content-between">
-
             @if (!string.IsNullOrEmpty(Model.ErrorMessage))
             {
                 <button class="btn btn-secondary" type="button" onclick="location.href='@Url.Page("/Recover")'">Obnoviť</button>
             }
             <button class="btn btn-primary" type="submit">Prihlásiť sa</button>
-
         </div>
+        
     </form>
 </div>
-
-
 
 @section Scripts {
     <script>

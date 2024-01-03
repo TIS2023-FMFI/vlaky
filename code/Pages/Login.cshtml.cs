@@ -35,7 +35,13 @@ namespace code.Pages
 
         public void OnGet(string returnUrl = null)
         {
-                ErrorMessage = null;
+            if (HttpContext.User.Identity.IsAuthenticated)
+            {
+                Response.Redirect("/Index");
+                return;
+            }
+
+            ErrorMessage = null;
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = "/Index") {

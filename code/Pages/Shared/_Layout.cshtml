@@ -1,21 +1,71 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
+
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"]CEVA</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
+
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="~/css/create_note.css.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="~/css/index.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="~/css/login.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="~/css/navigation.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="~/css/schedule.css" asp-append-version="true"/>
     <link rel="stylesheet" href="~/code.styles.css" asp-append-version="true" />
+    
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <link rel="icon" href="~/images/logo-icon.png" type="image/icon type">
     @RenderSection("PageStyles", required: false)
+    
 </head>
 <body>
-    @RenderBody()
+
+    @if (!ViewContext.HttpContext.User.Identity.IsAuthenticated)
+    {
+        @RenderBody()
+    }
+    else
+    {
+        <div class="main">
+            <div class="navigation">
+
+                <img src="~/images/logo.png" alt="CEVA Logistics logo" class="nav-logo" />
+                
+                <button class="nav-toggle" aria-label="toggle navigation">
+                    <img src="~/images/hamburger-menu-icon.png" alt="icon" class="hamburger-icon" />
+                </button>
+
+                <nav class="nav">
+                    <ul>
+                        <li>
+                            <a href="/Index" class="@((Context.Request.Path == "/Index" || Context.Request.Path == "/CreateBoardNote") ? "active" : "")">Poznámky</a>
+                        </li>
+                        <li>
+                            <a href="/Schedule" class="@((Context.Request.Path == "/Schedule") ? "active" : "")">Rozvrh</a>
+                        </li>
+                        <li>
+                            <a href="/History" class="@((Context.Request.Path == "/History") ? "active" : "")">História</a>
+                        </li>
+                        <li>
+                            <a href="/Users" class="@((Context.Request.Path == "/Users") ? "active" : "")">Používatelia</a>
+                        </li>
+                        <li>
+                            <a href="/Logout" class="@((Context.Request.Path == "/Logout") ? "active" : "")">Odhlásiť sa</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+
+            @RenderBody()
+
+        </div>
+    }
+    
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
-

@@ -1,71 +1,46 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "";
 }
 
-<div class="main">
+<div class="notes-container">
+    @foreach (var note in Model.Notes)
+    {
+        <div class="note @GetPriorityClass(note.Priority)">
 
-    <div class="navigation">
-        <img src="~/images/logo.png" alt="CEVA Logistics logo" class="nav-logo" />
-        <button class="nav-toggle" aria-label="toggle navigation">
-            <img src="~/images/hamburger-menu-icon.png" alt="icon" class="hamburger-icon" />
-        </button>
-        <nav class="nav">
-            <ul>
-                <li>
-                    <a href="/Index" class="active">Poznámky</a>
-                </li>
-                <li>
-                    <a href="/Schedule">Rozvrh</a>
-                </li>
-                <li>
-                    <a href="/Historia">História</a>
-                </li>
-                <li>
-                    <a href="/Pouzivatelia">Používatelia</a>
-                </li>
-                <li>
-                    <a href="/Logout">Odhlásiť sa</a>
-                </li>
-            </ul>
-        </nav>
-    </div>
+            <div class="note-header">
+                <span class="note-title">@note.Title</span>
 
-    <div class="notes-container">
-        @foreach (var note in Model.Notes)
-        {
-            <div class="note @GetPriorityClass(note.Priority)">
-                <div class="note-header">
-                    <span class="note-title">@note.Title</span>
-                    <div class="note-controls">
-                    
-                        <form id="deleteNoteForm" asp-controller="Index" asp-action="OnPostDeleteAsync" asp-route-noteId="@note.Id">
-                            @Html.AntiForgeryToken()
-                            <button class="note-delete delete-button" title="Delete" data-note-id="@note.Id" asp-page-handler="OnPostDeleteAsync" asp-route-noteId="@note.Id">
-                                <img src="~/images/delete-icon.png" alt="Delete" />
-                            </button>
-                        </form>
-                        <button class="note-edit" title="Edit" onclick="editNote(@note.Id)">
-                            <img src="~/images/edit-icon.png" alt="Edit" />
+                <div class="note-controls">
+                    <form id="deleteNoteForm" asp-controller="Index" asp-action="OnPostDeleteAsync" asp-route-noteId="@note.Id">
+                        <button class="note-delete delete-button" title="Delete" data-note-id="@note.Id" asp-page-handler="OnPostDeleteAsync" asp-route-noteId="@note.Id">
+                            <img src="~/images/delete-icon.png" alt="Delete"/>
                         </button>
-                    </div>
-                </div>
-                <div class="note-meta">
-                    <span class="note-date">@note.Date</span>
-                    <span class="note-user">@note.User</span>
-                </div>
-                <div class="note-content">
-                    @note.Content
+                    </form>
+
+                    <button class="note-edit" title="Edit" onclick="editNote(@note.Id)">
+                        <img src="~/images/edit-icon.png" alt="Edit" />
+                    </button>
                 </div>
             </div>
-        }
-    </div>
 
-    <a href="/CreateBoardNote" class="btn btn-primary create-note-button" aria-label="Create new note">
-        Vytvoriť poznámku
-    </a>
+            <div class="note-meta">
+                <span class="note-date">@note.Date.ToString("dd/MM/yy")</span>
+                <span class="note-user">@note.UserId.ToString()</span>
+            </div>
+
+            <div class="note-content">
+                @note.Text
+            </div>
+
+        </div>
+    }
 </div>
+
+<a href="/CreateBoardNote" class="btn btn-primary create-note-button" aria-label="Create new note">
+    Vytvoriť poznámku
+</a>
 
 @functions {
     string GetPriorityClass(int priority)
@@ -83,7 +58,8 @@
 }
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src = "https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
 <script>
     $(document).ready(function () {
         $(".note-delete").click(function (e) {
@@ -93,13 +69,8 @@
             var confirmed = confirm("Chcete vymazať poznámku s názvom: " + noteTitle + "?");
 
             if (confirmed) {
-            // Delete the note from the UI
                 $note.remove();
-
-                // Get the noteId
                 var noteId = $(this).data('note-id');
-
-                // Redirect to the delete action page
                 window.location.href = '/Index?noteId=' + noteId;
             }
         });

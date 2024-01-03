@@ -4,8 +4,8 @@ using Microsoft.Extensions.Logging;
 using code.Services;
 using code.Models;
 using Microsoft.AspNetCore.Http;
+using System.ComponentModel.DataAnnotations;
 using System;
-
 
 namespace code.Pages
 {
@@ -23,6 +23,7 @@ namespace code.Pages
         [BindProperty]
         public string Content { get; set; }
 
+        public string ErrorMessage { get; set; }
 
         public CreateBoardNoteModel(BlackBoardService blackBoardService, ILogger<CreateBoardNoteModel> logger)
         {
@@ -30,9 +31,15 @@ namespace code.Pages
             _logger = logger;
         }
 
-
         public async Task<IActionResult> OnGetAsync(int? noteId)
         {
+            ErrorMessage = null;
+
+            if (!HttpContext.User.Identity.IsAuthenticated)
+            {
+                return Redirect("/Login");
+            }
+
             if (noteId.HasValue && noteId != null)
             {
                 var note = await _blackBoardService.GetNoteById(noteId.Value);
@@ -48,12 +55,21 @@ namespace code.Pages
             return Page();
         }
 
-
         public async Task<IActionResult> OnPostAsync(string Title, int Priority, string Content)
         {
+            if (!HttpContext.User.Identity.IsAuthenticated)
+            {
+                return Redirect("/Login");
+            }
+
+            if (string.IsNullOrEmpty(Title) || string.IsNullOrEmpty(Content)) 
+            {
+                ErrorMessage = "Vyplňte všetky polia.";
+                return Page();
+            }
 
             var noteId = HttpContext.Request.Query["noteId"].ToString();
-            
+
             var newNote = new BlackBoardNote
             {
                 Title = Title,
@@ -63,16 +79,17 @@ namespace code.Pages
                 Date = DateTime.Now
             };
 
-            if (!string.IsNullOrEmpty(noteId)) {
+            if (!string.IsNullOrEmpty(noteId))
+            {
                 newNote.Id = Convert.ToInt32(noteId);
                 await _blackBoardService.EditNote(newNote);
             }
-            else {
+            else
+            {
                 await _blackBoardService.AddNote(newNote);
             }
 
             return RedirectToPage("/Index");
-
         }
     }
 }
