@@ -10,7 +10,6 @@ namespace code.Services
         public SQLService(DbConnectionService DbService) 
         {
             this.DbService = DbService;
-            connection = DbService.getConnection();
         }
 
         ~SQLService()
@@ -29,6 +28,8 @@ namespace code.Services
         */
         public async Task<NpgsqlDataReader> sqlCommand(string sql, IEnumerable<NpgsqlParameter> parameters)
         {
+            refreshConnection();
+
             Task<NpgsqlDataReader> task = null;
             NpgsqlDataReader reader = null;
 
@@ -48,6 +49,14 @@ namespace code.Services
                 cmd.Parameters.Add(parameter);
             }
             return await cmd.ExecuteReaderAsync();
+        }
+
+        private void refreshConnection() {
+            if (connection != null) 
+            {
+                connection.Dispose();
+            }
+            connection = DbService.getConnection();
         }
     }
 }
