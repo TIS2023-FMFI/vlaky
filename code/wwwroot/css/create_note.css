@@ -1,0 +1,108 @@
+.note-creation-section {
+    width: 90%;
+    max-width: 1000px;
+    min-width: 200px;
+    padding: 10px;
+    margin-left: 220px;
+    margin-top: 20px;
+    margin-right: 20px;
+}
+
+.note-creation-form {
+    background: lightgray;
+    padding: 20px;
+    border-radius: 15px;
+    max-width: 800px;
+    min-width: 200px;
+    margin-bottom: 20px;
+}
+
+.note-form-group {
+    margin-bottom: 15px;
+    border-radius: 15px;
+}
+
+.note-form-label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #333;
+    border-radius: 15px;
+}
+
+.note-form-input,
+.note-form-select {
+    width: 100%;
+    padding: 10px;
+    border: 15px;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.priority-select {
+    width: 50%;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+.note-form-button:hover {
+    background-color: #0056b3;
+}
+
+.note-form-input {
+    border-radius: 15px;
+}
+
+@media (max-width: 1200px) {
+    .note-creation-section {
+        margin-left: 170px;
+    }
+}
+
+@media (max-width: 800px) {
+    .note-creation-section {
+        margin-left: 20px;
+        margin-top: 80px;
+        margin-right: 20px;
+        width: 100%;
+    }
+}
+
+.note-form-button-group {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.note-form-button {
+    width: 150px;
+    text-align: center;
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    color: black;
+    background-color: #afcfff;
+    border: none;
+    cursor: pointer;
+    z-index: 1001;
+    padding: 10px 20px;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.note-form-button:hover {
+    background-color: #8fb2ff;
+    color: black;
+}
+
+.note-form-input,
+.note-form-select {
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+input,
+textarea {
+    padding-left: 20px;
+    padding-right: 20px;
+}

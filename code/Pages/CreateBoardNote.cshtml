@@ -1,89 +1,70 @@
 @page
 @model CreateBoardNoteModel
 @{
-    ViewData["Title"] = "CEVA";
+    ViewData["Title"] = "";
 }
 
-<div class="main">
+@{
+    var color1 = "#FF8A84";
+    var color2 = "#FFC581";
+    var color3 = "#FEF8A0";
+    var color4 = "#D4E3FC";
+    var color5 = "#CBE8BA";
+}
 
-    <div class="navigation">
-        <img src="~/images/logo.png" alt="CEVA Logistics logo" class="nav-logo" />
-        <button class="nav-toggle" aria-label="toggle navigation">
-            <img src="~/images/hamburger-menu-icon.png" alt="icon" class="hamburger-icon" />
-        </button>
-        <nav class="nav">
-            <ul>
-                <li>
-                    <a href="/Index" class="active">Poznámky</a>
-                </li>
-                <li>
-                    <a href="/Schedule">Rozvrh</a>
-                </li>
-                <li>
-                    <a href="/Historia">História</a>
-                </li>
-                <li>
-                    <a href="/Pouzivatelia">Používatelia</a>
-                </li>
-                <li>
-                    <a href="/Logout">Odhlásiť sa</a>
-                </li>
-            </ul>
-        </nav>
-    </div>
+<div class="note-creation-section">
+    <form method="post" class="note-creation-form">
+        
+        <div class="note-form-group">
+            <label for="Priority" class="note-form-label">Priorita:</label>
+            <select class="note-form-input priority-select" asp-for="Priority" id="Priority" name="Priority" required>
+                <option value="1" style="background-color: @color1;">1</option>
+                <option value="2" style="background-color: @color2;">2</option>
+                <option value="3" style="background-color: @color3;">3</option>
+                <option value="4" style="background-color: @color4;">4</option>
+                <option value="5" style="background-color: @color5;">5</option>
+            </select>
+        </div>
 
-    <div class="note-creation-section">
-        <form method="post" class="note-creation-form">
-            
-            <div class="note-form-group">
-                <label for="Priority" class="note-form-label">Priorita:</label>
-                <select class="note-form-input priority-select" id="Priority" name="Priority" required>
-                    <option value="1" style="background-color: #FF8A84;">1</option>
-                    <option value="2" style="background-color: #FFC581;">2</option>
-                    <option value="3" style="background-color: #FEF8A0;">3</option>
-                    <option value="4" style="background-color: #D4E3FC;">4</option>
-                    <option value="5" style="background-color: #CBE8BA;">5</option>
-                </select>
-            </div>
+        <div class="note-form-group">
+            <label for="Title" class="note-form-label">Názov:</label>
+            <input type="text" class="note-form-input" id="Title" name="Title" value="@Model.Title">
+        </div>
 
-            <div class="note-form-group">
-                <label for="Title" class="note-form-label">Názov:</label>
-                <input type="text" class="note-form-input" id="Title" name="Title" required value="@Model.Title">
-            </div>
+        <div class="note-form-group">
+            <label for="Content" class="note-form-label">Text:</label>
+            <textarea class="note-form-input" id="Content" name="Content" rows="13" >@Model.Content</textarea>
+        </div>
 
-            <div class="note-form-group">
-                <label for="Content" class="note-form-label">Text:</label>
-                <textarea class="note-form-input" id="Content" name="Content" rows="13" required>@Model.Content</textarea>
-            </div>
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="text-danger">@Model.ErrorMessage</div>
+        }
 
-                    <div class="note-form-button-group">
-                <a href="/Index" class="note-form-button">Späť</a>
-                <button type="submit" class="note-form-button">Uložiť</button>
-            </div>
-        </form>
-    </div>
-
-
+        <div class="note-form-button-group">
+            <a href="/Index" class="note-form-button">Späť</a>
+            <button type="submit" class="note-form-button">Uložiť</button>
+        </div>
+    </form>
 </div>
-
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-    var prioritySelect = document.getElementById('Priority');
-    var colors = {
-        '1': '#FF8A84',
-        '2': '#FFC581',
-        '3': '#FEF8A0',
-        '4': '#D4E3FC',
-        '5': '#CBE8BA'
-    };
+        var prioritySelect = document.getElementById('Priority');
+        var colors = {
+            '1': '@color1',
+            '2': '@color2',
+            '3': '@color3',
+            '4': '@color4',
+            '5': '@color5'
+        };
 
-    function changeColor() {
-        var selectedValue = prioritySelect.options[prioritySelect.selectedIndex].value;
-        prioritySelect.style.backgroundColor = colors[selectedValue];
-    }
+        function changeColor() {
+            var selectedValue = prioritySelect.options[prioritySelect.selectedIndex].value;
+            prioritySelect.style.backgroundColor = colors[selectedValue];
+        }
 
-    prioritySelect.addEventListener('change', changeColor);
-    changeColor();
+        prioritySelect.addEventListener('change', changeColor);
+        changeColor();
     });
 </script>
