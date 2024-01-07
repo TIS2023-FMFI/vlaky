@@ -86,5 +86,25 @@ namespace code.Services{
                 
                 return Accounts.FirstOrDefault();
             }
+
+            public async Task<string?> GetUserNameById(int userId)
+            {
+                IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>()
+                {
+                    new NpgsqlParameter("p1", userId)
+                };
+
+                NpgsqlDataReader reader = await s.sqlCommand("SELECT name FROM users WHERE id = (@p1)", parameters);
+
+                if (reader.Read())
+                {
+                    string userName = (string)reader[0];
+                    reader.Close();
+                    return userName;
+                }
+                
+                reader.Close();
+                return null;
+            }
         }
 }

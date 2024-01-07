@@ -12,7 +12,7 @@ namespace code.Services
 			this.s = s;
 		}
 
-        public async void AddWagon(Wagon w)
+        public async Task AddWagon(Wagon w)
         {
             string sql = "INSERT INTO wagons (train_id, n_order, state) VALUES ((@p1),(@p2),(@p3))";
 			
@@ -52,9 +52,9 @@ namespace code.Services
 			return wagons;
 		}
 
-        public async void UpdateWagon(Wagon w)
+        public async Task UpdateWagon(Wagon w)
 		{
-			string sql = "UDPATE wagons SET train_id = (@p2), n_order = (@p3), state = (@p4) WHERE id = (@p1)";
+			string sql = "UPDATE wagons SET train_id = (@p2), n_order = (@p3), state = (@p4) WHERE id = (@p1)";
 
 			List<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
             parameters.Add(new NpgsqlParameter("p1", w.Id));
@@ -68,7 +68,7 @@ namespace code.Services
 		}
 
 
-		public async void DeleteWagon(Wagon w)
+		public async Task DeleteWagon(Wagon w)
 		{
 			string sql = "DELETE FROM wagons WHERE id = (@p1)";
 

@@ -27,7 +27,7 @@
 
             <div class="note-meta">
                 <span class="note-date">@note.Date.ToString("dd/MM/yy")</span>
-                <span class="note-user">@note.UserId.ToString()</span>
+                <span class="note-user">@await Model.GetAccountName(note.UserId)</span>
             </div>
 
             <div class="note-content">

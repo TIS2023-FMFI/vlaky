@@ -28,6 +28,7 @@
     align-items: center;
     padding: 15px 15px;
     font-weight: bold;
+    transition: background-color 0.2s ease;
 }
 
 .navigation ul li a:hover {

@@ -4,20 +4,26 @@ using Microsoft.AspNetCore.Authentication;
 using code.Services;
 using code.Models;
 using System.Linq;
+using System.Security.Claims;
 
 namespace code.Pages
 {
     public class IndexModel : PageModel
     {
-        private readonly ILogger<IndexModel> _logger;
         private readonly BlackBoardService _blackBoardService;
+        private readonly AccountManagerService _accountManagerService;
+        private readonly ILogger<IndexModel> _logger;
 
         public List<BlackBoardNote> Notes { get; set; }
 
+        public string UserName { get; private set; }
+
         public IndexModel(ILogger<IndexModel> logger,
-            BlackBoardService blackBoardService)
+            BlackBoardService blackBoardService,
+            AccountManagerService accountManagerService)
         {
             _logger = logger;
+            _accountManagerService = accountManagerService;
             _blackBoardService = blackBoardService;
             Notes = new List<BlackBoardNote>();
         }
@@ -28,6 +34,10 @@ namespace code.Pages
             {
                 Response.Redirect("/Login");
                 return;
+            }
+            else
+            {
+                UserName = User.FindFirst(ClaimTypes.Name)?.Value;
             }
 
             var noteId = HttpContext.Request.Query["noteId"].ToString();
@@ -49,6 +59,16 @@ namespace code.Pages
                 })
                 .OrderBy(note => note.Priority)
                 .ToList();
+        }
+
+        public async Task<string> GetAccountName(int userId)
+        {
+            var accountName = await _accountManagerService.GetUserNameById(userId);
+            if (accountName!= null)
+            {
+                return accountName;
+            }
+            return "vymazaný používateľ";
         }
     }
 }

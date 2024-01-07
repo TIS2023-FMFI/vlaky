@@ -1,95 +1,111 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.Extensions.Logging;
-using code.Services;
-using code.Models;
-using Microsoft.AspNetCore.Http;
-using System.ComponentModel.DataAnnotations;
-using System;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Mvc.RazorPages;
+    using Microsoft.Extensions.Logging;
+    using code.Services;
+    using code.Models;
+    using Microsoft.AspNetCore.Http;
+    using System.ComponentModel.DataAnnotations;
+    using System;
+    using System.Security.Claims;
 
-namespace code.Pages
-{
-    public class CreateBoardNoteModel : PageModel
+    namespace code.Pages
     {
-        private readonly BlackBoardService _blackBoardService;
-        private readonly ILogger<CreateBoardNoteModel> _logger;
-
-        [BindProperty]
-        public string Title { get; set; }
-
-        [BindProperty]
-        public int Priority { get; set; }
-
-        [BindProperty]
-        public string Content { get; set; }
-
-        public string ErrorMessage { get; set; }
-
-        public CreateBoardNoteModel(BlackBoardService blackBoardService, ILogger<CreateBoardNoteModel> logger)
+        public class CreateBoardNoteModel : PageModel
         {
-            _blackBoardService = blackBoardService;
-            _logger = logger;
-        }
+            private readonly BlackBoardService _blackBoardService;
+            private readonly ILogger<CreateBoardNoteModel> _logger;
 
-        public async Task<IActionResult> OnGetAsync(int? noteId)
-        {
-            ErrorMessage = null;
+            [BindProperty]
+            public string Title { get; set; }
 
-            if (!HttpContext.User.Identity.IsAuthenticated)
+            [BindProperty]
+            public int Priority { get; set; }
+
+            [BindProperty]
+            public string Content { get; set; }
+
+            public string ErrorMessage { get; set; }
+
+            public string UId { get; private set; }
+
+            public CreateBoardNoteModel(BlackBoardService blackBoardService, ILogger<CreateBoardNoteModel> logger)
             {
-                return Redirect("/Login");
+                _blackBoardService = blackBoardService;
+                _logger = logger;
             }
 
-            if (noteId.HasValue && noteId != null)
+            public async Task<IActionResult> OnGetAsync(int? noteId)
             {
-                var note = await _blackBoardService.GetNoteById(noteId.Value);
+                ErrorMessage = null;
 
-                if (note != null)
+                if (!HttpContext.User.Identity.IsAuthenticated)
                 {
-                    Title = note.Title;
-                    Priority = note.Priority;
-                    Content = note.Text;
+                    return Redirect("/Login");
                 }
-            }
 
-            return Page();
-        }
+                if (!ModelState.IsValid) 
+                {
+                    return Page();
+                }
 
-        public async Task<IActionResult> OnPostAsync(string Title, int Priority, string Content)
-        {
-            if (!HttpContext.User.Identity.IsAuthenticated)
-            {
-                return Redirect("/Login");
-            }
+                if (noteId.HasValue && noteId != null)
+                {
+                    var note = await _blackBoardService.GetNoteById(noteId.Value);
 
-            if (string.IsNullOrEmpty(Title) || string.IsNullOrEmpty(Content)) 
-            {
-                ErrorMessage = "Vyplňte všetky polia.";
+                    if (note != null)
+                    {
+                        Title = note.Title;
+                        Priority = note.Priority;
+                        Content = note.Text;
+                    }
+                }
+
                 return Page();
             }
 
-            var noteId = HttpContext.Request.Query["noteId"].ToString();
-
-            var newNote = new BlackBoardNote
+            public async Task<IActionResult> OnPostAsync(string Title, int Priority, string Content)
             {
-                Title = Title,
-                Text = Content,
-                Priority = Priority,
-                UserId = 1,
-                Date = DateTime.Now
-            };
+                if (!HttpContext.User.Identity.IsAuthenticated)
+                {
+                    return Redirect("/Login");
+                }
+                else
+                {
+                    UId = User.FindFirst("Id")?.Value;
+                }
 
-            if (!string.IsNullOrEmpty(noteId))
-            {
-                newNote.Id = Convert.ToInt32(noteId);
-                await _blackBoardService.EditNote(newNote);
+                if (!ModelState.IsValid) 
+                {
+                    return Page();
+                }
+
+                if (string.IsNullOrEmpty(Title) || string.IsNullOrEmpty(Content)) 
+                {
+                    ErrorMessage = "Vyplňte všetky polia.";
+                    return Page();
+                }
+
+                var noteId = HttpContext.Request.Query["noteId"].ToString();
+                var newNote = new BlackBoardNote
+                {
+                    Title = Title,
+                    Text = Content,
+                    Priority = Priority,
+                    UserId = Convert.ToInt32(UId),
+                    Date = DateTime.Now
+                };
+
+                if (!string.IsNullOrEmpty(noteId))
+                {
+                    newNote.Id = Convert.ToInt32(noteId);
+                    await _blackBoardService.EditNote(newNote);
+                }
+                else
+                {
+                    await _blackBoardService.AddNote(newNote);
+                }
+
+                return RedirectToPage("/Index");
             }
-            else
-            {
-                await _blackBoardService.AddNote(newNote);
-            }
-
-            return RedirectToPage("/Index");
         }
     }
-}

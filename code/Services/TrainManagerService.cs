@@ -1,110 +1,280 @@
 ﻿using System;
 using Npgsql;
 using code.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace code.Services
 {
-	public class TrainManagerService
-	{
-		private SQLService s;
-		public TrainManagerService(SQLService s)
-		{
-			this.s = s;
-		}
+    public class TrainManagerService
+    {
+        private SQLService s;
+        public TrainManagerService(SQLService s)
+        {
+            this.s = s;
+        }
 
-		public async void AddTrain(Train trn)
-		{
-			
-			string sql = "INSERT INTO trains (name, destination, state, date, coll, n_wagons, max_lenght, lenght) VALUES ((@p1),(@p2),(@p3),(@p4),(@p5),(@p6),(@p7),(@p8))";
-			
-			List<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
-			parameters.Add(new NpgsqlParameter("p1", trn.Name));
-			parameters.Add(new NpgsqlParameter("p2", trn.Destination));
-			parameters.Add(new NpgsqlParameter("p3", trn.Status));
-			parameters.Add(new NpgsqlParameter("p4", trn.Date));
-			parameters.Add(new NpgsqlParameter("p5", trn.Coll));
-			parameters.Add(new NpgsqlParameter("p6", trn.Wagons.Count));
-			parameters.Add(new NpgsqlParameter("p7", trn.MaxLength));
-			parameters.Add(new NpgsqlParameter("p8", trn.Lenght));
-			
-			NpgsqlDataReader reader = await s.sqlCommand(sql,parameters);
-			reader.Close();
-			
-		}
+        public async Task<int> AddTrain(Train trn)
+        {
+            WagonManagerService WMService = new WagonManagerService(s);
+            string sql = "INSERT INTO trains (name, destination, state, date, coll, n_wagons, max_leanght, leanght) VALUES (@p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8) RETURNING id";
 
-		public async Task<List<Train>> GetTrainsByDate(string from, string to)
-		{
-			WagonManagerService WMService = new WagonManagerService(s);
-			string sql = "SELECT * from trains WHERE date BETWEEN (@p1) AND (@p2)";
+            List<NpgsqlParameter> parameters = new List<NpgsqlParameter>
+            {
+                new NpgsqlParameter("p1", trn.Name),
+                new NpgsqlParameter("p2", trn.Destination),
+                new NpgsqlParameter("p3", trn.Status),
+                new NpgsqlParameter("p4", trn.Date),
+                new NpgsqlParameter("p5", trn.Coll),
+                new NpgsqlParameter("p6", trn.nWagons), 
+                new NpgsqlParameter("p7", trn.MaxLength),
+                new NpgsqlParameter("p8", trn.Lenght)
+            };
 
-			List<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
-			parameters.Add(new NpgsqlParameter("p1", from));
-			parameters.Add(new NpgsqlParameter("p2", to));
+            int trainId = 0;
+            NpgsqlDataReader reader = await s.sqlCommand(sql, parameters);
+            if (reader.Read())
+            {
+                trainId = (int)reader[0];
+            }
+            reader.Close();
+            Console.WriteLine($"Train {trainId} added");
 
-			NpgsqlDataReader reader = await s.sqlCommand(sql,parameters);
+            for (int i = 1; i <= trn.nWagons; i++)
+            {
+                await WMService.AddWagon(new Wagon
+                {
+                    TrainId = trainId,
+                    NOrder = i,
+                    State = 0
+                });
+                Console.WriteLine($"Wagon {i} added to train {trainId}");
+            }
 
-			List<Train> trains = new List<Train>();
-			while(reader.Read())
-			{
-				var temp = new Train
-				{
-					Id = (int)reader[0],
-					Name = (string)reader[1],
-					Destination = (string)reader[2],
-					Status = (int)reader[3],
-					Date = (DateTime)reader[4],
-					Coll = (bool)reader[5],
-					
-					MaxLength=(int)reader[7],
-					Lenght = (double)reader[8]
-				};
-				trains.Add(temp);
-			}
-			reader.Close();
-			foreach (Train train in trains)
-			{
-				train.Wagons = await WMService.GetWagonsByTrainId(train.Id);
-			}
+            return trainId;
+        }
 
-			return trains;
-		}
 
-		public async void UpdateTrain(Train trn)
-		{
-			string sql = "UDPATE trains SET name = (@p2), destination = (@p3), state = (@p4), date = (@p5), coll=(@p6) " 
-													+ "n_wagons = (@p7), max_lenght = (@p8), lenght = (@p9) "
-																						+ "WHERE id = (@p1)";
+        public async Task<List<Train>> GetTrainsByDate(DateTime from, DateTime to)
+        {
+            WagonManagerService WMService = new WagonManagerService(s);
+            string sql = "SELECT * from trains WHERE date BETWEEN (@p1) AND (@p2)";
 
-			List<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
-			parameters.Add(new NpgsqlParameter("p1", trn.Id));
-			parameters.Add(new NpgsqlParameter("p2", trn.Name));
-			parameters.Add(new NpgsqlParameter("p3", trn.Destination));
-			parameters.Add(new NpgsqlParameter("p4", trn.Status));
-			parameters.Add(new NpgsqlParameter("p5", trn.Date));
-			parameters.Add(new NpgsqlParameter("p6", trn.Coll));
-			parameters.Add(new NpgsqlParameter("p7", trn.Wagons.Count));
-			parameters.Add(new NpgsqlParameter("p8", trn.MaxLength));
-			parameters.Add(new NpgsqlParameter("p9", trn.Lenght));
-		
-			NpgsqlDataReader reader = await s.sqlCommand(sql,parameters);
+            List<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
+            parameters.Add(new NpgsqlParameter("p1", from));
+            parameters.Add(new NpgsqlParameter("p2", to));
 
-			reader.Close();
-		}
+            NpgsqlDataReader reader = await s.sqlCommand(sql, parameters);
 
-		public async void DeleteTrain(Train trn)
-		{
-			string sql = "DELETE FROM trains WHERE id = (@p1)";
+            List<Train> trains = new List<Train>();
+            while (reader.Read())
+            {
+                var temp = new Train
+                {
+                    Id = (int)reader[0],
+                    Name = (string)reader[1],
+                    Destination = (string)reader[2],
+                    Status = (int)reader[3],
+                    Date = (DateTime)reader[4],
+                    Coll = (bool)reader[5],
+                    nWagons = (int)reader[6],
+                    MaxLength = (double)reader[7],
+                    Lenght = (double)reader[8]
+                };
+                trains.Add(temp);
+            }
+            reader.Close();
+            foreach (Train train in trains)
+            {
+                train.Wagons = await WMService.GetWagonsByTrainId(train.Id);
+            }
 
-			List<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
-			parameters.Add(new NpgsqlParameter("p1", trn.Id));
+            return trains;
+        }
 
-			NpgsqlDataReader reader = await s.sqlCommand(sql,parameters);
+        public async Task UpdateTrain(Train trn)
+        {
+            WagonManagerService WMService = new WagonManagerService(s);
+            var existingWagons = (await WMService.GetWagonsByTrainId(trn.Id))
+                .OrderBy(wagon => wagon.NOrder)
+                .ToList();
+            string sql = "UPDATE trains SET name = @p2, destination = @p3, state = @p4, date = @p5, coll = @p6, n_wagons = @p7, max_leanght = @p8, leanght = @p9 WHERE id = @p1";
 
-			reader.Close();
-		}
-	
-	}	
+            List<NpgsqlParameter> parameters = new List<NpgsqlParameter>
+            {
+                new NpgsqlParameter("p1", trn.Id),
+                new NpgsqlParameter("p2", trn.Name),
+                new NpgsqlParameter("p3", trn.Destination),
+                new NpgsqlParameter("p4", trn.Status),
+                new NpgsqlParameter("p5", trn.Date),
+                new NpgsqlParameter("p6", trn.Coll),
+                new NpgsqlParameter("p7", trn.nWagons),
+                new NpgsqlParameter("p8", trn.MaxLength),
+                new NpgsqlParameter("p9", trn.Lenght)
+            };
 
+            await s.sqlCommand(sql, parameters);
+
+            if (existingWagons.Count > trn.nWagons)
+            {
+                for (int i = trn.nWagons; i < existingWagons.Count; i++)
+                {
+                    await WMService.DeleteWagon(existingWagons[i]);
+                }
+            }
+            else if (existingWagons.Count < trn.nWagons)
+            {
+                for (int i = existingWagons.Count + 1; i <= trn.nWagons; i++)
+                {
+                    await WMService.AddWagon(new Wagon
+                    {
+                        TrainId = trn.Id,
+                        NOrder = i,
+                        State = 0
+                    });
+                }
+            }
+        }
+
+        public async Task DeleteTrain(Train trn)
+        {
+            string sql = "DELETE FROM trains WHERE id = (@p1)";
+
+            List<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
+            parameters.Add(new NpgsqlParameter("p1", trn.Id));
+
+            NpgsqlDataReader reader = await s.sqlCommand(sql, parameters);
+
+            reader.Close();
+        }
+
+        public async Task DeleteTrainById(int trainId)
+        {
+            Train train = await GetTrainById(trainId);
+            
+            if (train == null)
+            {
+                return;
+            }
+
+            // Delete related wagon comments
+            string deleteWagonCommentsSql = "DELETE FROM wagon_comments WHERE wagon_id IN (SELECT id FROM wagons WHERE train_id = @p1)";
+            List<NpgsqlParameter> wagonCommentsParameters = new List<NpgsqlParameter>();
+            wagonCommentsParameters.Add(new NpgsqlParameter("p1", trainId));
+            
+            await s.sqlCommand(deleteWagonCommentsSql, wagonCommentsParameters);
+
+            // Delete wagons
+            string deleteWagonsSql = "DELETE FROM wagons WHERE train_id = @p1";
+            List<NpgsqlParameter> wagonsParameters = new List<NpgsqlParameter>();
+            wagonsParameters.Add(new NpgsqlParameter("p1", trainId));
+            
+            await s.sqlCommand(deleteWagonsSql, wagonsParameters);
+
+            // Delete train comments
+            string deleteTrainCommentsSql = "DELETE FROM train_comments WHERE train_id = @p1";
+            List<NpgsqlParameter> trainCommentsParameters = new List<NpgsqlParameter>();
+            trainCommentsParameters.Add(new NpgsqlParameter("p1", trainId));
+            
+            await s.sqlCommand(deleteTrainCommentsSql, trainCommentsParameters);
+
+            // Delete the train
+            string deleteTrainSql = "DELETE FROM trains WHERE id = @p1";
+            List<NpgsqlParameter> trainParameters = new List<NpgsqlParameter>();
+            trainParameters.Add(new NpgsqlParameter("p1", trainId));
+            
+            await s.sqlCommand(deleteTrainSql, trainParameters);
+        }
+
+        public async Task<Train> GetTrainById(int trainId)
+        {
+            string sql = "SELECT * FROM trains WHERE id = (@p1)";
+
+            List<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
+            parameters.Add(new NpgsqlParameter("p1", trainId));
+
+            NpgsqlDataReader reader = await s.sqlCommand(sql, parameters);
+
+            Train train = null;
+            if (reader.Read())
+            {
+                train = new Train
+                {
+                    Id = (int)reader[0],
+                    Name = (string)reader[1],
+                    Destination = (string)reader[2],
+                    Status = (int)reader[3],
+                    Date = (DateTime)reader[4],
+                    Coll = (bool)reader[5],
+                    nWagons = (int)reader[6],
+                    MaxLength = (double)reader[7],
+                    Lenght = (double)reader[8]
+                };
+            }
+            reader.Close();
+
+            if (train != null)
+            {
+                WagonManagerService WMService = new WagonManagerService(s);
+                train.Wagons = await WMService.GetWagonsByTrainId(train.Id);
+            }
+
+            return train;
+        }
+
+        public async Task<TrainNote> GetTrainNoteByTrainId(int trainId)
+        {
+            string sql = "SELECT * FROM train_comments WHERE train_id = (@p1)";
+
+            List<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
+            parameters.Add(new NpgsqlParameter("p1", trainId));
+
+            NpgsqlDataReader reader = await s.sqlCommand(sql, parameters);
+
+            TrainNote trainNote = null;
+            if (reader.Read())
+            {
+                trainNote = new TrainNote
+                {
+                    TrainId = (int)reader[0],
+                    UserId = (int)reader[1],
+                    Text = (string)reader[2],
+                };
+            }
+            reader.Close();
+
+            return trainNote;
+        }
+
+        public async Task UpdateTrainNote(TrainNote note)
+        {
+            Console.WriteLine(note.TrainId);
+            Console.WriteLine(note.Text);
+            Console.WriteLine(note.UserId);
+            string sql = "UPDATE train_comments SET text = @p2, user_id = @p3 WHERE train_id = @p1";
+
+            List<NpgsqlParameter> parameters = new List<NpgsqlParameter>
+            {
+                new NpgsqlParameter("p1", note.TrainId),
+                new NpgsqlParameter("p2", note.Text),
+                new NpgsqlParameter("p3", note.UserId)
+            };
+
+            await s.sqlCommand(sql, parameters);
+        }
+
+        public async Task AddTrainNote(TrainNote trainNote)
+        {
+            string sql = "INSERT INTO train_comments (train_id, user_id, text) VALUES (@p1, @p2, @p3)";
+
+            List<NpgsqlParameter> parameters = new List<NpgsqlParameter>
+            {
+                new NpgsqlParameter("p1", trainNote.TrainId),
+                new NpgsqlParameter("p2", trainNote.UserId),
+                new NpgsqlParameter("p3", trainNote.Text)
+            };
+
+            await s.sqlCommand(sql, parameters);
+        }
+    }
 }
-
-	

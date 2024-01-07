@@ -1,0 +1,11 @@
+/* css je zdedené z create_note.css, pretože je to rovnaký form, plus nejaké dodatky */
+
+.checkboxes .custom-checkbox {
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.checkboxes .custom-label {
+    display: inline-block;
+    vertical-align: middle;
+}

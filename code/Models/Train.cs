@@ -13,7 +13,8 @@ namespace code.Models
         public double Lenght{get;set;}
         public DateTime Date{get;set;}
         public int Status{get;set;}
-        
+        public int nWagons{get;set;}
+
         public Train(){}
 
         public void AddVagon(Wagon w){

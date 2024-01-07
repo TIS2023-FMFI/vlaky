@@ -6,71 +6,40 @@
 @inject AccountManagerService manager
 @inject NavigationManager uriHelper
 
-<style>
-.user-list{
-    background-color: gray;
-    color: white;
-    border: 2px solid black;
-    margin: 20px;
-    padding: 20px;
-}
-.user-tab{
-    background-color: lightgray;
-    color: black;
-    border: 2px solid black;
-    margin: 20px;
-    padding: 20px;
-}
-.modal-body{
-    background-color: gray;
-    color: white;
-    border: 2px solid black;
-    margin: 20px;
-    padding: 20px;
-}
-.inputs{
-    background-color: lightgray;
-    color: black;
-    border: 2px solid black;
-    margin: 20px;
-    padding: 20px;
-}
-</style>
-
 <div class="user-list">
 
 <div class="add-button">
     @if(Nevyplnil){
-        <h6>Nevyplnili ste vsetky polozky, pouzivatel nebol pridany</h6>
+        <h6>Nevyplnili ste všetky položky, používateľ nebol pridaný.</h6>
     }
-    <button @onclick="e => AddAccount()"
-        data-toggle="modal" data-target="#productModal" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productModal">
-        Add User
+    <button class="note-form-button" @onclick="e => AddAccount()"
+        data-toggle="modal" data-target="#productModal" data-bs-toggle="modal" data-bs-target="#productModal">
+        Pridať
     </button>
 </div>
 @try{
     @foreach(var a in accounts){
         <div class="user-tab">
-            <div class="user-info">
-                Name: @a.Name;<br>
-                Mail: @a.Mail;
+            <div class="user-info" style="word-break: break-all;">
+                Meno: <b>@a.Name</b><br>
+                Email: <b>@a.Mail</b>
             </div>
             <small class="text-muted">
-                <button @onclick="e => ModifyPriviliges(a.Id)"
-                    data-toggle="modal" data-target="#productModal" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productModal">
-                    Modify user privileges
+                <button class="note-form-button" @onclick="e => ModifyPriviliges(a.Id)"
+                    data-toggle="modal" data-target="#productModal" data-bs-toggle="modal" data-bs-target="#productModal">
+                    Zmena privilégií
                 </button>
-                <button @onclick="e => ChangePassword(a.Id)"
-                    data-toggle="modal" data-target="#productModal" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productModal">
-                    Change user password
+                <button class="note-form-button" @onclick="e => ChangePassword(a.Id)"
+                    data-toggle="modal" data-target="#productModal" data-bs-toggle="modal" data-bs-target="#productModal">
+                    Zmena hesla
                 </button>
-                <button @onclick="e => ChangeMail(a.Id)"
-                    data-toggle="modal" data-target="#productModal" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productModal">
-                    Change user email
+                <button class="note-form-button" @onclick="e => ChangeMail(a.Id)"
+                    data-toggle="modal" data-target="#productModal" data-bs-toggle="modal" data-bs-target="#productModal">
+                    Zmena emailu
                 </button>
-                <button @onclick="e => SelectAccountForDeletion(a.Id)"
-                    data-toggle="modal" data-target="#productModal" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productModal">
-                    Delete User
+                <button class="note-form-button" @onclick="e => SelectAccountForDeletion(a.Id)"
+                    data-toggle="modal" data-target="#productModal" data-bs-toggle="modal" data-bs-target="#productModal">
+                    Vymazať
                 </button>
             </small>
         </div>
@@ -85,13 +54,13 @@
     @if(DeleteAcc){
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="productTitle">Zmazanie učtu</h5>
+                <h5 class="modal-title" id="productTitle">Zmazanie účtu</h5>
                 <button @onclick="e => nullAll()" type="button" class="close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body">
-                Ste si istý, že chcete zmatať účet používateľa @Acc.Name?
+            <div class="modal-body" style="color: black;">
+                Ste si istý, že chcete zmazať účet používateľa @Acc.Name?
             </div>
             <button @onclick="e => DeleteSelectedAccount()"
                 class="btn btn-success" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
@@ -105,19 +74,19 @@
     @if(AddAcc){
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="productTitle">Pridanie učtu</h5>
+                <h5 class="modal-title" id="productTitle">Pridanie účtu</h5>
                 <button @onclick="e => nullAll()" type="button" class="close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
                 <div class = "inputs">
-                    Name:
-                    <input type="text" id="name" name="name" @bind="name"><br>
+                    Meno:
+                    <input class="note-form-input" type="text" id="name" name="name" @bind="name"><br>
                 </div>
                 <div class = "inputs">
-                    Mail:
-                    <input type="text" id="mail" name="mail" @bind="mail"><br>
+                    Email:
+                    <input class="note-form-input" type="text" id="mail" name="mail" @bind="mail"><br>
                 </div>
                 <div class = "inputs">
                     Privilege to manage users:
@@ -136,65 +105,65 @@
                     <input type="checkbox" id="privileges" name="privileges" @bind="privileges[6]"><br>
                 </div>
                 <div class = "inputs">
-                    Pass:
-                    <input type="text" id="pass" name="pass" @bind="pass"><br>
+                    Heslo:
+                    <input class="note-form-input" type="text" id="pass" name="pass" @bind="pass"><br>
                 </div>
             </div>
             <button @onclick="e => SubmitNewAccount()"
                 class="btn btn-success" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
-                Add User
+                Pridať
             </button>
         </div>
     }
     @if(PrivAcc){
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="productTitle">Zmena privilegii</h5>
+                <h5 class="modal-title" id="productTitle">Zmena privilégií</h5>
                 <button @onclick="e => nullAll()" type="button" class="close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
                 <div class = "inputs">
-                    Privilege to log into the site:
+                    Prístup k stránke:
                     <input type="checkbox" id="privileges" name="privileges" @bind="privileges[0]"><br>
-                    Privilege to manage users:
+                    Manažment používateľov:
                     <input type="checkbox" id="privileges" name="privileges" @bind="privileges[1]"><br>
-                    Privilege to manage notes:
+                    Manažmenť poznámok:
                     <input type="checkbox" id="privileges" name="privileges" @bind="privileges[2]"><br>
-                    Privilege to create templates:
+                    Vytváranie šablón:
                     <input type="checkbox" id="privileges" name="privileges" @bind="privileges[3]"><br>
-                    Privilege to manage trains:
+                    Manažment vlakov:
                     <input type="checkbox" id="privileges" name="privileges" @bind="privileges[4]"><br>
-                    Privilege to comment trains:
+                    Komentovanie vlakov:
                     <input type="checkbox" id="privileges" name="privileges" @bind="privileges[5]"><br>
-                    Privilege to write on blackboard:
+                    Písanie na tabuľu poznámok:
                     <input type="checkbox" id="privileges" name="privileges" @bind="privileges[6]"><br>
                 </div>
             </div>
             <button @onclick="e => SavePrivileges()"
                 class="btn btn-success" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
-                Confirm changes
+                Potvrdiť
             </button>
         </div>
     }
     @if(MailAcc){
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="productTitle">Zmena mailu</h5>
+                <h5 class="modal-title" id="productTitle">Zmena emailu</h5>
                 <button @onclick="e => nullAll()" type="button" class="close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
                 <div class = "inputs">
-                    Mail:
-                    <input type="text" id="mail" name="mail" @bind="mail"><br>
+                    Email:
+                    <input class="note-form-input" type="text" id="mail" name="mail" @bind="mail"><br>
                 </div>
             </div>
             <button @onclick="e => ChangeEmail()"
                 class="btn btn-success" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
-                Confirm changes
+                Potvrdiť
             </button>
         </div>
     }
@@ -208,13 +177,13 @@
             </div>
             <div class="modal-body">
                 <div class = "inputs">
-                    Password:
-                    <input type="text" id="mail" name="mail" @bind="pass"><br>
+                    Nové heslo:
+                    <input class="note-form-input" type="text" id="mail" name="mail" @bind="pass"><br>
                 </div>
             </div>
             <button @onclick="e => ChangePass()"
                 class="btn btn-success" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
-                Confirm changes
+                Potvrdiť
             </button>
         </div>
     }
@@ -257,6 +226,7 @@
     void SelectAccountForDeletion(int AccountId)
     {
         Acc = accounts.First(x => x.Id == AccountId);
+        nullAll();
         DeleteAcc = true;
     }
 
@@ -272,6 +242,7 @@
         for(int i =0;i<7;i++){
             privileges[i]=false;
         }
+        nullAll();
         AddAcc = true;
     }
 
@@ -301,6 +272,7 @@
                 privileges[i] = true;
             }
         }
+        nullAll();
         PrivAcc = true;
     }
     void SavePrivileges(){
@@ -318,6 +290,7 @@
 
     void ChangePassword(int selectedAccountId){
         Acc = accounts.First(x => x.Id == selectedAccountId);
+        nullAll();
         PassAcc = true;
     }
 
@@ -330,6 +303,7 @@
     void ChangeMail(int selectedAccountId){
         Acc = accounts.First(x => x.Id == selectedAccountId);
         mail = Acc.Mail;
+        nullAll();
         MailAcc = true;
     }
 
@@ -343,11 +317,6 @@
     protected override async Task OnInitializedAsync()
     {
         await InitAccounts();
-        await Task.Delay(500);
     }
 
  }
-
-
-
-

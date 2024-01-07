@@ -3,11 +3,11 @@
 @using code.Components
 @using Microsoft.AspNetCore.Authentication;
 @{
-    ViewData["Title"] = "Management";
+    ViewData["Title"] = "";
 }
 
 
 @(await Html.RenderComponentAsync<UserManagement>(RenderMode.ServerPrerendered))
 
 
-<script src="_framework/blazor.server.js"></script> 
+<script src="_framework/blazor.server.js"></script>

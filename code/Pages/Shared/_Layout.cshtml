@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="sk">
 <head>
 
     <meta charset="utf-8" />
@@ -8,11 +8,16 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
 
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
-    <link rel="stylesheet" href="~/css/create_note.css.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="~/css/create_note.css" asp-append-version="true"/>
     <link rel="stylesheet" href="~/css/index.css" asp-append-version="true"/>
     <link rel="stylesheet" href="~/css/login.css" asp-append-version="true"/>
     <link rel="stylesheet" href="~/css/navigation.css" asp-append-version="true"/>
     <link rel="stylesheet" href="~/css/schedule.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="~/css/train.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="~/css/create_train.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="~/css/history.css" asp-append-version="true"/>
+    <link rel="stylesheet" href="~/css/user_management.css" asp-append-version="true"/>
+    
     <link rel="stylesheet" href="~/code.styles.css" asp-append-version="true" />
     
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
@@ -43,13 +48,13 @@
                             <a href="/Index" class="@((Context.Request.Path == "/Index" || Context.Request.Path == "/CreateBoardNote") ? "active" : "")">Poznámky</a>
                         </li>
                         <li>
-                            <a href="/Schedule" class="@((Context.Request.Path == "/Schedule") ? "active" : "")">Rozvrh</a>
+                            <a href="/Schedule" class="@((Context.Request.Path == "/Schedule" || Context.Request.Path == "/CreateTrain" || Context.Request.Path == "/Train") ? "active" : "")">Rozvrh</a>
                         </li>
                         <li>
                             <a href="/History" class="@((Context.Request.Path == "/History") ? "active" : "")">História</a>
                         </li>
                         <li>
-                            <a href="/Users" class="@((Context.Request.Path == "/Users") ? "active" : "")">Používatelia</a>
+                            <a href="/UserManagementPage" class="@((Context.Request.Path == "/UserManagementPage") ? "active" : "")">Používatelia</a>
                         </li>
                         <li>
                             <a href="/Logout" class="@((Context.Request.Path == "/Logout") ? "active" : "")">Odhlásiť sa</a>

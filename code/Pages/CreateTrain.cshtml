@@ -1,0 +1,83 @@
+@page
+@model code.Pages.CreateTrainModel
+@{
+    ViewData["Title"] = "";
+}
+
+<div class="note-creation-section">
+    <form method="post" class="note-creation-form">
+        
+        <!-- Templates -->
+        <div class="note-form-group">
+            <label asp-for="Template" class="note-form-label">Výber šablóny:</label>
+            <select asp-for="Template" class="note-form-input">
+            </select>
+        </div>
+        
+        <!-- Train Name -->
+        <div class="note-form-group">
+            <label asp-for="Name" class="note-form-label">Názov:</label>
+            <input asp-for="Name" class="note-form-input">
+        </div>
+
+        <!-- Destination -->
+        <div class="note-form-group">
+            <label asp-for="Destination" class="note-form-label">Destinácia:</label>
+            <input asp-for="Destination" class="note-form-input">
+        </div>
+
+        <!-- Maximum Length -->
+        <div class="note-form-group">
+            <label asp-for="Maxlength" class="note-form-label">Maximálna dĺžka:</label>
+            <input asp-for="Maxlength" class="note-form-input">
+        </div>
+
+        <!-- Real Length -->
+        <div class="note-form-group">
+            <label asp-for="RealLength" class="note-form-label">Reálna dĺžka:</label>
+            <input asp-for="RealLength" class="note-form-input">
+        </div>
+
+        <!-- Number of Wagons -->
+        <div class="note-form-group">
+            <label asp-for="WagonCount" class="note-form-label">Počet vagónov:</label>
+            <input asp-for="WagonCount" class="note-form-input">
+        </div>
+
+        <!-- Date -->
+        <div class="note-form-group">
+            <label asp-for="Date" class="note-form-label">Dátum:</label>
+            <input asp-for="Date" class="note-form-input" type="date">
+        </div>
+
+        <!-- Coll Train Checkbox -->
+        <div class="note-form-group checkboxes">
+            <input asp-for="Coll" id="Coll" type="checkbox" class="custom-checkbox">
+            <label asp-for="Coll" class="note-form-label custom-label">Colný vlak</label>
+        </div>
+
+        <!-- Save Template Checkbox -->
+        <div class="note-form-group checkboxes">
+            <input asp-for="SaveTemplate" id="SaveTemplate" type="checkbox" class="custom-checkbox">
+            <label asp-for="SaveTemplate" class="note-form-label custom-label">Uložiť šablónu</label>
+        </div>
+
+        <!-- Note Textarea -->
+        <div class="note-form-group">
+            <label asp-for="TrainNote" class="note-form-label">Poznámka:</label>
+            <textarea asp-for="TrainNote" class="note-form-input" rows="4"></textarea>
+        </div>
+
+        <!-- Error Message Display -->
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="text-danger">@Model.ErrorMessage</div>
+        }
+
+        <!-- Form Buttons -->
+        <div class="note-form-button-group">
+            <a href="/Schedule" class="note-form-button">Späť</a>
+            <button type="submit" class="note-form-button">Uložiť</button>
+        </div>
+    </form>
+</div>

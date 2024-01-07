@@ -1,0 +1,13 @@
+@page
+@model TrainModel
+@using code.Components
+@using Microsoft.AspNetCore.Authentication;
+@{
+    ViewData["Title"] = "";
+}
+
+
+@(await Html.RenderComponentAsync<TrainPage>(RenderMode.ServerPrerendered))
+
+
+<script src="_framework/blazor.server.js"></script>
