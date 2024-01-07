@@ -1,43 +1,98 @@
 @page
 @model ScheduleModel
 @{
-    ViewData["Title"] = "Train Schedule";
+    ViewData["Title"] = "";
 }
 
+<div class="schedule-container">
+
+    <form id="dateForm" method="get">
+        <div class="date-picker-container">
+
+            <div class="date-input-container">
+                <label for="startDate">Od:</label>
+                <input type="date" id="startDate" name="startDate" class="date-input" value="@Model.StartDate.ToString("yyyy-MM-dd")" onchange="this.form.submit()" />
+            </div>
+
+            <div class="date-input-container">
+                <label for="endDate">Do:</label>
+                <input type="date" id="endDate" name="endDate" class="date-input" value="@Model.EndDate.ToString("yyyy-MM-dd")" onchange="this.form.submit()" />
+            </div>
+
+        </div>
+    </form>
 
 
 
-<div class="date-picker-container">
-    <label for="startDate">Od:</label>
-    <input type="date" id="startDate" class="date-input" />
-    <label for="endDate">Do:</label>
-    <input type="date" id="endDate" class="date-input" />
+    <div class="icons-container">
+        <div class="icon">
+            <img src="~/images/train_naplanovany.svg" alt="Naplánovaný" />
+            <span>Naplánovaný</span>
+        </div>
+        <div class="icon">
+            <img src="~/images/train_vpriprave.svg" alt="V príprave" />
+            <span>V príprave</span>
+        </div>
+        <div class="icon">
+            <img src="~/images/train_pripraveny.svg" alt="Pripravený" />
+            <span>Pripravený</span>
+        </div>
+        <div class="icon">
+            <img src="~/images/train_expedovany.svg" alt="Expedovaný" />
+            <span>Expedovaný</span>
+        </div>
+        <div class="icon">
+            <img src="~/images/train_zruseny.svg" alt="Zrušený" />
+            <span>Zrušený</span>
+        </div>
+    </div>
+
+    @foreach (var day in Model.Schedule)
+    {
+        <div class="day">
+        
+            <div class="day-header">
+                <span class="day-name">@Model.EditDateName(day.Date.ToString("dddd", new System.Globalization.CultureInfo("sk-SK")))</span>
+                <span class="day-date">@day.Date.ToString("dd. MM. yy", new System.Globalization.CultureInfo("sk-SK"))</span>
+            </div>
+
+            <div class="train-container">
+                @foreach (var train in day.Trains)
+                {
+                    <a href="/Train?trainId=@train.Id" class="train-link">
+                        <div class="train-hoverable">
+                            <div class="train">
+                                <img src="@Url.Content(Model.GetTrainStatusImage(train.Status))" alt="Train" />
+                                <span>@train.Name</span>
+                                <span>@train.Destination</span>
+                                @if (train.Coll) 
+                                {
+                                    <span class="coll-train">colný</span>
+                                }
+                                else
+                                {
+                                    <span></span>
+                                }
+                                <span>@train.Wagons.Count(w => w.State == 3) / @train.Wagons.Count()</span>
+                            </div>
+                        </div>
+                    </a>
+                }
+            </div>
+        </div>
+    }
+
 </div>
 
+<a href="/CreateTrain" class="btn btn-primary create-note-button" aria-label="Create new note">
+    Naplánovať vlak
+</a>
 
-
-<div class="icons-container">
-    <div class="icon">
-        <img src="~/images/train_naplanovany.svg" alt="Naplánovaný" />
-        <span>Naplánovaný</span>
-    </div>
-    <div class="icon">
-        <img src="~/images/train_vpriprave.svg" alt="V príprave" />
-        <span>V príprave</span>
-    </div>
-    <div class="icon">
-        <img src="~/images/train_pripraveny.svg" alt="Pripravený" />
-        <span>Pripravený</span>
-    </div>
-    <div class="icon">
-        <img src="~/images/train_expedovany.svg" alt="Expedovaný" />
-        <span>Expedovaný</span>
-    </div>
-    <div class="icon">
-        <img src="~/images/train_zruseny.svg" alt="Zrušený" />
-        <span>Zrušený</span>
-    </div>
-</div>
-
-
+@section Scripts {
+    <script>
+        function submitForm() {
+            document.getElementById("dateForm").submit();
+        }
+    </script>
+}
 

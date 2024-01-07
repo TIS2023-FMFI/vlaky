@@ -1,0 +1,188 @@
+.inspect-container {
+    width: 100%;
+    margin-left: 230px;
+    margin-right: 30px;
+    margin-top: 30px;
+    margin-bottom: 80px;
+}
+
+.train-first {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 60px;
+}
+
+.train-state,
+.train-info,
+.train-note {
+    flex-grow: 0;
+    flex-shrink: 0;
+    flex-basis: auto;
+    min-width: 200px;
+}
+
+.train-state img {
+    width: 100px;
+    margin: 0 auto;
+}
+
+.train-state select {
+    display: block;
+    width: 100%;
+}
+
+.train-state {
+    text-align: center;
+}
+
+.inspect-container p {
+    margin: 0;
+}
+
+.train-note textarea {
+    width: 100%;
+    min-width: 300px;
+    min-height: 120px;
+    padding: 10px;
+    border-radius: 20px;
+}
+
+.train-wagons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 10px;
+}
+
+.wagon-container {
+    width: 200px;
+}
+
+.wagon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid gray;
+    border-radius: 10px;
+    padding: 10px;
+    background-color: #f5f5f5;
+    position: relative;
+    height: 75px;
+}
+
+.wagon-status-0 {
+    background-color: #fff;
+}
+
+.wagon-status-1 {
+    background-color: #ffc581;
+}
+
+.wagon-status-2 {
+    background-color: #a8c6fa;
+}
+
+.wagon-status-3 {
+    background-color: #aedd94;
+}
+
+.icon-rectangle {
+    width: 30px;
+    height: 15px;
+    margin-right: 5px;
+    border: 1px solid black;
+}
+
+.icon-state-0 .icon-rectangle {
+    background-color: #fff;
+}
+
+.icon-state-1 .icon-rectangle {
+    background-color: #ffc581;
+}
+
+.icon-state-2 .icon-rectangle {
+    background-color: #a8c6fa;
+}
+
+.icon-state-3 .icon-rectangle {
+    background-color: #aedd94;
+}
+
+.second {
+    margin-right: 170px;
+    min-width: 150px;
+}
+
+.select-center-text {
+    border: 1px solid gray;
+    height: 40px;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.wagon-checkbox {
+    position: relative;
+    z-index: 100;
+    top: -70px;
+    right: -175px;
+}
+
+.wagon-label {
+    text-align: center;
+    margin-top: 40px;
+}
+
+@media (max-width: 1200px) {
+    .inspect-container {
+        margin-left: 180px;
+    }
+
+    .train-first {
+        align-items: center;
+        justify-content: center;
+        gap: 20px 80px;
+    }
+}
+
+@media (max-width: 800px) {
+    .inspect-container {
+        margin-left: 30px;
+        margin-top: 80px;
+    }
+
+    .train-first {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .wagon-container {
+        width: 130px;
+    }
+
+    .wagon {
+        height: 50px;
+    }
+
+    .train-note {
+        width: 80%;
+    }
+
+    .train-first {
+        gap: 20px;
+    }
+
+    .wagon-checkbox {
+        top: -45px;
+        right: -105px;
+    }
+
+    .wagon-label {
+        text-align: center;
+        margin-top: 20px;
+    }
+}
