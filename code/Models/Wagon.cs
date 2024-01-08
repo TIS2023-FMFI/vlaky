@@ -8,6 +8,7 @@ namespace code.Models
         public int Id{get;set;}
         public int TrainId{get;set;}
         public int NOrder{get;set;}
+        public List<WagonNote> Notes{get;set;}
         public Wagon(){}
         public async void setNOrder(int no,SQLService s){
             NOrder = no;

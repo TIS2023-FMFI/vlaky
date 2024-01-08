@@ -3,12 +3,14 @@
 @using code.Services;
 @inject TrainManagerService TrainManager
 @inject WagonManagerService WagonManager
+@inject AccountManagerService AccountManager
 @using System.Globalization
 @using System.Web
 @using System.Security.Claims
 @inject IHttpContextAccessor HttpContextAccessor
 
 @code {
+
     [Parameter]
     public int trainId { get; set; }
     public Train train;
@@ -17,13 +19,19 @@
     public string editedNoteContent;
     public int uid;
     private bool showDeleteConfirmationModal = false;
+    private List<Wagon> selectedWagons = new List<Wagon>();
+    private bool showAddNote = false;
+    private string wagonNote { get; set; }
+    private List<WagonNote> currentWagonNotes = new List<WagonNote>();
+    private bool showWagonTooltip = false;
+    private bool showWagonCommentsModal = false;
+
 
     protected override async Task OnInitializedAsync()
     {   
         var claims = HttpContextAccessor.HttpContext.User;
         var userIdClaim = claims.FindFirst("Id");
         uid = Convert.ToInt32(userIdClaim.Value);
-        Console.WriteLine(uid);
 
         trainId = -1;
 
@@ -62,7 +70,7 @@
     {
         if (train == null)
         {
-            return "~/images/train_naplanovany.svg";
+            return "/images/train_naplanovany.svg";
         }
 
         switch(train.Status)
@@ -98,8 +106,44 @@
     {
         wagon.State += 1;
         wagon.State %= 4;
-        await WagonManager.UpdateWagon(wagon);
-        NavigationManager.NavigateTo(NavigationManager.Uri, true);
+
+        try
+        {
+            await WagonManager.UpdateWagon(wagon);
+
+            foreach (var w in selectedWagons) 
+            {
+                if (w.State != wagon.State) {
+                    w.State = wagon.State;
+                    await WagonManager.UpdateWagon(w);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+
+        }
+
+        StateHasChanged();
+    }
+
+    private void SelectWagon(Wagon wagon, ChangeEventArgs e)
+    {
+        var isChecked = Convert.ToBoolean(e.Value);
+
+        if (isChecked)
+        {
+            if (!selectedWagons.Contains(wagon))
+            {
+                selectedWagons.Add(wagon);
+            }
+        }
+        else
+        {
+            selectedWagons.Remove(wagon);
+        }
+
+        StateHasChanged();
     }
 
     private async Task ShowDeleteConfirmation()
@@ -111,6 +155,7 @@
     {
         showDeleteConfirmationModal = false;
         await TrainManager.DeleteTrainById(trainId);
+        StateHasChanged();
         NavigationManager.NavigateTo("/Schedule", true);
     }
 
@@ -118,6 +163,74 @@
     {
         showDeleteConfirmationModal = false;
     }
+
+    private void ShowAddNoteModal()
+    {
+        if (selectedWagons.Any())
+        {
+            showAddNote = true;
+        }
+    }
+
+    private void CloseAddNoteModal()
+    {
+        showAddNote = false;
+    }
+
+    private async Task AddNoteToSelectedWagons()
+    {   
+        if (string.IsNullOrEmpty(wagonNote)) {
+            return;
+        }
+
+        WagonNote finalWagonNote = new WagonNote
+        {
+            UserId = uid,
+            Text = wagonNote,
+        };
+
+        foreach (var wagon in selectedWagons)
+        {
+            finalWagonNote.WagonId = wagon.Id;
+            await WagonManager.AddWagonNote(finalWagonNote);
+        }
+
+        selectedWagons.Clear();
+        wagonNote = string.Empty;
+        CloseAddNoteModal();
+        StateHasChanged();
+        NavigationManager.NavigateTo(NavigationManager.Uri, true);
+    }
+
+    private async Task updateWagonNote(ChangeEventArgs e) {
+        wagonNote = e.Value.ToString();
+    }
+
+    private void ShowWagonCommentsModal(Wagon wagon)
+    {
+        currentWagonNotes = wagon.Notes;
+        showWagonCommentsModal = true;
+        StateHasChanged();
+    }
+    
+    private void CancelWagonCommentsModal() {
+        showWagonCommentsModal = false;
+        StateHasChanged();
+    }
+
+    public async Task<string> GetUserNameById(int userId)
+    {
+        try
+        {
+            var userName = await AccountManager.GetUserNameById(userId);
+            return userName;
+        }
+        catch (Exception ex)
+        {
+            return "nezmámy používateľ";
+        }
+    }
+
 }
 
 <div class="inspect-container">
@@ -185,7 +298,13 @@
                     <div class="wagon @($"wagon-status-{wagon.State}")" onclick="@(() => OnWagonClicked(wagon))">
                         <label class="wagon-label">@wagon.NOrder</label>
                     </div>
-                    <input class="wagon-checkbox" type="checkbox" id="@($"wagon-checkbox-{wagon.Id}")" />
+                    <input class="wagon-checkbox" type="checkbox" id="@($"wagon-checkbox-{wagon.Id}")" onchange="@((ChangeEventArgs e) => SelectWagon(wagon, e))" />
+
+                    @if (wagon.Notes != null && wagon.Notes.Count > 0)
+                    {
+                        <img src="images/notes.png" class="wagon-icon" onclick="@(() => ShowWagonCommentsModal(wagon))" />
+                    }
+                
                 </div>
             }
         }
@@ -216,6 +335,59 @@
     <div class="modal-backdrop fade show" onclick="@CancelDeleteTrain"></div>
 }
 
+@if (showAddNote)
+{
+    <div class="modal fade show" id="productModal" style="display: block;" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Pridať poznámku</h5>
+                    <button type="button" class="close" onclick="@CloseAddNoteModal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" style="color: black;">
+                    <textarea class="note-form-input" bind="@wagonNote" onchange="@updateWagonNote" rows="6"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" style="border-radius: 20px; width: 100px" onclick="@CloseAddNoteModal">Zrušiť</button>
+                    <button type="button" class="btn btn-danger" style="border-radius: 20px;  width: 100px" onclick="@AddNoteToSelectedWagons">Potvrdiť</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show" onclick="@CloseAddNoteModal"></div>
+}
+
+@if (showWagonCommentsModal) 
+{
+    <div class="modal fade show" id="productModal" style="display: block;" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Poznámky</h5>
+                    <button type="button" class="close" onclick="@CancelWagonCommentsModal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" style="color: black;">
+                    @foreach (WagonNote note in currentWagonNotes)
+                    {
+                        <p><b>@note.UserId</b>: @note.Text</p>
+                        <p></p>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" style="border-radius: 20px; width: 100px" onclick="@CancelWagonCommentsModal">Zrušiť</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show" onclick="@CloseAddNoteModal"></div>
+}
+
+
+
 @if (train != null) {
     <a href="/CreateTrain?trainId=@(train?.Id)" class="btn btn-primary create-note-button" aria-label="Create new note">
     Upraviť
@@ -223,3 +395,7 @@
 }
 
 <button class="btn btn-primary create-note-button second" onclick="@ShowDeleteConfirmation">Vymazať</button>
+
+@if (selectedWagons.Any()) {
+    <button class="btn btn-primary create-note-button third" onclick="@ShowAddNoteModal">Pridať poznámku</button>
+}

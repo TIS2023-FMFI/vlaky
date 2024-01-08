@@ -26,14 +26,12 @@ namespace code.Services
         {
             if (disposing)
             {
-                // Dispose of managed resources (e.g., connection)
                 if (connection != null)
                 {
                     connection.Dispose();
                     connection = null;
                 }
             }
-            // Dispose of unmanaged resources (if any)
         }
 
         /**

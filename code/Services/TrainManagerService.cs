@@ -217,6 +217,13 @@ namespace code.Services
             {
                 WagonManagerService WMService = new WagonManagerService(s);
                 train.Wagons = await WMService.GetWagonsByTrainId(train.Id);
+
+                if (train.Wagons != null)
+                {
+                    foreach (Wagon w in train.Wagons) {
+                        w.Notes = await WMService.GetWagonNotesByWagonId(w.Id);
+                    }
+                }
             }
 
             return train;

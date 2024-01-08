@@ -69,15 +69,71 @@ namespace code.Services
 
 
 		public async Task DeleteWagon(Wagon w)
-		{
-			string sql = "DELETE FROM wagons WHERE id = (@p1)";
+        {
+            // First, delete all comments associated with the wagon
+            string deleteCommentsSql = "DELETE FROM wagon_comments WHERE wagon_id = (@p1)";
 
-			List<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
-			parameters.Add(new NpgsqlParameter("p1", w.Id));
+            List<NpgsqlParameter> deleteCommentsParams = new List<NpgsqlParameter>();
+            deleteCommentsParams.Add(new NpgsqlParameter("p1", w.Id));
 
-			NpgsqlDataReader reader = await s.sqlCommand(sql,parameters);
+            NpgsqlDataReader deleteCommentsReader = await s.sqlCommand(deleteCommentsSql, deleteCommentsParams);
+            deleteCommentsReader.Close();
 
-			reader.Close();
-		}
+            // Then, delete the wagon
+            string deleteWagonSql = "DELETE FROM wagons WHERE id = (@p2)";
+
+            List<NpgsqlParameter> deleteWagonParams = new List<NpgsqlParameter>();
+            deleteWagonParams.Add(new NpgsqlParameter("p2", w.Id));
+
+            NpgsqlDataReader deleteWagonReader = await s.sqlCommand(deleteWagonSql, deleteWagonParams);
+
+            deleteWagonReader.Close();
+        }
+
+
+		public async Task AddWagonNote(WagonNote note)
+        {
+            string sql = "INSERT INTO wagon_comments (wagon_id, user_id, text) VALUES ((@p1), (@p2), (@p3))";
+
+            List<NpgsqlParameter> parameters = new List<NpgsqlParameter>
+            {
+                new NpgsqlParameter("p1", note.WagonId),
+                new NpgsqlParameter("p2", note.UserId),
+                new NpgsqlParameter("p3", note.Text)
+            };
+
+            NpgsqlDataReader reader = await s.sqlCommand(sql, parameters);
+            reader.Close();
+        }
+
+		public async Task<List<WagonNote>> GetWagonNotesByWagonId(int wagonId)
+        {
+            string sql = @"
+                SELECT wagon_id, user_id, text 
+                FROM wagon_comments
+                WHERE wagon_id = @p1";
+
+            List<NpgsqlParameter> parameters = new List<NpgsqlParameter>
+            {
+                new NpgsqlParameter("p1", wagonId)
+            };
+
+            NpgsqlDataReader reader = await s.sqlCommand(sql, parameters);
+            
+            List<WagonNote> wagonNotes = new List<WagonNote>();
+            while(reader.Read())
+            {
+                var note = new WagonNote
+                {
+                    WagonId = (int)reader["wagon_id"],
+                    UserId = (int)reader["user_id"],
+                    Text = reader["text"].ToString()
+                };
+                wagonNotes.Add(note);
+            }
+            reader.Close();
+
+            return wagonNotes;
+        }
     }
 }
