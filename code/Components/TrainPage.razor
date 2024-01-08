@@ -1,0 +1,401 @@
+@inject NavigationManager NavigationManager
+@using code.Models;
+@using code.Services;
+@inject TrainManagerService TrainManager
+@inject WagonManagerService WagonManager
+@inject AccountManagerService AccountManager
+@using System.Globalization
+@using System.Web
+@using System.Security.Claims
+@inject IHttpContextAccessor HttpContextAccessor
+
+@code {
+
+    [Parameter]
+    public int trainId { get; set; }
+    public Train train;
+    public TrainNote note;
+    public int SelectedStatus;
+    public string editedNoteContent;
+    public int uid;
+    private bool showDeleteConfirmationModal = false;
+    private List<Wagon> selectedWagons = new List<Wagon>();
+    private bool showAddNote = false;
+    private string wagonNote { get; set; }
+    private List<WagonNote> currentWagonNotes = new List<WagonNote>();
+    private bool showWagonTooltip = false;
+    private bool showWagonCommentsModal = false;
+
+
+    protected override async Task OnInitializedAsync()
+    {   
+        var claims = HttpContextAccessor.HttpContext.User;
+        var userIdClaim = claims.FindFirst("Id");
+        uid = Convert.ToInt32(userIdClaim.Value);
+
+        trainId = -1;
+
+        var uri = new Uri(NavigationManager.Uri);
+        var queryTrainId = HttpUtility.ParseQueryString(uri.Query).Get("trainId");
+        if (!string.IsNullOrEmpty(queryTrainId) && int.TryParse(queryTrainId, out var id))
+        {
+            trainId = id;
+        }
+
+        if (trainId == -1)
+        {
+            NavigationManager.NavigateTo("/Schedule");
+            return;
+        }
+
+        train = await TrainManager.GetTrainById(trainId);
+
+        if (train == null)
+        {
+            NavigationManager.NavigateTo("/Schedule");
+            return;
+        }
+
+        note = await TrainManager.GetTrainNoteByTrainId(trainId);
+
+        if (note != null)
+        {
+            editedNoteContent = note.Text;
+        }
+
+        SelectedStatus = train.Status;
+    }
+
+    public string GetTrainStatusImage()
+    {
+        if (train == null)
+        {
+            return "/images/train_naplanovany.svg";
+        }
+
+        switch(train.Status)
+        {
+            case 0: return "images/train_naplanovany.svg";
+            case 1: return "images/train_vpriprave.svg";
+            case 2: return "images/train_pripraveny.svg";
+            case 3: return "images/train_expedovany.svg";
+            case 4: return "images/train_zruseny.svg";
+            default: return "images/train_naplanovany.svg";
+        }
+    }
+
+    private async Task OnStatusChanged(ChangeEventArgs e)
+    {
+        SelectedStatus = int.Parse(e.Value.ToString());
+        train.Status = SelectedStatus;
+        await TrainManager.UpdateTrain(train);
+    }
+
+    private async Task OnNoteChanged(ChangeEventArgs e)
+    {
+        if (editedNoteContent != e.Value.ToString())
+        {
+            editedNoteContent = e.Value.ToString();
+            note.Text = editedNoteContent;
+            note.UserId = uid;
+            await TrainManager.UpdateTrainNote(note);
+        }
+    }
+
+    private async Task OnWagonClicked(Wagon wagon)
+    {
+        wagon.State += 1;
+        wagon.State %= 4;
+
+        try
+        {
+            await WagonManager.UpdateWagon(wagon);
+
+            foreach (var w in selectedWagons) 
+            {
+                if (w.State != wagon.State) {
+                    w.State = wagon.State;
+                    await WagonManager.UpdateWagon(w);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+
+        }
+
+        StateHasChanged();
+    }
+
+    private void SelectWagon(Wagon wagon, ChangeEventArgs e)
+    {
+        var isChecked = Convert.ToBoolean(e.Value);
+
+        if (isChecked)
+        {
+            if (!selectedWagons.Contains(wagon))
+            {
+                selectedWagons.Add(wagon);
+            }
+        }
+        else
+        {
+            selectedWagons.Remove(wagon);
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task ShowDeleteConfirmation()
+    {
+        showDeleteConfirmationModal = true;
+    }
+
+    private async Task ConfirmDeleteTrain()
+    {
+        showDeleteConfirmationModal = false;
+        await TrainManager.DeleteTrainById(trainId);
+        StateHasChanged();
+        NavigationManager.NavigateTo("/Schedule", true);
+    }
+
+    private void CancelDeleteTrain()
+    {
+        showDeleteConfirmationModal = false;
+    }
+
+    private void ShowAddNoteModal()
+    {
+        if (selectedWagons.Any())
+        {
+            showAddNote = true;
+        }
+    }
+
+    private void CloseAddNoteModal()
+    {
+        showAddNote = false;
+    }
+
+    private async Task AddNoteToSelectedWagons()
+    {   
+        if (string.IsNullOrEmpty(wagonNote)) {
+            return;
+        }
+
+        WagonNote finalWagonNote = new WagonNote
+        {
+            UserId = uid,
+            Text = wagonNote,
+        };
+
+        foreach (var wagon in selectedWagons)
+        {
+            finalWagonNote.WagonId = wagon.Id;
+            await WagonManager.AddWagonNote(finalWagonNote);
+        }
+
+        selectedWagons.Clear();
+        wagonNote = string.Empty;
+        CloseAddNoteModal();
+        StateHasChanged();
+        NavigationManager.NavigateTo(NavigationManager.Uri, true);
+    }
+
+    private async Task updateWagonNote(ChangeEventArgs e) {
+        wagonNote = e.Value.ToString();
+    }
+
+    private void ShowWagonCommentsModal(Wagon wagon)
+    {
+        currentWagonNotes = wagon.Notes;
+        showWagonCommentsModal = true;
+        StateHasChanged();
+    }
+    
+    private void CancelWagonCommentsModal() {
+        showWagonCommentsModal = false;
+        StateHasChanged();
+    }
+
+    public async Task<string> GetUserNameById(int userId)
+    {
+        try
+        {
+            var userName = await AccountManager.GetUserNameById(userId);
+            return userName;
+        }
+        catch (Exception ex)
+        {
+            return "nezmámy používateľ";
+        }
+    }
+
+}
+
+<div class="inspect-container">
+    <div class="train-first">
+        <div class="train-state">
+            <img src="@GetTrainStatusImage()" alt="Train State" />
+            <select value="@SelectedStatus" onchange="@OnStatusChanged" class="note-form-input select-center-text">
+                <option value="0">Naplánovaný</option>
+                <option value="1">V príprave</option>
+                <option value="2">Pripravený</option>
+                <option value="3">Expedovaný</option>
+                <option value="4">Zrušený</option>
+            </select>
+        </div>
+
+        <div class="train-info">
+            @if (train != null)
+            {
+                <div class="train-info">
+                    <p>Názov: @train.Name</p>
+                    <p>Destinácia: @train.Destination</p>
+                    <p>Maximálna dĺžka: @train.MaxLength</p>
+                    <p>Reálna dĺžka: @train.Lenght</p>
+                    <p>Počet vagónov: @train.nWagons</p>
+                    <p>Dátum: @train.Date.ToString("dd. MM. yyyy", new CultureInfo("sk-SK"))</p>
+                    <p>Colný: @(train.Coll ? "Áno" : "Nie")</p>
+                </div>
+            }
+            else
+            {
+            }
+        </div>
+
+        <div class="train-note">
+            <p style="margin-bottom: 10px;">Poznámka:</p>
+            <textarea class="custom-textarea" rows="4" bind="@editedNoteContent" value="@editedNoteContent" onchange="@OnNoteChanged"></textarea>
+        </div>
+    </div>
+
+    <div class="icons-container">
+        <div class="icon icon-state-0">
+            <div class="icon-rectangle"></div>
+            <span>Nenaložený</span>
+        </div>
+        <div class="icon icon-state-1">
+            <div class="icon-rectangle"></div>
+            <span>Naplánovaný</span>
+        </div>
+        <div class="icon icon-state-2">
+            <div class="icon-rectangle"></div>
+            <span>Nakladá sa</span>
+        </div>
+        <div class="icon icon-state-3">
+            <div class="icon-rectangle"></div>
+            <span>Naložený</span>
+        </div>
+    </div>
+
+    <div class="train-wagons">
+        @if (train != null)
+        {
+            @foreach (var wagon in train.Wagons.OrderBy(w => w.NOrder))
+            {
+                <div class="wagon-container">
+                    <div class="wagon @($"wagon-status-{wagon.State}")" onclick="@(() => OnWagonClicked(wagon))">
+                        <label class="wagon-label">@wagon.NOrder</label>
+                    </div>
+                    <input class="wagon-checkbox" type="checkbox" id="@($"wagon-checkbox-{wagon.Id}")" onchange="@((ChangeEventArgs e) => SelectWagon(wagon, e))" />
+
+                    @if (wagon.Notes != null && wagon.Notes.Count > 0)
+                    {
+                        <img src="images/notes.png" class="wagon-icon" onclick="@(() => ShowWagonCommentsModal(wagon))" />
+                    }
+                
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@if (showDeleteConfirmationModal)
+{
+    <div class="modal fade show" id="productModal" style="display: block;" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Vymazať vlak</h5>
+                    <button type="button" class="close" onclick="@CancelDeleteTrain">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" style="color: black;">
+                    Určite chcete vymazať tento vlak?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" style="border-radius: 20px; width: 100px" onclick="@CancelDeleteTrain">Zrušiť</button>
+                    <button type="button" class="btn btn-danger" style="border-radius: 20px;  width: 100px" onclick="@ConfirmDeleteTrain">Potvrdiť</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show" onclick="@CancelDeleteTrain"></div>
+}
+
+@if (showAddNote)
+{
+    <div class="modal fade show" id="productModal" style="display: block;" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Pridať poznámku</h5>
+                    <button type="button" class="close" onclick="@CloseAddNoteModal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" style="color: black;">
+                    <textarea class="note-form-input" bind="@wagonNote" onchange="@updateWagonNote" rows="6"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" style="border-radius: 20px; width: 100px" onclick="@CloseAddNoteModal">Zrušiť</button>
+                    <button type="button" class="btn btn-danger" style="border-radius: 20px;  width: 100px" onclick="@AddNoteToSelectedWagons">Potvrdiť</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show" onclick="@CloseAddNoteModal"></div>
+}
+
+@if (showWagonCommentsModal) 
+{
+    <div class="modal fade show" id="productModal" style="display: block;" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Poznámky</h5>
+                    <button type="button" class="close" onclick="@CancelWagonCommentsModal">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" style="color: black;">
+                    @foreach (WagonNote note in currentWagonNotes)
+                    {
+                        <p><b>@note.UserId</b>: @note.Text</p>
+                        <p></p>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" style="border-radius: 20px; width: 100px" onclick="@CancelWagonCommentsModal">Zrušiť</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show" onclick="@CloseAddNoteModal"></div>
+}
+
+
+
+@if (train != null) {
+    <a href="/CreateTrain?trainId=@(train?.Id)" class="btn btn-primary create-note-button" aria-label="Create new note">
+    Upraviť
+</a>
+}
+
+<button class="btn btn-primary create-note-button second" onclick="@ShowDeleteConfirmation">Vymazať</button>
+
+@if (selectedWagons.Any()) {
+    <button class="btn btn-primary create-note-button third" onclick="@ShowAddNoteModal">Pridať poznámku</button>
+}

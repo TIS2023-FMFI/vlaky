@@ -1,0 +1,62 @@
+.user-list {
+    background-color: lightgray;
+    color: white;
+    border: 2px solid black;
+    margin: 30px;
+    padding: 20px;
+    margin-left: 230px;
+    border-radius: 20px;
+    border: none;
+}
+.user-tab {
+    background-color: darkgray;
+    color: black;
+    border: 2px solid black;
+    margin: 20px;
+    padding: 20px;
+    border: none;
+    border-radius: 20px;
+}
+.modal-body {
+    background-color: lightgray;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    margin: 20px;
+    padding: 20px;
+}
+.inputs {
+    background-color: lightgray;
+    color: black;
+    border: none;
+    border-radius: 20px;
+}
+
+.user-info {
+    padding: 10px;
+    padding-top: 0.5rempx;
+}
+
+.add-button {
+    margin-left: 20px;
+}
+
+@media (max-width: 1200px) {
+    .user-list {
+        margin-left: 180px;
+    }
+}
+
+@media (max-width: 800px) {
+    .user-list {
+        margin-left: 30px;
+        margin-top: 90px;
+    }
+}
+
+.close {
+    background-color: white;
+    border-radius: 10px;
+    border: 1px solid black;
+    width: 30px;
+}

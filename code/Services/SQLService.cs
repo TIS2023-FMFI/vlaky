@@ -1,21 +1,37 @@
 using Npgsql;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace code.Services
 {
-    public class SQLService
+    public class SQLService : IDisposable
     {
         private DbConnectionService DbService;
         private NpgsqlConnection connection;
-        
-        public SQLService(DbConnectionService DbService) 
+
+        public SQLService(DbConnectionService DbService)
         {
             this.DbService = DbService;
+            connection = DbService.getConnection();
         }
 
-        ~SQLService()
+        public void Dispose()
         {
-                connection.Dispose();
-                connection = null;
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (connection != null)
+                {
+                    connection.Dispose();
+                    connection = null;
+                }
+            }
         }
 
         /**
@@ -33,7 +49,8 @@ namespace code.Services
             Task<NpgsqlDataReader> task = null;
             NpgsqlDataReader reader = null;
 
-            while (task == null || (task.IsFaulted && task.Exception.InnerException.GetType() == typeof(NpgsqlException))) {
+            while (task == null || (task.IsFaulted && task.Exception.InnerException.GetType() == typeof(NpgsqlException)))
+            {
                 task = sqlExecuteCommandAsync(sql, parameters);
                 reader = await task;
             }
@@ -51,8 +68,9 @@ namespace code.Services
             return await cmd.ExecuteReaderAsync();
         }
 
-        private void refreshConnection() {
-            if (connection != null) 
+        private void refreshConnection()
+        {
+            if (connection != null)
             {
                 connection.Dispose();
             }

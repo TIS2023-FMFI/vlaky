@@ -1,31 +1,30 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using code.Services;
 using code.Models;
+using code.Services;
 
 namespace code.Pages
 {
-    public class DaySchedule
+    public class HistoryModel : PageModel
     {
-        public DateTime Date { get; set; }
-        public List<Train> Trains { get; set; }
-    }
-
-    public class ScheduleModel : PageModel
-    {
-        private readonly TrainManagerService _TrainManagerService;
-        private readonly ILogger<ScheduleModel> _logger;
+        private readonly TrainManagerService _trainManagerService;
+        private readonly ILogger<HistoryModel> _logger;
 
         public List<DaySchedule> Schedule { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+        public int TrainsInState3Count { get; set; }
+        public int TrainsInState4Count { get; set; }
+        public int TotalTrainsCount { get; set; }
 
-        public ScheduleModel(TrainManagerService trainManagerService, ILogger<ScheduleModel> logger)
+        public HistoryModel(TrainManagerService trainManagerService, ILogger<HistoryModel> logger)
         {
-            _TrainManagerService = trainManagerService;
+            _trainManagerService = trainManagerService;
             _logger = logger;
         }
 
@@ -45,7 +44,10 @@ namespace code.Pages
             StartDate = startDate ?? DateTime.Today;
             EndDate = endDate ?? StartDate.AddDays(7);
 
-            var allTrainsByDate = await _TrainManagerService.GetTrainsByDate(StartDate, EndDate);
+            var allTrainsByDate = await _trainManagerService.GetTrainsByDate(StartDate, EndDate);
+            TrainsInState3Count = allTrainsByDate.Count(t => t.Status == 3);
+            TrainsInState4Count = allTrainsByDate.Count(t => t.Status == 4);
+            TotalTrainsCount = TrainsInState3Count + TrainsInState4Count;
 
             for (DateTime date = StartDate; date <= EndDate; date = date.AddDays(1))
             {
@@ -53,7 +55,7 @@ namespace code.Pages
                 {
                     Date = date,
                     Trains = allTrainsByDate
-                        .Where(t => t.Date.Date == date.Date)
+                        .Where(t => t.Date.Date == date.Date && (t.Status == 3 || t.Status == 4))
                         .OrderBy(t => t.Id)
                         .ToList()
                 };
@@ -66,7 +68,7 @@ namespace code.Pages
 
         public string GetTrainStatusImage(int status)
         {
-            switch (status)
+            switch(status)
             {
                 case 0: return "~/images/train_naplanovany.svg";
                 case 1: return "~/images/train_vpriprave.svg";
