@@ -16,7 +16,6 @@
 .date-picker-container label {
     margin-right: 15px;
     color: #555;
-    
 }
 
 .date-input {
@@ -30,7 +29,6 @@
     padding-left: 25px;
     padding-right: 25px;
 }
-
 
 .icons-container {
     display: flex;
@@ -69,7 +67,7 @@
 }
 
 .day-header {
-    background-color: #EBEBEB;
+    background-color: #ebebeb;
     border: 0px solid #dcdcdc;
     box-shadow: 0 3px 5px rgba(51, 51, 51, 0.5);
     padding: 5px;
@@ -128,7 +126,6 @@
     font-weight: bold;
 }
 
-
 .train-link {
     text-decoration: none;
     color: inherit;
@@ -144,7 +141,6 @@
     background-color: #d9e2ff;
     color: black;
 }
-
 
 @media (max-width: 1200px) {
     .schedule-container {
@@ -190,7 +186,7 @@
         flex-wrap: wrap;
         flex-direction: column;
     }
-    
+
     .train img {
         margin: 0;
         padding: 0;

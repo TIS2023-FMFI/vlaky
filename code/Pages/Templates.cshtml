@@ -1,0 +1,60 @@
+@page
+@model code.Pages.TemplatesModel
+@{
+    ViewData["Title"] = "Templates";
+}
+
+<div class="notes-container">
+    @foreach (var template in Model.Templates)
+    {
+        <div class="note" style="background-color: lightgray;">
+
+            <div class="note-header">
+                <span class="note-title">@template.Name</span>
+
+                <div class="note-controls">
+                    <form asp-controller="Templates" asp-action="OnPostDeleteAsync" asp-route-templateId="@template.Id">
+                        <button class="note-delete delete-button" title="Delete" data-template-id="@template.Id">
+                            <img src="~/images/delete-icon.png" alt="Delete"/>
+                        </button>
+                    </form>
+
+                    <button class="note-edit" title="Edit" onclick="editTemplate(@template.Id)">
+                        <img src="~/images/edit-icon.png" alt="Edit" />
+                    </button>
+                </div>
+            </div>
+
+            <div class="note-content">
+                <span>@template.Destination</span>
+            </div>
+
+        </div>
+    }
+</div>
+
+<a href="/CreateEditTemplate" class="btn btn-primary create-note-button" aria-label="Create new template">
+    Vytvoriť šablónu
+</a>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $(".note-delete").click(function (e) {
+            e.preventDefault();
+            var templateName = $(this).closest('.note').find('.note-title').text();
+            var $template = $(this).closest('.note');
+            var confirmed = confirm("Chcete vymazať šablónu s názvom: " + templateName + "?");
+
+            if (confirmed) {
+                var templateId = $(this).data('template-id');
+                window.location.href = '/Templates?templateId=' + templateId;
+            }
+        });
+    });
+
+    function editTemplate(templateId) {
+        window.location.href = '/CreateEditTemplate?templateId=' + templateId;
+    }
+</script>
