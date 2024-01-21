@@ -4,6 +4,7 @@
 @using Microsoft.AspNetCore.Components.Web;
 
 @inject AccountManagerService manager
+@inject LoggerService loggerService
 @inject NavigationManager uriHelper
 
 <div class="user-list">
@@ -198,7 +199,7 @@
  @code{
     bool DeleteAcc;
     bool loading = true;
-    Account? Acc;
+    Account? Acc, tempAcc;
     SQLService s = new SQLService(new DbConnectionService());
     bool AddAcc = false;
     bool PrivAcc = false;
@@ -208,7 +209,7 @@
     string name;
     string mail;
     bool[] privileges = new bool[7];
-    string pass;
+    string? pass;
     List<Account>? accounts;
 
     async Task InitAccounts(){
@@ -230,8 +231,9 @@
         DeleteAcc = true;
     }
 
-    void DeleteSelectedAccount(){
+    void DeleteSelectedAccount(){   
         Acc.DeleteSelf(s);
+        loggerService.writeUserDelete(HttpContext, Acc);
         Acc = null;
         DeleteAcc = false;
         uriHelper.NavigateTo(uriHelper.Uri, forceLoad: true);
@@ -260,6 +262,7 @@
             }
         }
         manager.AddAccount(new Account(accounts.Count,name,mail,p,pass));
+        loggerService.writeUserNew(HttpContext, new Account(accounts.Count,name,mail,p,pass));
         name = mail = pass = null;
         uriHelper.NavigateTo(uriHelper.Uri, forceLoad: true);
     }
@@ -267,6 +270,7 @@
 
     void ModifyPriviliges(int selectedAccountId){
         Acc = accounts.First(x => x.Id == selectedAccountId);
+        
         for(int i = 0;i<7;i++){
             if(AuthRequirementHandler.isBitSet(Acc.Privileges,i)){
                 privileges[i] = true;
@@ -283,8 +287,12 @@
                 p = AuthRequirementHandler.setBit(p,i);
             }
         }
+        temp = new Account();
+        temp.Privileges = p;
         Acc.UpdatePrivileges(p,s);
+        loggerService.writeUserPrivilegesChange(HttpContext, temp, Acc);
         Acc = null;
+        temp = null;
         uriHelper.NavigateTo(uriHelper.Uri, forceLoad: true);
     }
 
@@ -296,6 +304,7 @@
 
     void ChangePass(){
         Acc.UpdatePassWord(pass,s);
+        loggerService.writeUserPassChange(HttpContext, Acc);
         Acc = null;
         PassAcc = false;
         uriHelper.NavigateTo(uriHelper.Uri, forceLoad: true);
@@ -309,6 +318,7 @@
 
     void ChangeEmail(){
         Acc.UpdateMail(mail,s);
+        loggerService.writeUserMailChange(HttpContext, Acc);
         Acc = null;
         MailAcc = false;
         uriHelper.NavigateTo(uriHelper.Uri, forceLoad: true);
