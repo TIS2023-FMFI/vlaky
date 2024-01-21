@@ -31,7 +31,6 @@ CREATE TABLE IF NOT EXISTS public.templates
     id serial,
     name text,
     destination text,
-    max_leanght integer,
     PRIMARY KEY (id),
     UNIQUE (name)
 );
@@ -39,8 +38,8 @@ CREATE TABLE IF NOT EXISTS public.templates
 CREATE TABLE IF NOT EXISTS public.trains
 (
     id serial,
-    name character varying(30),
-    destination character varying(30),
+    name text,
+    destination text,
     state integer NOT NULL,
     date date,
     coll boolean NOT NULL,
