@@ -1,5 +1,5 @@
 @page
-@model code.Pages.CreateTrainModel
+@model CreateTrainModel
 @{
     ViewData["Title"] = "";
 }
@@ -10,38 +10,43 @@
         <!-- Templates -->
         <div class="note-form-group">
             <label asp-for="Template" class="note-form-label">Výber šablóny:</label>
-            <select asp-for="Template" class="note-form-input">
+            <select asp-for="Template" class="note-form-input" id="Template">
+                <option value=""></option>
+                @foreach (var template in Model.Templates)
+                {
+                    <option value="@template.Id">@template.Name</option>
+                }
             </select>
         </div>
         
         <!-- Train Name -->
         <div class="note-form-group">
             <label asp-for="Name" class="note-form-label">Názov:</label>
-            <input asp-for="Name" class="note-form-input">
+            <input id="Name" asp-for="Name" class="note-form-input">
         </div>
 
         <!-- Destination -->
         <div class="note-form-group">
             <label asp-for="Destination" class="note-form-label">Destinácia:</label>
-            <input asp-for="Destination" class="note-form-input">
+            <input id="Destination" asp-for="Destination" class="note-form-input">
         </div>
 
         <!-- Maximum Length -->
         <div class="note-form-group">
             <label asp-for="Maxlength" class="note-form-label">Maximálna dĺžka:</label>
-            <input asp-for="Maxlength" class="note-form-input">
+            <input asp-for="Maxlength" class="note-form-input" type="number">
         </div>
 
         <!-- Real Length -->
         <div class="note-form-group">
-            <label asp-for="RealLength" class="note-form-label">Reálna dĺžka:</label>
-            <input asp-for="RealLength" class="note-form-input">
+            <label asp-for="RealLength" class="note-form-label" >Reálna dĺžka:</label>
+            <input asp-for="RealLength" class="note-form-input" type="number">
         </div>
 
         <!-- Number of Wagons -->
         <div class="note-form-group">
             <label asp-for="WagonCount" class="note-form-label">Počet vagónov:</label>
-            <input asp-for="WagonCount" class="note-form-input">
+            <input asp-for="WagonCount" class="note-form-input" type="number">
         </div>
 
         <!-- Date -->
@@ -81,3 +86,24 @@
         </div>
     </form>
 </div>
+
+
+@section Scripts {
+    <script>
+        const nameInput = document.getElementById('Name');
+        const destinationInput = document.getElementById('Destination');
+        const templateDropdown = document.getElementById('Template');
+
+        templateDropdown.addEventListener('change', function() {
+            const selectedTemplateId = parseInt(templateDropdown.value);
+
+            if (TemplateMap.hasOwnProperty(selectedTemplateId)) {
+
+                const { Namee, Destinationn } = TemplateMap[selectedTemplateId];
+
+                nameInput.value = Namee;
+                destinationInput.value = Destinationn;
+            }
+        });
+    </script>
+}

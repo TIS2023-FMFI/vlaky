@@ -1,0 +1,30 @@
+@page
+@model code.Pages.CreateEditTemplateModel
+@{
+    ViewData["Title"] = "Create/Edit Template";
+}
+
+<div class="note-creation-section">
+    <form method="post" class="note-creation-form">
+        
+        <div class="note-form-group">
+            <label for="Name" class="note-form-label">Názov:</label>
+            <input type="text" class="note-form-input" id="Name" name="Name" value="@Model.Name" >
+        </div>
+
+        <div class="note-form-group">
+            <label for="Destination" class="note-form-label">Destinácia:</label>
+            <input type="text" class="note-form-input" id="Destination" name="Destination" value="@Model.Destination">
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="text-danger">@Model.ErrorMessage</div>
+        }
+
+        <div class="note-form-button-group">
+            <a href="/Templates" class="note-form-button">Späť</a>
+            <button type="submit" class="note-form-button">Uložiť</button>
+        </div>
+    </form>
+</div>

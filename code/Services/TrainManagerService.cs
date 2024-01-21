@@ -258,7 +258,7 @@ namespace code.Services
             Console.WriteLine(note.TrainId);
             Console.WriteLine(note.Text);
             Console.WriteLine(note.UserId);
-            string sql = "UPDATE train_comments SET text = @p2, user_id = @p3 WHERE train_id = @p1";
+            string sql = "UPDATE train_comments SET text = (@p2), user_id = (@p3) WHERE train_id = (@p1)";
 
             List<NpgsqlParameter> parameters = new List<NpgsqlParameter>
             {

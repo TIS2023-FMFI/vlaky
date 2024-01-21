@@ -74,13 +74,9 @@
                     UId = User.FindFirst("Id")?.Value;
                 }
 
-                if (!ModelState.IsValid) 
-                {
-                    return Page();
-                }
-
                 if (string.IsNullOrEmpty(Title) || string.IsNullOrEmpty(Content)) 
                 {
+                    Console.WriteLine("Empty");
                     ErrorMessage = "Vyplňte všetky polia.";
                     return Page();
                 }
