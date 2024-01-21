@@ -11,10 +11,11 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 namespace code.Pages
 {
     public class LoginModel(ILogger<IndexModel> logger,
-        AccountManagerService accountManagerService) : PageModel
+        AccountManagerService accountManagerService, LoggerService loggerService) : PageModel
     {
         public bool fail = false;
         private readonly ILogger<IndexModel> _logger = logger;
+        private LoggerService _loggerService = loggerService;
         private readonly AccountManagerService accountManager = accountManagerService;
 
         [BindProperty]
@@ -37,6 +38,7 @@ namespace code.Pages
         {
             if (HttpContext.User.Identity.IsAuthenticated)
             {
+                _loggerService.writeLogIn(HttpContext);
                 Response.Redirect("/Index");
                 return;
             }
