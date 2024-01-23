@@ -125,7 +125,7 @@ namespace code.Services
 
         public void writeUserChange(HttpContext context, string str)
         {
-            string str = CONF_COLUMN_SEPARATOR + 
+            str = CONF_COLUMN_SEPARATOR + 
             CONF_CHANGE +
             CONF_INCOLUMN_SEPARETOR + 
             str;
@@ -153,7 +153,7 @@ namespace code.Services
 
         public void writeUserMailChange(HttpContext context, Account oldAcc, Account newAcc)
         {
-            string str = acc.Name +
+            string str = oldAcc.Name +
             CONF_COLUMN_SEPARATOR + 
             CONF_MAIL +
             CONF_INCOLUMN_SEPARETOR +
@@ -175,7 +175,7 @@ namespace code.Services
 
         public void writeUserPrivilegesChange(HttpContext context, Account oldAcc, Account newAcc)
         {
-            string str = acc.Name +
+            string str = oldAcc.Name +
             CONF_COLUMN_SEPARATOR + 
             CONF_PRIVILEGES +
             CONF_INCOLUMN_SEPARETOR +
