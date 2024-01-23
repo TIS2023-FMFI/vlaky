@@ -45,7 +45,7 @@ namespace code.Pages
             var noteId = HttpContext.Request.Query["noteId"].ToString();
             if (!string.IsNullOrEmpty(noteId))
             {
-                var note = await _blackBoardService.GetNoteById(noteId.Value);
+                var note = await _blackBoardService.GetNoteById(Convert.ToInt32(noteId));
                 await _blackBoardService.RemoveNoteById(Convert.ToInt32(noteId));
                 _loggerService.writeCommDelete(HttpContext, note);
             }
