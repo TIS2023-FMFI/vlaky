@@ -3,6 +3,7 @@
 @using code.Auth;
 @using Microsoft.AspNetCore.Components.Web;
 
+@inject IHttpContextAccessor HttpContextAccessor
 @inject AccountManagerService manager
 @inject LoggerService loggerService
 @inject NavigationManager uriHelper
@@ -233,7 +234,7 @@
 
     void DeleteSelectedAccount(){   
         Acc.DeleteSelf(s);
-        loggerService.writeUserDelete(HttpContext, Acc);
+        loggerService.writeUserDelete(HttpContextAccessor.HttpContext, Acc);
         Acc = null;
         DeleteAcc = false;
         uriHelper.NavigateTo(uriHelper.Uri, forceLoad: true);
@@ -262,7 +263,7 @@
             }
         }
         manager.AddAccount(new Account(accounts.Count,name,mail,p,pass));
-        loggerService.writeUserNew(HttpContext, new Account(accounts.Count,name,mail,p,pass));
+        loggerService.writeUserNew(HttpContextAccessor.HttpContext, new Account(accounts.Count,name,mail,p,pass));
         name = mail = pass = null;
         uriHelper.NavigateTo(uriHelper.Uri, forceLoad: true);
     }
@@ -279,6 +280,7 @@
         nullAll();
         PrivAcc = true;
     }
+
     void SavePrivileges(){
         PrivAcc = false;
         int p = 0;
@@ -287,12 +289,12 @@
                 p = AuthRequirementHandler.setBit(p,i);
             }
         }
-        temp = new Account();
-        temp.Privileges = p;
+        tempAcc = new Account();
+        tempAcc.Privileges = p;
         Acc.UpdatePrivileges(p,s);
-        loggerService.writeUserPrivilegesChange(HttpContext, temp, Acc);
+        loggerService.writeUserPrivilegesChange(HttpContextAccessor.HttpContext, tempAcc, Acc);
         Acc = null;
-        temp = null;
+        tempAcc = null;
         uriHelper.NavigateTo(uriHelper.Uri, forceLoad: true);
     }
 
@@ -304,7 +306,7 @@
 
     void ChangePass(){
         Acc.UpdatePassWord(pass,s);
-        loggerService.writeUserPassChange(HttpContext, Acc);
+        loggerService.writeUserPassChange(HttpContextAccessor.HttpContext, Acc);
         Acc = null;
         PassAcc = false;
         uriHelper.NavigateTo(uriHelper.Uri, forceLoad: true);
@@ -317,9 +319,13 @@
     }
 
     void ChangeEmail(){
+        tempAcc = new Account();
+        tempAcc.Mail = Acc.Mail;
+        tempAcc.Name = Acc.Name;
         Acc.UpdateMail(mail,s);
-        loggerService.writeUserMailChange(HttpContext, Acc);
+        loggerService.writeUserMailChange(HttpContextAccessor.HttpContext, tempAcc, Acc);
         Acc = null;
+        tempAcc = null;
         MailAcc = false;
         uriHelper.NavigateTo(uriHelper.Uri, forceLoad: true);
     }
