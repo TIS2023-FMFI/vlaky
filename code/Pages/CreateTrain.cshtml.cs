@@ -137,13 +137,20 @@ namespace code.Pages
             Console.WriteLine("before");
             if (string.IsNullOrEmpty(Name) || string.IsNullOrEmpty(Destination)) 
             {
-                ErrorMessage = "Vyplňte názov aj destináciu .";
-                return Page();
+                if(string.IsNullOrEmpty(this.Template)){
+                    ErrorMessage = "Vyplňte názov aj destináciu .";
+                    return Page();
+                }
             }
             Console.WriteLine("after nullll");
+            Console.WriteLine(this.Template);
 
             var trainId = HttpContext.Request.Query["trainId"].ToString();
-
+            if(!string.IsNullOrEmpty(this.Template) && !this.SaveTemplate){
+                var t = await _TemplateManagerService.GetTemplateById(Convert.ToInt32(this.Template));
+                this.Name = t.Name;
+                this.Destination = t.Destination;
+            }
             var newTrain = new Train
             {
                 Name = this.Name,
@@ -166,6 +173,21 @@ namespace code.Pages
                     return Redirect("/Schedule");
                 }
 
+                if(this.SaveTemplate && !string.IsNullOrEmpty(this.Template)){
+                    var t = await _TemplateManagerService.GetTemplateById(Convert.ToInt32(this.Template));
+                    t.Name = newTrain.Name;
+                    t.Destination = newTrain.Destination;
+                    await _TemplateManagerService.UpdateTemplate(t);
+                }
+                
+                if(this.SaveTemplate && string.IsNullOrEmpty(this.Template)){
+                    TrainTemplate t = new TrainTemplate{
+                        Name = this.Name,
+                        Destination = this.Destination
+                    };
+                    await _TemplateManagerService.AddTemplate(t);
+                }             
+
                 newTrain.Status = currentTrain.Status;
                 await _TrainManagerService.UpdateTrain(newTrain);
 
@@ -178,6 +200,7 @@ namespace code.Pages
                 }
                 
                 await _TrainManagerService.UpdateTrainNote(nn);
+
             }
             else
             {
@@ -194,6 +217,14 @@ namespace code.Pages
                     }
 
                 await _TrainManagerService.AddTrainNote(nn);
+                if(this.SaveTemplate){
+                    TrainTemplate t = new TrainTemplate{
+                        Name = this.Name,
+                        Destination = this.Destination
+                    };
+                    await _TemplateManagerService.AddTemplate(t);
+                }
+
             }
 
             return Redirect("/Schedule");
