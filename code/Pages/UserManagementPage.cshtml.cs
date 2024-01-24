@@ -16,6 +16,7 @@ namespace code.Pages;
 public class ManageModel : PageModel
 {
     private readonly ILogger<ManageModel> _logger;
+    
     public bool allow;
 
     public ManageModel(ILogger<ManageModel> logger)

@@ -14,6 +14,8 @@ namespace code.Pages
         private readonly TrainManagerService _TrainManagerService;
         private readonly TemplateManagerService _TemplateManagerService;
         private readonly ILogger<CreateTrainModel> _logger;
+        private readonly LoggerService _loggerService;
+
 
         [BindProperty]
         public string Template { get; set; }
@@ -49,19 +51,16 @@ namespace code.Pages
 
         public string UId { get; private set; }
 
-        public List<TrainTemplate> Templates { get; set; }
 
-
-        public CreateTrainModel(TrainManagerService trainManagerService, 
-                        TemplateManagerService templateManagerService, 
-                        ILogger<CreateTrainModel> logger)
+        public CreateTrainModel(TrainManagerService trainManagerService, ILogger<CreateTrainModel> logger, LoggerService loggerService, TemplateManagerService templateManagerService)
         {
             _TrainManagerService = trainManagerService;
             _TemplateManagerService = templateManagerService;
             _logger = logger;
+            _loggerService = loggerService;
         }
 
-
+        [HttpGet]
         public async Task<IActionResult> OnGet(int? trainId)
         {
             ErrorMessage = null;
@@ -113,19 +112,19 @@ namespace code.Pages
                 Date = DateTime.Now;
             }
 
+
             Templates = await _TemplateManagerService.GetTemplates();
             if (Templates == null)
             {
                 Templates = new List<TrainTemplate>();
             }
 
+
             return Page();
         }
 
         public async Task<IActionResult> OnPost()
         {   
-
-            Console.WriteLine("OnPost thiiiiiiiiiiiiisssssssssssssssssss");
             if (!HttpContext.User.Identity.IsAuthenticated)
             {
                 return Redirect("/Login");
@@ -151,6 +150,7 @@ namespace code.Pages
                 this.Name = t.Name;
                 this.Destination = t.Destination;
             }
+            
             var newTrain = new Train
             {
                 Name = this.Name,
@@ -200,11 +200,17 @@ namespace code.Pages
                 }
                 
                 await _TrainManagerService.UpdateTrainNote(nn);
+                
+                _loggerService.writeTrainChange(HttpContext, currentTrain, newTrain);
+                _loggerService.writeCommChange(HttpContext, nn);
 
             }
             else
             {
                 var idd = await _TrainManagerService.AddTrain(newTrain);
+
+                _loggerService.writeTrainNew(HttpContext, newTrain);
+
                 var nn = new TrainNote
                 {
                     TrainId = idd,
@@ -214,7 +220,7 @@ namespace code.Pages
                 if (nn.Text == null)
                     {
                         nn.Text = "";
-                    }
+                    }else{_loggerService.writeCommNew(HttpContext, nn);}
 
                 await _TrainManagerService.AddTrainNote(nn);
                 if(this.SaveTemplate){
@@ -224,6 +230,7 @@ namespace code.Pages
                     };
                     await _TemplateManagerService.AddTemplate(t);
                 }
+
 
             }
 
