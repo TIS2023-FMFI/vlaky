@@ -111,8 +111,7 @@ namespace code.Services
             string sql = @"
                 SELECT wagon_id, user_id, text 
                 FROM wagon_comments
-                WHERE wagon_id = @p1
-                ORDER BY id";
+                WHERE wagon_id = @p1";
 
             List<NpgsqlParameter> parameters = new List<NpgsqlParameter>
             {

@@ -29,7 +29,7 @@ namespace code.Services
 
 		public async Task<List<TrainTemplate>> GetTemplates()
 		{
-			string sql = "SELECT * from templates ORDER BY id";
+			string sql = "SELECT * from templates";
 
 			List<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
 
@@ -79,44 +79,7 @@ namespace code.Services
 
 			reader.Close();
 		}
-
-		public async Task<TrainTemplate> GetTemplateById(int templateId)
-		{
-			string sql = "SELECT * FROM templates WHERE id = @p1";
-
-			List<NpgsqlParameter> parameters = new List<NpgsqlParameter>
-			{
-				new NpgsqlParameter("p1", templateId)
-			};
-
-			NpgsqlDataReader reader = await s.sqlCommand(sql, parameters);
-			
-			if (reader.Read())
-			{
-				return new TrainTemplate
-				{
-					Id = (int)reader["id"],
-					Name = (string)reader["name"],
-					Destination = (string)reader["destination"]
-				};
-			}
-
-			reader.Close();
-			return null;
-		}
-
-		public async Task RemoveTemplateById(int templateId)
-        {
-            string sql = "DELETE FROM templates WHERE id = @p1";
-
-            List<NpgsqlParameter> parameters = new List<NpgsqlParameter>
-            {
-                new NpgsqlParameter("p1", templateId)
-            };
-
-            NpgsqlDataReader reader = await s.sqlCommand(sql, parameters);
-            reader.Close();
-        }
+	
 	}	
 
 }

@@ -3,7 +3,9 @@
 @using code.Auth;
 @using Microsoft.AspNetCore.Components.Web;
 
+@inject IHttpContextAccessor HttpContextAccessor
 @inject AccountManagerService manager
+@inject LoggerService loggerService
 @inject NavigationManager uriHelper
 
 <div class="user-list">
@@ -198,7 +200,7 @@
  @code{
     bool DeleteAcc;
     bool loading = true;
-    Account? Acc;
+    Account? Acc, tempAcc;
     SQLService s = new SQLService(new DbConnectionService());
     bool AddAcc = false;
     bool PrivAcc = false;
@@ -208,7 +210,7 @@
     string name;
     string mail;
     bool[] privileges = new bool[7];
-    string pass;
+    string? pass;
     List<Account>? accounts;
 
     async Task InitAccounts(){
@@ -230,8 +232,9 @@
         DeleteAcc = true;
     }
 
-    void DeleteSelectedAccount(){
+    void DeleteSelectedAccount(){   
         Acc.DeleteSelf(s);
+        loggerService.writeUserDelete(HttpContextAccessor.HttpContext, Acc);
         Acc = null;
         DeleteAcc = false;
         uriHelper.NavigateTo(uriHelper.Uri, forceLoad: true);
@@ -260,6 +263,7 @@
             }
         }
         manager.AddAccount(new Account(accounts.Count,name,mail,p,pass));
+        loggerService.writeUserNew(HttpContextAccessor.HttpContext, new Account(accounts.Count,name,mail,p,pass));
         name = mail = pass = null;
         uriHelper.NavigateTo(uriHelper.Uri, forceLoad: true);
     }
@@ -267,6 +271,7 @@
 
     void ModifyPriviliges(int selectedAccountId){
         Acc = accounts.First(x => x.Id == selectedAccountId);
+        
         for(int i = 0;i<7;i++){
             if(AuthRequirementHandler.isBitSet(Acc.Privileges,i)){
                 privileges[i] = true;
@@ -275,6 +280,7 @@
         nullAll();
         PrivAcc = true;
     }
+
     void SavePrivileges(){
         PrivAcc = false;
         int p = 0;
@@ -283,8 +289,12 @@
                 p = AuthRequirementHandler.setBit(p,i);
             }
         }
+        tempAcc = new Account();
+        tempAcc.Privileges = p;
         Acc.UpdatePrivileges(p,s);
+        loggerService.writeUserPrivilegesChange(HttpContextAccessor.HttpContext, tempAcc, Acc);
         Acc = null;
+        tempAcc = null;
         uriHelper.NavigateTo(uriHelper.Uri, forceLoad: true);
     }
 
@@ -296,6 +306,7 @@
 
     void ChangePass(){
         Acc.UpdatePassWord(pass,s);
+        loggerService.writeUserPassChange(HttpContextAccessor.HttpContext, Acc);
         Acc = null;
         PassAcc = false;
         uriHelper.NavigateTo(uriHelper.Uri, forceLoad: true);
@@ -308,8 +319,13 @@
     }
 
     void ChangeEmail(){
+        tempAcc = new Account();
+        tempAcc.Mail = Acc.Mail;
+        tempAcc.Name = Acc.Name;
         Acc.UpdateMail(mail,s);
+        loggerService.writeUserMailChange(HttpContextAccessor.HttpContext, tempAcc, Acc);
         Acc = null;
+        tempAcc = null;
         MailAcc = false;
         uriHelper.NavigateTo(uriHelper.Uri, forceLoad: true);
     }

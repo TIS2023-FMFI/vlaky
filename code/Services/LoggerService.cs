@@ -16,6 +16,11 @@ namespace code.Services
         private static string CONF_LOGIN = "log_in";
 
         private static string CONF_CHANGE = "change";
+        private static string CONF_ACC_NEW = "new";
+        private static string CONF_ACC_DELETE = "delete";
+        private static string CONF_MAIL = "mail";
+        private static string CONF_PASS = "password";
+        private static string CONF_PRIVILEGES = "privileges";
 
         private static string CONF_TEMPLATE = "template";
         private static string CONF_TEMPLATE_NEW = "new";
@@ -62,6 +67,11 @@ namespace code.Services
 
             var changeConf = conf.GetSection("ChangeOptions");
             CONF_CHANGE = changeConf["PrimaryLabel"] ?? CONF_CHANGE;
+            CONF_ACC_NEW = changeConf["SecondaryLabelNew"] ?? CONF_ACC_NEW;
+            CONF_ACC_DELETE = changeConf["SecondaryLabelDelete"] ?? CONF_ACC_DELETE;
+            CONF_MAIL = changeConf["SecondaryLabelMail"] ?? CONF_MAIL;
+            CONF_PASS = changeConf["SecondaryLabelPassword"] ?? CONF_PASS;
+            CONF_PRIVILEGES = changeConf["SecondaryLabelPrivileges"] ?? CONF_PRIVILEGES;
 
             var tempConf = conf.GetSection("TemplateOptions");
             CONF_TEMPLATE = tempConf["PrimaryLabel"] ?? CONF_TEMPLATE;
@@ -113,12 +123,67 @@ namespace code.Services
             writeToLog(context, str);
         }
 
-        public void writeChange(HttpContext context)
+        public void writeUserChange(HttpContext context, string str)
         {
-            string str = CONF_COLUMN_SEPARATOR + 
-            CONF_CHANGE;
+            str = CONF_COLUMN_SEPARATOR + 
+            CONF_CHANGE +
+            CONF_INCOLUMN_SEPARETOR + 
+            str;
 
             writeToLog(context, str);
+        }
+
+        public void writeUserNew(HttpContext context, Account acc)
+        {
+            string str = acc.Name +
+            CONF_COLUMN_SEPARATOR + 
+            CONF_ACC_NEW;
+
+            writeUserChange(context, str);
+        }
+
+        public void writeUserDelete(HttpContext context, Account acc)
+        {
+            string str = acc.Name +
+            CONF_COLUMN_SEPARATOR + 
+            CONF_ACC_DELETE;
+
+            writeUserChange(context, str);
+        }
+
+        public void writeUserMailChange(HttpContext context, Account oldAcc, Account newAcc)
+        {
+            string str = oldAcc.Name +
+            CONF_COLUMN_SEPARATOR + 
+            CONF_MAIL +
+            CONF_INCOLUMN_SEPARETOR +
+            oldAcc.Mail + 
+            CONF_ARROW +
+            newAcc.Mail;
+
+            writeUserChange(context, str);
+        }
+
+        public void writeUserPassChange(HttpContext context, Account acc)
+        {
+            string str = acc.Name +
+            CONF_COLUMN_SEPARATOR + 
+            CONF_PASS;
+
+            writeUserChange(context, str);
+        }
+
+        public void writeUserPrivilegesChange(HttpContext context, Account oldAcc, Account newAcc)
+        {
+            string str = oldAcc.Name +
+            CONF_COLUMN_SEPARATOR + 
+            CONF_PRIVILEGES +
+            CONF_INCOLUMN_SEPARETOR +
+            oldAcc.Privileges.ToString() + 
+            CONF_ARROW +
+            newAcc.Privileges.ToString();
+
+            writeUserChange(context, str);
         }
 
         private void writeTemplate(HttpContext context, string str)

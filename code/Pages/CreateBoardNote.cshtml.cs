@@ -14,6 +14,7 @@
         {
             private readonly BlackBoardService _blackBoardService;
             private readonly ILogger<CreateBoardNoteModel> _logger;
+            private readonly LoggerService _loggerService;
 
             [BindProperty]
             public string Title { get; set; }
@@ -28,10 +29,11 @@
 
             public string UId { get; private set; }
 
-            public CreateBoardNoteModel(BlackBoardService blackBoardService, ILogger<CreateBoardNoteModel> logger)
+            public CreateBoardNoteModel(BlackBoardService blackBoardService, ILogger<CreateBoardNoteModel> logger, LoggerService loggerService)
             {
                 _blackBoardService = blackBoardService;
                 _logger = logger;
+                _loggerService = loggerService;
             }
 
             public async Task<IActionResult> OnGetAsync(int? noteId)
@@ -74,9 +76,13 @@
                     UId = User.FindFirst("Id")?.Value;
                 }
 
+                if (!ModelState.IsValid) 
+                {
+                    return Page();
+                }
+
                 if (string.IsNullOrEmpty(Title) || string.IsNullOrEmpty(Content)) 
                 {
-                    Console.WriteLine("Empty");
                     ErrorMessage = "Vyplňte všetky polia.";
                     return Page();
                 }
@@ -95,10 +101,12 @@
                 {
                     newNote.Id = Convert.ToInt32(noteId);
                     await _blackBoardService.EditNote(newNote);
+                    _loggerService.writeCommChange(HttpContext, newNote);
                 }
                 else
                 {
                     await _blackBoardService.AddNote(newNote);
+                    _loggerService.writeCommNew(HttpContext, newNote);
                 }
 
                 return RedirectToPage("/Index");

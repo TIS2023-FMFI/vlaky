@@ -12,8 +12,8 @@ namespace code.Pages
     public class CreateTrainModel : PageModel
     {
         private readonly TrainManagerService _TrainManagerService;
-        private readonly TemplateManagerService _TemplateManagerService;
         private readonly ILogger<CreateTrainModel> _logger;
+        private readonly LoggerService _loggerService;
 
         [BindProperty]
         public string Template { get; set; }
@@ -49,19 +49,14 @@ namespace code.Pages
 
         public string UId { get; private set; }
 
-        public List<TrainTemplate> Templates { get; set; }
-
-
-        public CreateTrainModel(TrainManagerService trainManagerService, 
-                        TemplateManagerService templateManagerService, 
-                        ILogger<CreateTrainModel> logger)
+        public CreateTrainModel(TrainManagerService trainManagerService, ILogger<CreateTrainModel> logger, LoggerService loggerService)
         {
             _TrainManagerService = trainManagerService;
-            _TemplateManagerService = templateManagerService;
             _logger = logger;
+            _loggerService = loggerService;
         }
 
-
+        [HttpGet]
         public async Task<IActionResult> OnGet(int? trainId)
         {
             ErrorMessage = null;
@@ -113,19 +108,11 @@ namespace code.Pages
                 Date = DateTime.Now;
             }
 
-            Templates = await _TemplateManagerService.GetTemplates();
-            if (Templates == null)
-            {
-                Templates = new List<TrainTemplate>();
-            }
-
             return Page();
         }
 
         public async Task<IActionResult> OnPost()
         {   
-
-            Console.WriteLine("OnPost thiiiiiiiiiiiiisssssssssssssssssss");
             if (!HttpContext.User.Identity.IsAuthenticated)
             {
                 return Redirect("/Login");
@@ -134,13 +121,12 @@ namespace code.Pages
             {
                 UId = User.FindFirst("Id")?.Value;
             }
-            Console.WriteLine("before");
+
             if (string.IsNullOrEmpty(Name) || string.IsNullOrEmpty(Destination)) 
             {
                 ErrorMessage = "Vyplňte názov aj destináciu .";
                 return Page();
             }
-            Console.WriteLine("after nullll");
 
             var trainId = HttpContext.Request.Query["trainId"].ToString();
 
@@ -167,21 +153,19 @@ namespace code.Pages
                 }
 
                 newTrain.Status = currentTrain.Status;
-                await _TrainManagerService.UpdateTrain(newTrain);
-
+                await _TrainManagerService.UpdateTrain(newTrain); 
                 var nn = await _TrainManagerService.GetTrainNoteByTrainId(newTrain.Id);
                 nn.Text = TrainNote;
                 nn.UserId = Convert.ToInt32(UId);
-                
-                if (nn.Text == null) {
-                    nn.Text = "";
-                }
-                
                 await _TrainManagerService.UpdateTrainNote(nn);
+
+                _loggerService.writeTrainChange(HttpContext, currentTrain, newTrain);
+                _loggerService.writeCommChange(HttpContext, nn);
             }
             else
             {
                 var idd = await _TrainManagerService.AddTrain(newTrain);
+                _loggerService.writeTrainNew(HttpContext, newTrain);
                 var nn = new TrainNote
                 {
                     TrainId = idd,
@@ -189,11 +173,14 @@ namespace code.Pages
                     Text = TrainNote
                 };
                 if (nn.Text == null)
-                    {
-                        nn.Text = "";
-                    }
+                {
+                    nn.Text = "";
+                }
+                else
+                    _loggerService.writeCommNew(HttpContext, nn);
 
                 await _TrainManagerService.AddTrainNote(nn);
+
             }
 
             return Redirect("/Schedule");
