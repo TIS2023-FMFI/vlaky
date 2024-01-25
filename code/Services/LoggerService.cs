@@ -106,13 +106,30 @@ namespace code.Services
             if (year < now.Year) {
                 reconf(now);
             }
-            File.AppendText(now.ToString() + 
-            CONF_COLUMN_SEPARATOR + 
-            context.User.FindFirst(
-                    c => c.Type == ClaimTypes.Name
-                ).ToString() +
-            str + 
-            Environment.NewLine);
+
+            string path = fileName;
+        
+            if (!File.Exists(path))
+            {
+                using (StreamWriter sw = File.CreateText(path))
+                {
+                    sw.WriteLine(now.ToString() + 
+                                CONF_COLUMN_SEPARATOR + 
+                                context.User.FindFirstValue(ClaimTypes.Name).ToString() +
+                                str);
+                }	
+            }
+            else
+            {
+                using (StreamWriter sw = File.AppendText(path))
+                {
+                    sw.WriteLine(now.ToString() + 
+                                CONF_COLUMN_SEPARATOR + 
+                                context.User.FindFirstValue(ClaimTypes.Name).ToString() +
+                                str);
+                }
+            }
+           
         }
 
         public void writeLogIn(HttpContext context)
