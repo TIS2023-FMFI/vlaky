@@ -12,8 +12,10 @@ namespace code.Pages
     public class CreateTrainModel : PageModel
     {
         private readonly TrainManagerService _TrainManagerService;
+        private readonly TemplateManagerService _TemplateManagerService;
         private readonly ILogger<CreateTrainModel> _logger;
         private readonly LoggerService _loggerService;
+
 
         [BindProperty]
         public string Template { get; set; }
@@ -49,9 +51,11 @@ namespace code.Pages
 
         public string UId { get; private set; }
 
-        public CreateTrainModel(TrainManagerService trainManagerService, ILogger<CreateTrainModel> logger, LoggerService loggerService)
+
+        public CreateTrainModel(TrainManagerService trainManagerService, ILogger<CreateTrainModel> logger, LoggerService loggerService, TemplateManagerService templateManagerService)
         {
             _TrainManagerService = trainManagerService;
+            _TemplateManagerService = templateManagerService;
             _logger = logger;
             _loggerService = loggerService;
         }
@@ -108,6 +112,14 @@ namespace code.Pages
                 Date = DateTime.Now;
             }
 
+
+            Templates = await _TemplateManagerService.GetTemplates();
+            if (Templates == null)
+            {
+                Templates = new List<TrainTemplate>();
+            }
+
+
             return Page();
         }
 
@@ -121,15 +133,24 @@ namespace code.Pages
             {
                 UId = User.FindFirst("Id")?.Value;
             }
-
+            Console.WriteLine("before");
             if (string.IsNullOrEmpty(Name) || string.IsNullOrEmpty(Destination)) 
             {
-                ErrorMessage = "Vyplňte názov aj destináciu .";
-                return Page();
+                if(string.IsNullOrEmpty(this.Template)){
+                    ErrorMessage = "Vyplňte názov aj destináciu .";
+                    return Page();
+                }
             }
+            Console.WriteLine("after nullll");
+            Console.WriteLine(this.Template);
 
             var trainId = HttpContext.Request.Query["trainId"].ToString();
-
+            if(!string.IsNullOrEmpty(this.Template) && !this.SaveTemplate){
+                var t = await _TemplateManagerService.GetTemplateById(Convert.ToInt32(this.Template));
+                this.Name = t.Name;
+                this.Destination = t.Destination;
+            }
+            
             var newTrain = new Train
             {
                 Name = this.Name,
@@ -152,20 +173,44 @@ namespace code.Pages
                     return Redirect("/Schedule");
                 }
 
+                if(this.SaveTemplate && !string.IsNullOrEmpty(this.Template)){
+                    var t = await _TemplateManagerService.GetTemplateById(Convert.ToInt32(this.Template));
+                    t.Name = newTrain.Name;
+                    t.Destination = newTrain.Destination;
+                    await _TemplateManagerService.UpdateTemplate(t);
+                }
+                
+                if(this.SaveTemplate && string.IsNullOrEmpty(this.Template)){
+                    TrainTemplate t = new TrainTemplate{
+                        Name = this.Name,
+                        Destination = this.Destination
+                    };
+                    await _TemplateManagerService.AddTemplate(t);
+                }             
+
                 newTrain.Status = currentTrain.Status;
-                await _TrainManagerService.UpdateTrain(newTrain); 
+                await _TrainManagerService.UpdateTrain(newTrain);
+
                 var nn = await _TrainManagerService.GetTrainNoteByTrainId(newTrain.Id);
                 nn.Text = TrainNote;
                 nn.UserId = Convert.ToInt32(UId);
+                
+                if (nn.Text == null) {
+                    nn.Text = "";
+                }
+                
                 await _TrainManagerService.UpdateTrainNote(nn);
-
+                
                 _loggerService.writeTrainChange(HttpContext, currentTrain, newTrain);
                 _loggerService.writeCommChange(HttpContext, nn);
+
             }
             else
             {
                 var idd = await _TrainManagerService.AddTrain(newTrain);
+
                 _loggerService.writeTrainNew(HttpContext, newTrain);
+
                 var nn = new TrainNote
                 {
                     TrainId = idd,
@@ -173,13 +218,19 @@ namespace code.Pages
                     Text = TrainNote
                 };
                 if (nn.Text == null)
-                {
-                    nn.Text = "";
-                }
-                else
-                    _loggerService.writeCommNew(HttpContext, nn);
+                    {
+                        nn.Text = "";
+                    }else{_loggerService.writeCommNew(HttpContext, nn);}
 
                 await _TrainManagerService.AddTrainNote(nn);
+                if(this.SaveTemplate){
+                    TrainTemplate t = new TrainTemplate{
+                        Name = this.Name,
+                        Destination = this.Destination
+                    };
+                    await _TemplateManagerService.AddTemplate(t);
+                }
+
 
             }
 
