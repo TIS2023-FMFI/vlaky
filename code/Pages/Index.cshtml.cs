@@ -13,6 +13,7 @@ namespace code.Pages
         private readonly BlackBoardService _blackBoardService;
         private readonly AccountManagerService _accountManagerService;
         private readonly ILogger<IndexModel> _logger;
+        private readonly LoggerService _loggerService;
 
         public List<BlackBoardNote> Notes { get; set; }
 
@@ -20,11 +21,12 @@ namespace code.Pages
 
         public IndexModel(ILogger<IndexModel> logger,
             BlackBoardService blackBoardService,
-            AccountManagerService accountManagerService)
+            AccountManagerService accountManagerService, LoggerService loggerService)
         {
             _logger = logger;
             _accountManagerService = accountManagerService;
             _blackBoardService = blackBoardService;
+            _loggerService = loggerService;
             Notes = new List<BlackBoardNote>();
         }
 
@@ -43,7 +45,9 @@ namespace code.Pages
             var noteId = HttpContext.Request.Query["noteId"].ToString();
             if (!string.IsNullOrEmpty(noteId))
             {
+                var note = await _blackBoardService.GetNoteById(Convert.ToInt32(noteId));
                 await _blackBoardService.RemoveNoteById(Convert.ToInt32(noteId));
+                _loggerService.writeCommDelete(HttpContext, note);
             }
 
             var blackBoardNotes = await _blackBoardService.GetNotes();

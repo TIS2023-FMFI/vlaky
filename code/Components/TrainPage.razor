@@ -4,6 +4,7 @@
 @inject TrainManagerService TrainManager
 @inject WagonManagerService WagonManager
 @inject AccountManagerService AccountManager
+@inject LoggerService loggerService
 @using System.Globalization
 @using System.Web
 @using System.Security.Claims
@@ -89,6 +90,7 @@
         SelectedStatus = int.Parse(e.Value.ToString());
         train.Status = SelectedStatus;
         await TrainManager.UpdateTrain(train);
+        
     }
 
     private async Task OnNoteChanged(ChangeEventArgs e)
@@ -104,18 +106,24 @@
 
     private async Task OnWagonClicked(Wagon wagon)
     {
+        var tempWagon = new Wagon();
+        tempWagon.State = wagon.State;
         wagon.State += 1;
         wagon.State %= 4;
-
+        
         try
         {
             await WagonManager.UpdateWagon(wagon);
+            loggerService.writeWagonChange(HttpContextAccessor.HttpContext, tempWagon, wagon);
+            
 
             foreach (var w in selectedWagons) 
             {
                 if (w.State != wagon.State) {
+                    tempWagon.State = w.State;
                     w.State = wagon.State;
                     await WagonManager.UpdateWagon(w);
+                    loggerService.writeWagonChange(HttpContextAccessor.HttpContext, tempWagon, w);
                 }
             }
         }
@@ -136,11 +144,13 @@
             if (!selectedWagons.Contains(wagon))
             {
                 selectedWagons.Add(wagon);
+                loggerService.writeWagonNew(HttpContextAccessor.HttpContext, wagon);
             }
         }
         else
         {
             selectedWagons.Remove(wagon);
+            loggerService.writeWagonDelete(HttpContextAccessor.HttpContext, wagon);
         }
 
         StateHasChanged();
@@ -193,6 +203,7 @@
         {
             finalWagonNote.WagonId = wagon.Id;
             await WagonManager.AddWagonNote(finalWagonNote);
+            loggerService.writeCommNew(HttpContextAccessor.HttpContext, finalWagonNote);
         }
 
         selectedWagons.Clear();
@@ -204,6 +215,7 @@
 
     private async Task updateWagonNote(ChangeEventArgs e) {
         wagonNote = e.Value.ToString();
+        //loggerService.writeCommChange(HttpContextAccessor.HttpContext,wagonNote);
     }
 
     private void ShowWagonCommentsModal(Wagon wagon)
@@ -373,7 +385,7 @@
                 <div class="modal-body" style="color: black;">
                     @foreach (WagonNote note in currentWagonNotes)
                     {
-                        <p style="word-break: break-all;"><b>@note.UserId</b>: @note.Text</p>
+                        <p><b>@note.UserId</b>: @note.Text</p>
                         <p></p>
                     }
                 </div>
