@@ -26,6 +26,7 @@
     private List<WagonNote> currentWagonNotes = new List<WagonNote>();
     private bool showWagonTooltip = false;
     private bool showWagonCommentsModal = false;
+    private bool showDeleteWagonsModal = false;
 
 
     protected override async Task OnInitializedAsync()
@@ -89,8 +90,7 @@
     {
         SelectedStatus = int.Parse(e.Value.ToString());
         train.Status = SelectedStatus;
-        await TrainManager.UpdateTrain(train);
-        
+        await TrainManager.UpdateTrainStatus(train.Id, SelectedStatus);
     }
 
     private async Task OnNoteChanged(ChangeEventArgs e)
@@ -243,6 +243,35 @@
         }
     }
 
+    private void ShowDeleteWagonsModal()
+    {
+        showDeleteWagonsModal = true;
+        StateHasChanged();
+    }
+
+    public async Task ConfirmDeleteWagons()
+    {
+        showDeleteWagonsModal = false;
+        foreach (var wagon in selectedWagons)
+        {
+            await WagonManager.DeleteWagon(wagon);
+            //loggerService na vymazanie vagonov
+        }
+
+        selectedWagons.Clear();
+        train.Wagons.Clear();
+        train = await TrainManager.GetTrainById(trainId);
+        await TrainManager.UpdateTrainNWagons(train.Id, train.Wagons.Count);
+        StateHasChanged();
+        NavigationManager.NavigateTo(NavigationManager.Uri, true);
+    }
+
+    private void CancelDeleteWagons() 
+    {
+        showDeleteWagonsModal = false;
+        StateHasChanged();
+    }
+
 }
 
 <div class="inspect-container">
@@ -266,7 +295,7 @@
                     <p>Destinácia: @train.Destination</p>
                     <p>Maximálna dĺžka: @train.MaxLength</p>
                     <p>Reálna dĺžka: @train.Lenght</p>
-                    <p>Počet vagónov: @train.nWagons</p>
+                    <p>Počet vagónov: @train.Wagons.Count</p>
                     <p>Dátum: @train.Date.ToString("dd. MM. yyyy", new CultureInfo("sk-SK"))</p>
                     <p>Colný: @(train.Coll ? "Áno" : "Nie")</p>
                 </div>
@@ -304,11 +333,12 @@
     <div class="train-wagons">
         @if (train != null)
         {
-            @foreach (var wagon in train.Wagons.OrderBy(w => w.NOrder))
+            var counter = 1;
+            @foreach (var wagon in train.Wagons.OrderBy(w => w.Id))
             {
                 <div class="wagon-container">
                     <div class="wagon @($"wagon-status-{wagon.State}")" onclick="@(() => OnWagonClicked(wagon))">
-                        <label class="wagon-label">@wagon.NOrder</label>
+                        <label class="wagon-label">@counter</label>
                     </div>
                     <input class="wagon-checkbox" type="checkbox" id="@($"wagon-checkbox-{wagon.Id}")" onchange="@((ChangeEventArgs e) => SelectWagon(wagon, e))" />
 
@@ -316,8 +346,10 @@
                     {
                         <img src="images/notes.png" class="wagon-icon" onclick="@(() => ShowWagonCommentsModal(wagon))" />
                     }
+
                 
                 </div>
+                counter += 1;
             }
         }
     </div>
@@ -325,7 +357,7 @@
 
 @if (showDeleteConfirmationModal)
 {
-    <div class="modal fade show" id="productModal" style="display: block;" tabindex="-1" role="dialog">
+    <div class="modal fade show" id="showDeleteConfirmationModal" style="display: block;" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -349,7 +381,7 @@
 
 @if (showAddNote)
 {
-    <div class="modal fade show" id="productModal" style="display: block;" tabindex="-1" role="dialog">
+    <div class="modal fade show" id="showAddNote" style="display: block;" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -373,7 +405,7 @@
 
 @if (showWagonCommentsModal) 
 {
-    <div class="modal fade show" id="productModal" style="display: block;" tabindex="-1" role="dialog">
+    <div class="modal fade show" id="showWagonCommentsModal" style="display: block;" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -398,6 +430,30 @@
     <div class="modal-backdrop fade show" onclick="@CloseAddNoteModal"></div>
 }
 
+@if (showDeleteWagonsModal)
+{
+    <div class="modal fade show" id="showDeleteWagonsModal" style="display: block;" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Vymazať vagóny</h5>
+                    <button type="button" class="close" onclick="@CancelDeleteWagons">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" style="color: black;">
+                    Určite chcete vymazať označené vagóny?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" style="border-radius: 20px; width: 100px" onclick="@CancelDeleteWagons">Zrušiť</button>
+                    <button type="button" class="btn btn-danger" style="border-radius: 20px;  width: 100px" onclick="@ConfirmDeleteWagons">Potvrdiť</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop fade show" onclick="@CancelDeleteTrain"></div>
+}
+
 
 
 @if (train != null) {
@@ -406,8 +462,12 @@
 </a>
 }
 
-<button class="btn btn-primary create-note-button second" onclick="@ShowDeleteConfirmation">Vymazať</button>
+<button class="btn btn-primary create-note-button second" onclick="@ShowDeleteConfirmation">Vymazať vlak</button>
 
 @if (selectedWagons.Any()) {
     <button class="btn btn-primary create-note-button third" onclick="@ShowAddNoteModal">Pridať poznámku</button>
+}
+
+@if (selectedWagons.Any()) {
+    <button class="btn btn-primary create-note-button fourth" onclick="@ShowDeleteWagonsModal">Vymazať vagóny</button>
 }

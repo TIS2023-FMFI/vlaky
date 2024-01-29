@@ -4,7 +4,7 @@
     ViewData["Title"] = "Create/Edit Template";
 }
 
-<div class="note-creation-section">
+<div class="note-creation-section" style="max-width: 700px;">
     <form method="post" class="note-creation-form">
         
         <div class="note-form-group">
@@ -14,12 +14,12 @@
 
         <div class="note-form-group">
             <label for="Destination" class="note-form-label">Destinácia:</label>
-            <input type="text" class="note-form-input" id="Destination" name="Destination" value="@Model.Destination">
+            <textarea class="note-form-input" id="Destination" name="Destination" rows="5">@Model.Destination</textarea>
         </div>
 
         @if (!string.IsNullOrEmpty(Model.ErrorMessage))
         {
-            <div class="text-danger">@Model.ErrorMessage</div>
+            <div class="text-danger"><b>@Model.ErrorMessage</b></div>
         }
 
         <div class="note-form-button-group">

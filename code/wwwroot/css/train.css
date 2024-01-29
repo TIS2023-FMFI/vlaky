@@ -122,6 +122,10 @@
     min-width: 170px;
 }
 
+.fourth {
+    margin-right: 530px;
+}
+
 .select-center-text {
     border: 1px solid gray;
     height: 40px;
@@ -161,6 +165,16 @@
         align-items: center;
         justify-content: center;
         gap: 20px 80px;
+    }
+    .third {
+        margin-right: 0px;
+        margin-bottom: 55px;
+        min-width: 170px;
+    }
+
+    .fourth {
+        margin-bottom: 55px;
+        margin-right: 190px;
     }
 }
 

@@ -7,6 +7,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using code.Models;
 using code.Services;
+using Microsoft.Net.Http.Headers;
+using System.Text;
 
 namespace code.Pages
 {
@@ -35,9 +37,15 @@ namespace code.Pages
                 return Redirect("/Login");
             }
 
-            if (!ModelState.IsValid)
+            if (!startDate.HasValue || !endDate.HasValue)
             {
-                return Page();
+                startDate = DateTime.Today;
+                endDate = startDate.Value.AddDays(7);
+
+                string formattedStartDate = startDate.Value.ToString("yyyy-MM-dd");
+                string formattedEndDate = endDate.Value.ToString("yyyy-MM-dd");
+
+                return RedirectToPage(new { startDate = formattedStartDate, endDate = formattedEndDate });
             }
 
             Schedule = new List<DaySchedule>();
@@ -90,6 +98,53 @@ namespace code.Pages
                 case "piatok": return "Piatok";
                 case "sobota": return "Sobota";
                 case "nedeľa": return "Nedeľa";
+                default: return "";
+            }
+        }
+
+        public async Task<IActionResult> OnPost(DateTime startDate, DateTime endDate)
+        {
+            int startDay = startDate.Day;
+            int startMonth = startDate.Month;
+            int startYear = startDate.Year;
+
+            int endDay = endDate.Day;
+            int endMonth = endDate.Month;
+            int endYear = endDate.Year;
+
+            string fileName = $"CEVA {startDay:D2}.{startMonth:D2}.{startYear} - {endDay:D2}.{endMonth:D2}.{endYear}.csv";
+
+            var allTrainsByDate = await _trainManagerService.GetTrainsByDate(startDate, endDate);
+
+            StringBuilder csvContent = new StringBuilder();
+            csvContent.AppendLine("\"datum\",\"nazov vlaku\",\"status vlaku\",\"pocet vagonov\",\"pocet nalozenych vagonov\"");
+
+            for (DateTime date = startDate; date <= endDate; date = date.AddDays(1))
+            {
+                var dayTrains = allTrainsByDate
+                    .Where(t => t.Date.Date == date.Date && (t.Status == 3 || t.Status == 4))
+                    .OrderBy(t => t.Id)
+                    .ToList();
+
+                foreach (var train in dayTrains)
+                {
+                    var dateString = $"{train.Date.Day:D2}/{train.Date.Month:D2}/{train.Date.Year}";
+                    string line = $"{dateString},{train.Name},{GetTrainStatus(train.Status)},{train.Wagons.Count},{train.Wagons.Count(w => w.State == 3)}";
+                    csvContent.AppendLine(line);
+                }
+            }
+
+            byte[] csvFileContent = Encoding.UTF8.GetBytes(csvContent.ToString());
+
+            return File(csvFileContent, "text/csv", fileName);
+        }
+
+        private string GetTrainStatus(int status)
+        {
+            switch (status)
+            {
+                case 3: return "expedovany";
+                case 4: return "zruseny";
                 default: return "";
             }
         }

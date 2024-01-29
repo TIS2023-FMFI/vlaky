@@ -51,6 +51,8 @@ namespace code.Pages
 
         public string UId { get; private set; }
 
+        public List<TrainTemplate> Templates { get; set; }
+
 
         public CreateTrainModel(TrainManagerService trainManagerService, ILogger<CreateTrainModel> logger, LoggerService loggerService, TemplateManagerService templateManagerService)
         {
@@ -72,7 +74,6 @@ namespace code.Pages
 
             if (!ModelState.IsValid) 
             {
-                Console.WriteLine("ModelState is not valid");
                 return Page();
             }
 
@@ -89,10 +90,8 @@ namespace code.Pages
                 Destination = train.Destination;
                 Maxlength = train.MaxLength;
                 RealLength = train.Lenght;
-                WagonCount = train.nWagons;
+                WagonCount = train.Wagons.Count;
                 Date = train.Date;
-                Console.WriteLine("Train: " + train.Date.ToString());
-                Console.WriteLine("Train: " + Date.ToString());
                 Coll = train.Coll;
 
                 var note = await _TrainManagerService.GetTrainNoteByTrainId(trainId.Value);
@@ -133,23 +132,15 @@ namespace code.Pages
             {
                 UId = User.FindFirst("Id")?.Value;
             }
-            Console.WriteLine("before");
+
+            Templates = await _TemplateManagerService.GetTemplates();
             if (string.IsNullOrEmpty(Name) || string.IsNullOrEmpty(Destination)) 
             {
-                if(string.IsNullOrEmpty(this.Template)){
-                    ErrorMessage = "Vyplňte názov aj destináciu .";
-                    return Page();
-                }
+                ErrorMessage = "Vyplňte názov aj destináciu .";
+                return Page();
             }
-            Console.WriteLine("after nullll");
-            Console.WriteLine(this.Template);
 
             var trainId = HttpContext.Request.Query["trainId"].ToString();
-            if(!string.IsNullOrEmpty(this.Template) && !this.SaveTemplate){
-                var t = await _TemplateManagerService.GetTemplateById(Convert.ToInt32(this.Template));
-                this.Name = t.Name;
-                this.Destination = t.Destination;
-            }
             
             var newTrain = new Train
             {
@@ -171,22 +162,7 @@ namespace code.Pages
                 if (currentTrain == null) 
                 {
                     return Redirect("/Schedule");
-                }
-
-                if(this.SaveTemplate && !string.IsNullOrEmpty(this.Template)){
-                    var t = await _TemplateManagerService.GetTemplateById(Convert.ToInt32(this.Template));
-                    t.Name = newTrain.Name;
-                    t.Destination = newTrain.Destination;
-                    await _TemplateManagerService.UpdateTemplate(t);
-                }
-                
-                if(this.SaveTemplate && string.IsNullOrEmpty(this.Template)){
-                    TrainTemplate t = new TrainTemplate{
-                        Name = this.Name,
-                        Destination = this.Destination
-                    };
-                    await _TemplateManagerService.AddTemplate(t);
-                }             
+                }           
 
                 newTrain.Status = currentTrain.Status;
                 await _TrainManagerService.UpdateTrain(newTrain);
@@ -223,15 +199,37 @@ namespace code.Pages
                     }else{_loggerService.writeCommNew(HttpContext, nn);}
 
                 await _TrainManagerService.AddTrainNote(nn);
-                if(this.SaveTemplate){
-                    TrainTemplate t = new TrainTemplate{
-                        Name = this.Name,
-                        Destination = this.Destination
-                    };
-                    await _TemplateManagerService.AddTemplate(t);
+            }
+
+            if(this.SaveTemplate)
+            {
+                TrainTemplate t = new TrainTemplate{
+                    Name = this.Name,
+                    Destination = this.Destination
+                };
+
+                if (Templates == null) {
+                    Templates = new List<TrainTemplate>();
                 }
 
+                var flag = false;
 
+                foreach (var tt in Templates) {
+                    if (tt.Name == this.Name) {
+                        flag = true;
+                        break;
+                    }
+                }
+                if (!flag) {
+                    await _TemplateManagerService.AddTemplate(t);
+                }
+            }
+
+            if (!string.IsNullOrEmpty(trainId)) 
+            {
+                Console.WriteLine(trainId);
+                string path = "/Train?trainId=" + trainId;
+                return Redirect(path);
             }
 
             return Redirect("/Schedule");

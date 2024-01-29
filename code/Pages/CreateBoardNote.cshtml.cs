@@ -45,10 +45,6 @@
                     return Redirect("/Login");
                 }
 
-                if (!ModelState.IsValid) 
-                {
-                    return Page();
-                }
 
                 if (noteId.HasValue && noteId != null)
                 {
@@ -74,11 +70,6 @@
                 else
                 {
                     UId = User.FindFirst("Id")?.Value;
-                }
-
-                if (!ModelState.IsValid) 
-                {
-                    return Page();
                 }
 
                 if (string.IsNullOrEmpty(Title) || string.IsNullOrEmpty(Content)) 
