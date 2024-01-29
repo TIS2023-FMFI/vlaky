@@ -32,8 +32,6 @@ builder.Services.AddAuthorization(options =>
         policy.Requirements.Add(new AuthRequirement(1)));
     options.AddPolicy("BlackboardManagementPolicy", policy =>
         policy.Requirements.Add(new AuthRequirement(2)));
-    options.AddPolicy("TemplateCreationPolicy", policy =>
-        policy.Requirements.Add(new AuthRequirement(3)));
     options.AddPolicy("TrainManagementPolicy", policy =>
         policy.Requirements.Add(new AuthRequirement(4)));
     options.AddPolicy("TrainNotesManagementPolicy", policy =>
@@ -45,6 +43,9 @@ builder.Services.AddAuthorization(options =>
 // add other services
 builder.Services.AddSingleton<IAuthorizationHandler, AuthRequirementHandler>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
+UserValidationService.ConfigureServise(builder.Configuration);
+builder.Services.AddSingleton<UserValidationService>();
 
 LoggerService.configureService(builder.Configuration);
 builder.Services.AddSingleton<LoggerService>();

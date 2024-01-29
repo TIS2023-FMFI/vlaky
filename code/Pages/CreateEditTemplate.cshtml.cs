@@ -5,13 +5,17 @@ using code.Services;
 using code.Models;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace code.Pages
 {
-    public class CreateEditTemplateModel : PageModel
+    [Authorize(Policy = "TrainManagementPolicy")]
+    public class CreateEditTemplate : PageModel
     {
+        private readonly ILogger<CreateEditTemplate> _logger;
+        private readonly LoggerService _loggerService;
+        private readonly UserValidationService _userValidationService;
         private readonly TemplateManagerService _templateManagerService;
-        private readonly ILogger<CreateEditTemplateModel> _logger;
 
         [BindProperty]
         public string Name { get; set; }
@@ -21,20 +25,22 @@ namespace code.Pages
 
         public string ErrorMessage { get; set; }
 
-        public CreateEditTemplateModel(TemplateManagerService templateManagerService, ILogger<CreateEditTemplateModel> logger)
+        public CreateEditTemplate(TemplateManagerService templateManagerService, 
+            ILogger<CreateEditTemplate> logger,
+            LoggerService loggerService,
+            UserValidationService userValidationService)
         {
             _templateManagerService = templateManagerService;
             _logger = logger;
+            _loggerService = loggerService;
+            _userValidationService = userValidationService;
         }
 
-        public async Task<IActionResult> OnGetAsync(int? templateId)
+        public async void OnGetAsync(int? templateId)
         {
-            ErrorMessage = null;
+            _userValidationService.ValidateUser(HttpContext);
 
-            if (!HttpContext.User.Identity.IsAuthenticated)
-            {
-                return Redirect("/Login");
-            }
+            ErrorMessage = null;
 
             if (templateId.HasValue)
             {
@@ -46,24 +52,19 @@ namespace code.Pages
                 }
                 else
                 {
-                    return RedirectToPage("/Templates");
+                    Redirect("/Templates");
                 }
             }
-
-            return Page();
         }
 
-        public async Task<IActionResult> OnPostAsync()
+        public async void OnPostAsync()
         {
-            if (!HttpContext.User.Identity.IsAuthenticated)
-            {
-                return Redirect("/Login");
-            }
+            _userValidationService.ValidateUser(HttpContext);
 
             if (string.IsNullOrEmpty(Name) || string.IsNullOrEmpty(Destination))
             {
                 ErrorMessage = "Vyplňte všetky polia.";
-                return Page();
+                return;
             }
 
             var templateId = HttpContext.Request.Query["templateId"].ToString();
@@ -82,8 +83,7 @@ namespace code.Pages
             {
                 await _templateManagerService.AddTemplate(newTemplate);
             }
-
-            return RedirectToPage("/Templates");
+            Redirect("/Templates");
         }
     }
 }

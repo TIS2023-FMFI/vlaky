@@ -53,9 +53,15 @@
                         <li>
                             <a href="/History" class="@((Context.Request.Path == "/History") ? "active" : "")">História</a>
                         </li>
-                        <li>
-                            <a href="/UserManagementPage" class="@((Context.Request.Path == "/UserManagementPage") ? "active" : "")">Používatelia</a>
-                        </li>
+                        @{
+                        int priv = Convert.ToInt32(ViewContext.HttpContext.User.FindFirst("Privileges").Value);
+                        if((priv >> 1) % 2 == 1)
+                        {
+                            <li>
+                                <a href="/UserManagementPage" class="@((Context.Request.Path == "/UserManagementPage") ? "active" : "")">Používatelia</a>
+                            </li>
+                        }
+                        }
                         <li>
                             <a href="/Logout" class="@((Context.Request.Path == "/Logout") ? "active" : "")">Odhlásiť sa</a>
                         </li>

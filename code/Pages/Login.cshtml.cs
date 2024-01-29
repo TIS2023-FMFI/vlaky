@@ -38,7 +38,6 @@ namespace code.Pages
         {
             if (HttpContext.User.Identity.IsAuthenticated)
             {
-                _loggerService.writeLogIn(HttpContext);
                 Response.Redirect("/Index");
                 return;
             }
@@ -70,7 +69,8 @@ namespace code.Pages
                 new Claim(ClaimTypes.Name, account.Name),
                 new Claim(ClaimTypes.Email, account.Mail),
                 new Claim("Id", account.Id.ToString()),
-                new Claim("Privileges", account.Privileges.ToString())
+                new Claim("Privileges", account.Privileges.ToString()),
+                new Claim("TimeCreated", DateTime.Now.ToString())
             };
 
             var claimsIdentity = new ClaimsIdentity(
@@ -87,6 +87,8 @@ namespace code.Pages
                 new ClaimsPrincipal(claimsIdentity),
                 authProperties
             );
+            
+            //_loggerService.writeLogIn(account.Name);
 
             ErrorMessage = null;
             return LocalRedirect(returnUrl);

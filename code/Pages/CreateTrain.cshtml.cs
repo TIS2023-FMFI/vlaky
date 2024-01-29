@@ -6,15 +6,18 @@ using System.Threading.Tasks;
 using code.Models;
 using code.Services;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace code.Pages
 {
+    [Authorize(Policy = "TrainManagementPolicy")]
     public class CreateTrainModel : PageModel
     {
         private readonly TrainManagerService _TrainManagerService;
         private readonly TemplateManagerService _TemplateManagerService;
         private readonly ILogger<CreateTrainModel> _logger;
         private readonly LoggerService _loggerService;
+        private readonly UserValidationService _userValidationService;
 
 
         [BindProperty]
@@ -52,28 +55,30 @@ namespace code.Pages
         public string UId { get; private set; }
 
 
-        public CreateTrainModel(TrainManagerService trainManagerService, ILogger<CreateTrainModel> logger, LoggerService loggerService, TemplateManagerService templateManagerService)
+        public CreateTrainModel(TrainManagerService trainManagerService, 
+            ILogger<CreateTrainModel> logger, 
+            LoggerService loggerService, 
+            TemplateManagerService templateManagerService,
+            UserValidationService userValidationService)
         {
             _TrainManagerService = trainManagerService;
             _TemplateManagerService = templateManagerService;
             _logger = logger;
             _loggerService = loggerService;
+            _userValidationService = userValidationService;
         }
 
         [HttpGet]
-        public async Task<IActionResult> OnGet(int? trainId)
+        public async void OnGet(int? trainId)
         {
+            _userValidationService.ValidateUser(HttpContext);
+            
             ErrorMessage = null;
-
-            if (!HttpContext.User.Identity.IsAuthenticated)
-            {
-                return Redirect("/Login");
-            }
 
             if (!ModelState.IsValid) 
             {
                 Console.WriteLine("ModelState is not valid");
-                return Page();
+                return;
             }
 
             if (trainId.HasValue || trainId != null) 
@@ -82,7 +87,7 @@ namespace code.Pages
 
                 if (train == null) 
                 {
-                    return Redirect("/Schedule");
+                    HttpContext.Response.Redirect("/Schedule");
                 }
 
                 Name = train.Name;
@@ -113,32 +118,24 @@ namespace code.Pages
             }
 
 
-            Templates = await _TemplateManagerService.GetTemplates();
+            List<TrainTemplate> Templates = await _TemplateManagerService.GetTemplates();
             if (Templates == null)
             {
                 Templates = new List<TrainTemplate>();
             }
-
-
-            return Page();
         }
 
-        public async Task<IActionResult> OnPost()
+        public async void OnPost()
         {   
-            if (!HttpContext.User.Identity.IsAuthenticated)
-            {
-                return Redirect("/Login");
-            }
-            else 
-            {
-                UId = User.FindFirst("Id")?.Value;
-            }
+            _userValidationService.ValidateUser(HttpContext);
+
+            UId = User.FindFirst("Id")?.Value;
             Console.WriteLine("before");
             if (string.IsNullOrEmpty(Name) || string.IsNullOrEmpty(Destination)) 
             {
                 if(string.IsNullOrEmpty(this.Template)){
                     ErrorMessage = "Vyplňte názov aj destináciu .";
-                    return Page();
+                    return;
                 }
             }
             Console.WriteLine("after nullll");
@@ -170,7 +167,7 @@ namespace code.Pages
                 
                 if (currentTrain == null) 
                 {
-                    return Redirect("/Schedule");
+                    HttpContext.Response.Redirect("/Schedule");
                 }
 
                 if(this.SaveTemplate && !string.IsNullOrEmpty(this.Template)){
@@ -230,11 +227,7 @@ namespace code.Pages
                     };
                     await _TemplateManagerService.AddTemplate(t);
                 }
-
-
             }
-
-            return Redirect("/Schedule");
         }
     }
 }

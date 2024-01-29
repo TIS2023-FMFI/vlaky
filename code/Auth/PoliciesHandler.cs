@@ -32,12 +32,12 @@ namespace code.Auth
             return (privileges >> bit) % 2 == 1;
         }
 
-        internal static bool isBitSet(string value, int bit)
+        public static bool isBitSet(string value, int bit)
         {
             return isBitSet(Convert.ToInt32(value), bit);
         }
 
-        internal static bool isBitSet(Claim ?claim, int bit)
+        public static bool isBitSet(Claim ?claim, int bit)
         {
             if(claim == null)
             {

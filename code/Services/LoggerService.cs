@@ -44,7 +44,7 @@ namespace code.Services
         private static string CONF_COMM_DELETE = "delete";
         private static string CONF_COMM_CHANGE = "change";
 
-        private int year;
+        private int year = 0;
         private string? fileName;
 
         public LoggerService() 
@@ -102,42 +102,46 @@ namespace code.Services
 
         private void writeToLog(HttpContext context, string str)
         {
+            string name = context.User.FindFirstValue(ClaimTypes.Name) != null ? 
+                context.User.FindFirstValue(ClaimTypes.Name).ToString() : "unknown";
+            writeToLog(name, str);
+        }
+
+        private void writeToLog(string name, string str)
+        {
             DateTime now = DateTime.Now;
             if (year < now.Year) {
                 reconf(now);
             }
 
-            string path = fileName;
-        
-            if (!File.Exists(path))
+            if (!File.Exists(fileName))
             {
-                using (StreamWriter sw = File.CreateText(path))
+                using (StreamWriter sw = File.CreateText(fileName))
                 {
                     sw.WriteLine(now.ToString() + 
                                 CONF_COLUMN_SEPARATOR + 
-                                context.User.FindFirstValue(ClaimTypes.Name).ToString() +
+                                name +
                                 str);
                 }	
             }
             else
             {
-                using (StreamWriter sw = File.AppendText(path))
+                using (StreamWriter sw = File.AppendText(fileName))
                 {
                     sw.WriteLine(now.ToString() + 
                                 CONF_COLUMN_SEPARATOR + 
-                                context.User.FindFirstValue(ClaimTypes.Name).ToString() +
+                                name +
                                 str);
                 }
             }
-           
         }
 
-        public void writeLogIn(HttpContext context)
+        public void writeLogIn(string name)
         {
             string str = CONF_COLUMN_SEPARATOR + 
             CONF_LOGIN;
 
-            writeToLog(context, str);
+            writeToLog(name, str);
         }
 
         public void writeUserChange(HttpContext context, string str)
@@ -196,9 +200,9 @@ namespace code.Services
             CONF_COLUMN_SEPARATOR + 
             CONF_PRIVILEGES +
             CONF_INCOLUMN_SEPARETOR +
-            oldAcc.Privileges.ToString() + 
+            newAcc.Privileges.ToString() + 
             CONF_ARROW +
-            newAcc.Privileges.ToString();
+            oldAcc.Privileges.ToString();
 
             writeUserChange(context, str);
         }

@@ -18,27 +18,31 @@ namespace code.Pages
     {
         private readonly TrainManagerService _TrainManagerService;
         private readonly ILogger<ScheduleModel> _logger;
+        private readonly LoggerService _loggerService;
+        private readonly UserValidationService _userValidationService;
 
         public List<DaySchedule> Schedule { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
 
-        public ScheduleModel(TrainManagerService trainManagerService, ILogger<ScheduleModel> logger)
+        public ScheduleModel(TrainManagerService trainManagerService, 
+            ILogger<ScheduleModel> logger,
+            LoggerService loggerService,
+            UserValidationService userValidationService)
         {
             _TrainManagerService = trainManagerService;
             _logger = logger;
+            _loggerService = loggerService;
+            _userValidationService = userValidationService;
         }
 
-        public async Task<IActionResult> OnGet(DateTime? startDate, DateTime? endDate)
+        public async void OnGet(DateTime? startDate, DateTime? endDate)
         {
-            if (!HttpContext.User.Identity.IsAuthenticated)
-            {
-                return Redirect("/Login");
-            }
-
+            _userValidationService.ValidateUser(HttpContext);
+            
             if (!ModelState.IsValid)
             {
-                return Page();
+                return;
             }
 
             Schedule = new List<DaySchedule>();
@@ -60,8 +64,6 @@ namespace code.Pages
 
                 Schedule.Add(daySchedule);
             }
-
-            return Page();
         }
 
         public string GetTrainStatusImage(int status)

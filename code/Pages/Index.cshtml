@@ -13,15 +13,21 @@
                 <span class="note-title">@note.Title</span>
 
                 <div class="note-controls">
-                    <form id="deleteNoteForm" asp-controller="Index" asp-action="OnPostDeleteAsync" asp-route-noteId="@note.Id">
-                        <button class="note-delete delete-button" title="Delete" data-note-id="@note.Id" asp-page-handler="OnPostDeleteAsync" asp-route-noteId="@note.Id">
-                            <img src="~/images/delete-icon.png" alt="Delete"/>
-                        </button>
-                    </form>
+                    @{
+                    if (note.UserId == Model.UserId || Model.IsManager) {
+                        <form id="deleteNoteForm" asp-controller="Index" asp-action="OnPostDeleteAsync" asp-route-noteId="@note.Id">
+                            <button class="note-delete delete-button" title="Delete" data-note-id="@note.Id" asp-page-handler="OnPostDeleteAsync" asp-route-noteId="@note.Id">
+                                <img src="~/images/delete-icon.png" alt="Delete"/>
+                            </button>
+                        </form>
+                    }
 
-                    <button class="note-edit" title="Edit" onclick="editNote(@note.Id)">
-                        <img src="~/images/edit-icon.png" alt="Edit" />
-                    </button>
+                    if (note.UserId == Model.UserId) {
+                        <button class="note-edit" title="Edit" onclick="editNote(@note.Id)">
+                            <img src="~/images/edit-icon.png" alt="Edit" />
+                        </button>
+                    }
+                    }
                 </div>
             </div>
 
@@ -38,9 +44,11 @@
     }
 </div>
 
-<a href="/CreateBoardNote" class="btn btn-primary create-note-button" aria-label="Create new note">
-    Vytvoriť poznámku
-</a>
+@if (Model.HasAddRights) {
+    <a href="/CreateBoardNote" class="btn btn-primary create-note-button" aria-label="Create new note">
+        Vytvoriť poznámku
+    </a>
+}
 
 @functions {
     string GetPriorityClass(int priority)

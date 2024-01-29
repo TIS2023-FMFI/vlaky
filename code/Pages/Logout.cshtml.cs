@@ -6,16 +6,12 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 
 public class LogoutModel : PageModel
 {
-    public async Task<IActionResult> OnGet()
+    public async void OnGet()
     {
-        if (!HttpContext.User.Identity.IsAuthenticated)
+        if (HttpContext.User.Identity.IsAuthenticated)
         {
-            return Redirect("/Login");
+            await HttpContext.SignOutAsync();
         }
-        else
-        {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        }
-        return Redirect("/Login");
+        HttpContext.ChallengeAsync();
     }
 }

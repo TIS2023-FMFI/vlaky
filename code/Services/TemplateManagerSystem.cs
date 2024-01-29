@@ -50,6 +50,16 @@ namespace code.Services
 			return templates;
 		}
 
+        public async Task<TrainTemplate> GetTemplateById(int tmpId)
+        {
+			List<TrainTemplate> templates = await GetTemplates();
+			foreach (var template in templates)
+			{
+				if (template.Id == tmpId) {return template;}
+			}
+			return null;
+        }
+
 		public async Task UpdateTemplate(TrainTemplate tmp)
 		{
 			string sql = "UPDATE templates SET name = (@p2), destination = (@p3) WHERE id = (@p1)";
@@ -68,18 +78,22 @@ namespace code.Services
 
 		public async Task DeleteTemplate(TrainTemplate tmp)
 		{
+			DeleteTemplate(tmp.Id);
+		}
+
+		public async Task DeleteTemplate(int tmpId)
+		{
 			string sql = "DELETE FROM templates WHERE id = (@p1)";
 
 			List<NpgsqlParameter> parameters = new List<NpgsqlParameter>()
 			{
-			new NpgsqlParameter("p1", tmp.Id)
+			new NpgsqlParameter("p1", tmpId)
 			};
 
 			NpgsqlDataReader reader = await s.sqlCommand(sql,parameters);
 
 			reader.Close();
 		}
-	
-	}	
+    }	
 
 }

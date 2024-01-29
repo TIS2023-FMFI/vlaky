@@ -26,6 +26,9 @@
     private List<WagonNote> currentWagonNotes = new List<WagonNote>();
     private bool showWagonTooltip = false;
     private bool showWagonCommentsModal = false;
+    private int userPrivileges = 0;
+    private bool hasManageTrains = false;
+    private bool hasAddNotes = false;
 
 
     protected override async Task OnInitializedAsync()
@@ -33,6 +36,9 @@
         var claims = HttpContextAccessor.HttpContext.User;
         var userIdClaim = claims.FindFirst("Id");
         uid = Convert.ToInt32(userIdClaim.Value);
+        userPrivileges = Convert.ToInt32(claims.FindFirst("Privileges"));
+        hasManageTrains = (userPrivileges >> 4) % 2 == 1;
+        hasAddNotes = (userPrivileges >> 5) % 2 == 1;
 
         trainId = -1;
 
@@ -249,13 +255,17 @@
     <div class="train-first">
         <div class="train-state">
             <img src="@GetTrainStatusImage()" alt="Train State" />
-            <select value="@SelectedStatus" onchange="@OnStatusChanged" class="note-form-input select-center-text">
-                <option value="0">Naplánovaný</option>
-                <option value="1">V príprave</option>
-                <option value="2">Pripravený</option>
-                <option value="3">Expedovaný</option>
-                <option value="4">Zrušený</option>
-            </select>
+            @{
+            if (hasManageTrains) {
+                <select value="@SelectedStatus" onchange="@OnStatusChanged" class="note-form-input select-center-text">
+                    <option value="0">Naplánovaný</option>
+                    <option value="1">V príprave</option>
+                    <option value="2">Pripravený</option>
+                    <option value="3">Expedovaný</option>
+                    <option value="4">Zrušený</option>
+                </select>
+            }
+            }
         </div>
 
         <div class="train-info">
@@ -278,7 +288,13 @@
 
         <div class="train-note">
             <p style="margin-bottom: 10px;">Poznámka:</p>
-            <textarea class="custom-textarea" rows="4" bind="@editedNoteContent" value="@editedNoteContent" onchange="@OnNoteChanged"></textarea>
+            @{
+                if (hasAddNotes){
+                    <textarea class="custom-textarea" rows="4" bind="@editedNoteContent" value="@editedNoteContent" onchange="@OnNoteChanged"></textarea>
+                } else {
+                    <textarea disabled class="custom-textarea" rows="4" bind="@editedNoteContent" value="@editedNoteContent" onchange="@OnNoteChanged"></textarea>
+                }
+            }
         </div>
     </div>
 
@@ -307,11 +323,18 @@
             @foreach (var wagon in train.Wagons.OrderBy(w => w.NOrder))
             {
                 <div class="wagon-container">
-                    <div class="wagon @($"wagon-status-{wagon.State}")" onclick="@(() => OnWagonClicked(wagon))">
-                        <label class="wagon-label">@wagon.NOrder</label>
-                    </div>
-                    <input class="wagon-checkbox" type="checkbox" id="@($"wagon-checkbox-{wagon.Id}")" onchange="@((ChangeEventArgs e) => SelectWagon(wagon, e))" />
-
+                    @{if (hasManageTrains) {
+                        <div class="wagon @($"wagon-status-{wagon.State}")" onclick="@(() => OnWagonClicked(wagon))">
+                            <label class="wagon-label">@wagon.NOrder</label>
+                        </div>
+                        <input class="wagon-checkbox" type="checkbox" id="@($"wagon-checkbox-{wagon.Id}")" onchange="@((ChangeEventArgs e) => SelectWagon(wagon, e))" />
+                    } else {
+                        <div class="wagon @($"wagon-status-{wagon.State}")">
+                            <label class="wagon-label">@wagon.NOrder</label>
+                        </div>
+                        //<input class="wagon-checkbox" type="checkbox" id="@($"wagon-checkbox-{wagon.Id}")" onchange="@((ChangeEventArgs e) => SelectWagon(wagon, e))" />
+                    }
+                    }
                     @if (wagon.Notes != null && wagon.Notes.Count > 0)
                     {
                         <img src="images/notes.png" class="wagon-icon" onclick="@(() => ShowWagonCommentsModal(wagon))" />
@@ -347,7 +370,7 @@
     <div class="modal-backdrop fade show" onclick="@CancelDeleteTrain"></div>
 }
 
-@if (showAddNote)
+@if (showAddNote && hasAddNotes)
 {
     <div class="modal fade show" id="productModal" style="display: block;" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-dialog-centered" role="document">
@@ -400,14 +423,16 @@
 
 
 
-@if (train != null) {
+@if (train != null && hasManageTrains) {
     <a href="/CreateTrain?trainId=@(train?.Id)" class="btn btn-primary create-note-button" aria-label="Create new note">
     Upraviť
 </a>
 }
 
-<button class="btn btn-primary create-note-button second" onclick="@ShowDeleteConfirmation">Vymazať</button>
+@if (hasManageTrains) {
+    <button class="btn btn-primary create-note-button second" onclick="@ShowDeleteConfirmation">Vymazať</button>
+}
 
-@if (selectedWagons.Any()) {
+@if (selectedWagons.Any() && hasManageTrains) {
     <button class="btn btn-primary create-note-button third" onclick="@ShowAddNoteModal">Pridať poznámku</button>
 }

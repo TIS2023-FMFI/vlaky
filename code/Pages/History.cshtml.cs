@@ -14,6 +14,8 @@ namespace code.Pages
     {
         private readonly TrainManagerService _trainManagerService;
         private readonly ILogger<HistoryModel> _logger;
+        private readonly LoggerService _loggerService;
+        private readonly UserValidationService _userValidationService;
 
         public List<DaySchedule> Schedule { get; set; }
         public DateTime StartDate { get; set; }
@@ -22,22 +24,24 @@ namespace code.Pages
         public int TrainsInState4Count { get; set; }
         public int TotalTrainsCount { get; set; }
 
-        public HistoryModel(TrainManagerService trainManagerService, ILogger<HistoryModel> logger)
+        public HistoryModel(TrainManagerService trainManagerService, 
+            ILogger<HistoryModel> logger,
+            LoggerService loggerService,
+            UserValidationService userValidationService)
         {
             _trainManagerService = trainManagerService;
             _logger = logger;
+            _loggerService = loggerService;
+            _userValidationService = userValidationService;
         }
 
-        public async Task<IActionResult> OnGet(DateTime? startDate, DateTime? endDate)
+        public async void OnGet(DateTime? startDate, DateTime? endDate)
         {
-            if (!HttpContext.User.Identity.IsAuthenticated)
-            {
-                return Redirect("/Login");
-            }
+            _userValidationService.ValidateUser(HttpContext);
 
             if (!ModelState.IsValid)
             {
-                return Page();
+                return;
             }
 
             Schedule = new List<DaySchedule>();
@@ -62,8 +66,6 @@ namespace code.Pages
 
                 Schedule.Add(daySchedule);
             }
-
-            return Page();
         }
 
         public string GetTrainStatusImage(int status)
