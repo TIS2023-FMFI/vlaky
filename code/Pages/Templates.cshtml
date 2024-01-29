@@ -1,13 +1,13 @@
 @page
 @model code.Pages.TemplatesModel
 @{
-    ViewData["Title"] = "Templates";
+    ViewData["Title"] = "";
 }
-
+    
 <div class="notes-container">
     @foreach (var template in Model.Templates)
     {
-        <div class="note" style="background-color: lightgray;">
+        <div class="note" style="background-color: #d4e3fc;">
 
             <div class="note-header">
                 <span class="note-title">@template.Name</span>

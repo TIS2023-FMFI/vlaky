@@ -45,13 +45,16 @@
                 <nav class="nav">
                     <ul>
                         <li>
-                            <a href="/Index" class="@((Context.Request.Path == "/Index" || Context.Request.Path == "/CreateBoardNote") ? "active" : "")">Poznámky</a>
+                            <a href="/Index" class="@((Context.Request.Path == "/Index" || Context.Request.Path == "/CreateBoardNote" || Context.Request.Path == "/") ? "active" : "")">Poznámky</a>
                         </li>
                         <li>
                             <a href="/Schedule" class="@((Context.Request.Path == "/Schedule" || Context.Request.Path == "/CreateTrain" || Context.Request.Path == "/Train") ? "active" : "")">Rozvrh</a>
                         </li>
                         <li>
                             <a href="/History" class="@((Context.Request.Path == "/History") ? "active" : "")">História</a>
+                        </li>
+                        <li>
+                            <a href="/Templates" class="@((Context.Request.Path == "/Templates") ? "active" : "")">Šablóny</a>
                         </li>
                         <li>
                             <a href="/UserManagementPage" class="@((Context.Request.Path == "/UserManagementPage") ? "active" : "")">Používatelia</a>

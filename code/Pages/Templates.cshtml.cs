@@ -33,8 +33,6 @@ namespace code.Pages
                 await _TemplateManagerService.RemoveTemplateById(Convert.ToInt32(templateId));
             }
 
-
-
             Templates = await _TemplateManagerService.GetTemplates();
 
             return Page();

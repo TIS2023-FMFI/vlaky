@@ -66,6 +66,23 @@ namespace code.Pages
                 return Page();
             }
 
+            var allTemplates = await _templateManagerService.GetTemplates();
+
+            if (allTemplates == null) 
+            {
+                allTemplates = new List<TrainTemplate>();
+            }
+
+
+            foreach (var tt in allTemplates)
+            {
+                if (tt.Name == Name)
+                {
+                    ErrorMessage = "Šablóna s týmto názvom už existuje.";
+                    return Page();
+                }
+            }
+
             var templateId = HttpContext.Request.Query["templateId"].ToString();
             var newTemplate = new TrainTemplate
             {

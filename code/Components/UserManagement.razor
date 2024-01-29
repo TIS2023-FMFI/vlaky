@@ -84,12 +84,14 @@
             <div class="modal-body">
                 <div class = "inputs">
                     Meno:
-                    <input class="note-form-input" type="text" id="name" name="name" @bind="name"><br>
+                    <input class="note-form-input" type="text" id="name" name="name" @bind="name" maxlength="30"><br>
                 </div>
+                <br>
                 <div class = "inputs">
                     Email:
                     <input class="note-form-input" type="text" id="mail" name="mail" @bind="mail"><br>
                 </div>
+                <br>
                 <div class = "inputs">
                     Privilege to manage users:
                     <input type="checkbox" id="privileges" name="privileges" @bind="privileges[0]"><br>
@@ -106,6 +108,7 @@
                     Privilege to log into the site:
                     <input type="checkbox" id="privileges" name="privileges" @bind="privileges[6]"><br>
                 </div>
+                <br>
                 <div class = "inputs">
                     Heslo:
                     <input class="note-form-input" type="text" id="pass" name="pass" @bind="pass"><br>

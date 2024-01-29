@@ -38,7 +38,6 @@ namespace code.Services
                 trainId = (int)reader[0];
             }
             reader.Close();
-            Console.WriteLine($"Train {trainId} added");
 
             for (int i = 1; i <= trn.nWagons; i++)
             {
@@ -48,7 +47,6 @@ namespace code.Services
                     NOrder = i,
                     State = 0
                 });
-                Console.WriteLine($"Wagon {i} added to train {trainId}");
             }
 
             return trainId;
@@ -108,7 +106,7 @@ namespace code.Services
                 new NpgsqlParameter("p4", trn.Status),
                 new NpgsqlParameter("p5", trn.Date),
                 new NpgsqlParameter("p6", trn.Coll),
-                new NpgsqlParameter("p7", trn.nWagons),
+                new NpgsqlParameter("p7", trn.Wagons.Count),
                 new NpgsqlParameter("p8", trn.MaxLength),
                 new NpgsqlParameter("p9", trn.Lenght)
             };
@@ -255,11 +253,8 @@ namespace code.Services
 
         public async Task UpdateTrainNote(TrainNote note)
         {
-            Console.WriteLine(note.TrainId);
-            Console.WriteLine(note.Text);
-            Console.WriteLine(note.UserId);
-            string sql = "UPDATE train_comments SET text = @p2, user_id = @p3 WHERE train_id = @p1";
-
+            string sql = "UPDATE train_comments SET text = (@p2), user_id = (@p3) WHERE train_id = (@p1)";
+            
             List<NpgsqlParameter> parameters = new List<NpgsqlParameter>
             {
                 new NpgsqlParameter("p1", note.TrainId),
@@ -279,6 +274,32 @@ namespace code.Services
                 new NpgsqlParameter("p1", trainNote.TrainId),
                 new NpgsqlParameter("p2", trainNote.UserId),
                 new NpgsqlParameter("p3", trainNote.Text)
+            };
+
+            await s.sqlCommand(sql, parameters);
+        }
+
+        public async Task UpdateTrainNWagons(int trainId, int newNWagons)
+        {
+            string sql = "UPDATE trains SET n_wagons = (@p2) WHERE id = (@p1)";
+
+            List<NpgsqlParameter> parameters = new List<NpgsqlParameter>
+            {
+                new NpgsqlParameter("p1", trainId),
+                new NpgsqlParameter("p2", newNWagons)
+            };
+
+            await s.sqlCommand(sql, parameters);
+        }
+
+        public async Task UpdateTrainStatus(int trainId, int newStatus)
+        {
+            string sql = "UPDATE trains SET state = (@p2) WHERE id = (@p1)";
+
+            List<NpgsqlParameter> parameters = new List<NpgsqlParameter>
+            {
+                new NpgsqlParameter("p1", trainId),
+                new NpgsqlParameter("p2", newStatus)
             };
 
             await s.sqlCommand(sql, parameters);
