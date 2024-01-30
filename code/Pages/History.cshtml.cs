@@ -39,7 +39,10 @@ namespace code.Pages
 
         public async void OnGet(DateTime? startDate, DateTime? endDate)
         {
-            if (await _userValidationService.IsUserInvalid(HttpContext)) {return;}
+            if (await _userValidationService.IsUserInvalid(HttpContext)) {
+                RedirectToPage("/Login");
+                return;
+            }
 
             Schedule = new List<DaySchedule>();
             StartDate = startDate ?? DateTime.Today;
