@@ -7,10 +7,14 @@ using System.Security.Cryptography;
 namespace code.Services{
     public class AccountManagerService{
             SQLService s;
-            public AccountManagerService(SQLService ns){
+            UserValidationService userValidation;
+
+            public AccountManagerService(SQLService ns,
+                UserValidationService userValidationService){
                 s = ns;
             }
-            public async void AddAccount(Account n){
+
+            public async Task<bool> AddAccount(Account n){
 
                 IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>
                 {
@@ -19,10 +23,16 @@ namespace code.Services{
                     new NpgsqlParameter("p3", n.Privileges),
                     new NpgsqlParameter("p4", n.Pass)
                 };
-
-                NpgsqlDataReader reader = await s.sqlCommand("INSERT INTO users (name, mail, privileges, pass) VALUES ((@p1),(@p2),(@p3),sha256((@p4)::bytea))", parameters);
-                reader.Close();
+                try{
+                    NpgsqlDataReader reader = await s.sqlCommand("INSERT INTO users (name, mail, privileges, pass) VALUES ((@p1),(@p2),(@p3),sha256((@p4)::bytea))", parameters);
+                    reader.Close();
+                    return true;
+                }catch(NpgsqlException){
+                    return false;
+                }
+                
             }
+
             public async void RemoveAccount(int id){
                 IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>
                 {
@@ -30,6 +40,7 @@ namespace code.Services{
                 };
                 NpgsqlDataReader reader = await s.sqlCommand("DELETE FROM users WHERE id = (@p1)", parameters);
                 reader.Close();
+                userValidation.AddChange(id);
             }
 
             public async Task<List<Account>> GetAccounts(){
