@@ -26,13 +26,13 @@
     
 </head>
 <body>
-
     @if (!ViewContext.HttpContext.User.Identity.IsAuthenticated)
     {
         @RenderBody()
     }
     else
     {
+    int priv = Convert.ToInt32(ViewContext.HttpContext.User.FindFirst("Privileges").Value);
         <div class="main">
             <div class="navigation">
 
@@ -53,12 +53,18 @@
                         <li>
                             <a href="/History" class="@((Context.Request.Path == "/History") ? "active" : "")">História</a>
                         </li>
-                        <li>
-                            <a href="/Templates" class="@((Context.Request.Path == "/Templates") ? "active" : "")">Šablóny</a>
-                        </li>
-                        <li>
-                            <a href="/UserManagementPage" class="@((Context.Request.Path == "/UserManagementPage") ? "active" : "")">Používatelia</a>
-                        </li>
+                        @if((priv >> 4) % 2 == 1)
+                        {
+                            <li>
+                                <a href="/Templates" class="@((Context.Request.Path == "/Templates") ? "active" : "")">Šablóny</a>
+                            </li>
+                        }
+                        @if((priv >> 1) % 2 == 1)
+                        {
+                            <li>
+                                <a href="/UserManagementPage" class="@((Context.Request.Path == "/UserManagementPage") ? "active" : "")">Používatelia</a>
+                            </li>
+                        }
                         <li>
                             <a href="/Logout" class="@((Context.Request.Path == "/Logout") ? "active" : "")">Odhlásiť sa</a>
                         </li>

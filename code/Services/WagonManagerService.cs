@@ -109,7 +109,7 @@ namespace code.Services
 		public async Task<List<WagonNote>> GetWagonNotesByWagonId(int wagonId)
         {
             string sql = @"
-                SELECT wagon_id, user_id, text 
+                SELECT *
                 FROM wagon_comments
                 WHERE wagon_id = @p1
                 ORDER BY id";

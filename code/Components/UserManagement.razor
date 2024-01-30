@@ -7,6 +7,7 @@
 @inject AccountManagerService manager
 @inject LoggerService loggerService
 @inject NavigationManager uriHelper
+@inject UserValidationService userValidation
 
 <div class="user-list">
 
@@ -27,10 +28,13 @@
                 Email: <b>@a.Mail</b>
             </div>
             <small class="text-muted">
+                @if (a.Id != Convert.ToInt32(HttpContextAccessor.HttpContext.User.FindFirst("Id").Value))
+                {
                 <button class="note-form-button" @onclick="e => ModifyPriviliges(a.Id)"
                     data-toggle="modal" data-target="#productModal" data-bs-toggle="modal" data-bs-target="#productModal">
                     Zmena privilégií
                 </button>
+                }
                 <button class="note-form-button" @onclick="e => ChangePassword(a.Id)"
                     data-toggle="modal" data-target="#productModal" data-bs-toggle="modal" data-bs-target="#productModal">
                     Zmena hesla
@@ -236,7 +240,7 @@
     }
 
     void DeleteSelectedAccount(){   
-        Acc.DeleteSelf(s);
+        Acc.DeleteSelf(s, userValidation);
         loggerService.writeUserDelete(HttpContextAccessor.HttpContext, Acc);
         Acc = null;
         DeleteAcc = false;
@@ -294,7 +298,7 @@
         }
         tempAcc = new Account();
         tempAcc.Privileges = p;
-        Acc.UpdatePrivileges(p,s);
+        Acc.UpdatePrivileges(p,s, userValidation);
         loggerService.writeUserPrivilegesChange(HttpContextAccessor.HttpContext, tempAcc, Acc);
         Acc = null;
         tempAcc = null;
@@ -308,7 +312,7 @@
     }
 
     void ChangePass(){
-        Acc.UpdatePassWord(pass,s);
+        Acc.UpdatePassWord(pass,s, userValidation);
         loggerService.writeUserPassChange(HttpContextAccessor.HttpContext, Acc);
         Acc = null;
         PassAcc = false;
@@ -325,7 +329,7 @@
         tempAcc = new Account();
         tempAcc.Mail = Acc.Mail;
         tempAcc.Name = Acc.Name;
-        Acc.UpdateMail(mail,s);
+        Acc.UpdateMail(mail,s, userValidation);
         loggerService.writeUserMailChange(HttpContextAccessor.HttpContext, tempAcc, Acc);
         Acc = null;
         tempAcc = null;

@@ -6,15 +6,18 @@ using System.Threading.Tasks;
 using code.Models;
 using code.Services;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace code.Pages
 {
+    [Authorize(Policy = "TrainManagementPolicy")]
     public class CreateTrainModel : PageModel
     {
         private readonly TrainManagerService _TrainManagerService;
         private readonly TemplateManagerService _TemplateManagerService;
         private readonly ILogger<CreateTrainModel> _logger;
         private readonly LoggerService _loggerService;
+        private readonly UserValidationService _userValidationService;
 
 
         [BindProperty]
@@ -54,28 +57,24 @@ namespace code.Pages
         public List<TrainTemplate> Templates { get; set; }
 
 
-        public CreateTrainModel(TrainManagerService trainManagerService, ILogger<CreateTrainModel> logger, LoggerService loggerService, TemplateManagerService templateManagerService)
+        public CreateTrainModel(TrainManagerService trainManagerService, 
+            ILogger<CreateTrainModel> logger, 
+            LoggerService loggerService, 
+            TemplateManagerService templateManagerService,
+            UserValidationService userValidationService)
         {
             _TrainManagerService = trainManagerService;
             _TemplateManagerService = templateManagerService;
             _logger = logger;
             _loggerService = loggerService;
+            _userValidationService = userValidationService;
         }
 
-        [HttpGet]
-        public async Task<IActionResult> OnGet(int? trainId)
+        public async void OnGet(int? trainId)
         {
+            if (await _userValidationService.IsUserInvalid(HttpContext)) {return;}
+
             ErrorMessage = null;
-
-            if (!HttpContext.User.Identity.IsAuthenticated)
-            {
-                return Redirect("/Login");
-            }
-
-            if (!ModelState.IsValid) 
-            {
-                return Page();
-            }
 
             if (trainId.HasValue || trainId != null) 
             {
@@ -83,7 +82,7 @@ namespace code.Pages
 
                 if (train == null) 
                 {
-                    return Redirect("/Schedule");
+                    Redirect("/Schedule");
                 }
 
                 Name = train.Name;
@@ -104,27 +103,22 @@ namespace code.Pages
                 {
                     TrainNote = note.Text;
                 }
-                
             }
             else 
             {
                 Date = DateTime.Now;
             }
 
-
             Templates = await _TemplateManagerService.GetTemplates();
             if (Templates == null)
             {
                 Templates = new List<TrainTemplate>();
             }
-
-
-            return Page();
         }
 
         public async Task<IActionResult> OnPost()
         {   
-            if (!HttpContext.User.Identity.IsAuthenticated)
+            if (await _userValidationService.IsUserInvalid(HttpContext))
             {
                 return Redirect("/Login");
             }

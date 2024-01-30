@@ -16,6 +16,8 @@ namespace code.Pages
     {
         private readonly TrainManagerService _trainManagerService;
         private readonly ILogger<HistoryModel> _logger;
+        private readonly LoggerService _loggerService;
+        private readonly UserValidationService _userValidationService;
 
         public List<DaySchedule> Schedule { get; set; }
         public DateTime StartDate { get; set; }
@@ -24,29 +26,20 @@ namespace code.Pages
         public int TrainsInState4Count { get; set; }
         public int TotalTrainsCount { get; set; }
 
-        public HistoryModel(TrainManagerService trainManagerService, ILogger<HistoryModel> logger)
+        public HistoryModel(TrainManagerService trainManagerService, 
+            ILogger<HistoryModel> logger,
+            LoggerService loggerService,
+            UserValidationService userValidationService)
         {
             _trainManagerService = trainManagerService;
             _logger = logger;
+            _loggerService = loggerService;
+            _userValidationService = userValidationService;
         }
 
-        public async Task<IActionResult> OnGet(DateTime? startDate, DateTime? endDate)
+        public async void OnGet(DateTime? startDate, DateTime? endDate)
         {
-            if (!HttpContext.User.Identity.IsAuthenticated)
-            {
-                return Redirect("/Login");
-            }
-
-            if (!startDate.HasValue || !endDate.HasValue)
-            {
-                startDate = DateTime.Today;
-                endDate = startDate.Value.AddDays(7);
-
-                string formattedStartDate = startDate.Value.ToString("yyyy-MM-dd");
-                string formattedEndDate = endDate.Value.ToString("yyyy-MM-dd");
-
-                return RedirectToPage(new { startDate = formattedStartDate, endDate = formattedEndDate });
-            }
+            if (await _userValidationService.IsUserInvalid(HttpContext)) {return;}
 
             Schedule = new List<DaySchedule>();
             StartDate = startDate ?? DateTime.Today;
@@ -70,8 +63,6 @@ namespace code.Pages
 
                 Schedule.Add(daySchedule);
             }
-
-            return Page();
         }
 
         public string GetTrainStatusImage(int status)
@@ -102,8 +93,11 @@ namespace code.Pages
             }
         }
 
-        public async Task<IActionResult> OnPost(DateTime startDate, DateTime endDate)
+        public async Task<IActionResult> OnPost(DateTime? StartDate, DateTime? EndDate)
         {
+            DateTime startDate = StartDate ?? DateTime.Today;
+            DateTime endDate = EndDate ?? startDate.AddDays(7);
+
             int startDay = startDate.Day;
             int startMonth = startDate.Month;
             int startYear = startDate.Year;

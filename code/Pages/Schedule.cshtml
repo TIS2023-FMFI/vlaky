@@ -84,9 +84,11 @@
 
 </div>
 
+@if (Model.HasTrainRights) {
 <a href="/CreateTrain" class="btn btn-primary create-note-button" aria-label="Create new note">
     Naplánovať vlak
 </a>
+}
 
 @section Scripts {
     <script>
