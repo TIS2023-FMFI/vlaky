@@ -37,11 +37,10 @@ namespace code.Pages
             _userValidationService = userValidationService;
         }
 
-        public async void OnGet(DateTime? startDate, DateTime? endDate)
+        public async Task<IActionResult> OnGet(DateTime? startDate, DateTime? endDate)
         {
             if (await _userValidationService.IsUserInvalid(HttpContext)) {
-                RedirectToPage("/Login");
-                return;
+                return Redirect("/Login");
             }
 
             Schedule = new List<DaySchedule>();
@@ -66,6 +65,8 @@ namespace code.Pages
 
                 Schedule.Add(daySchedule);
             }
+
+            return Page();
         }
 
         public string GetTrainStatusImage(int status)

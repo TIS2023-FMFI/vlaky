@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace code.Services
 {
-    public class SQLService : IDisposable
+    public class SQLService
     {
         private DbConnectionService DbService;
         private NpgsqlConnection connection;
@@ -14,24 +14,6 @@ namespace code.Services
         {
             this.DbService = DbService;
             connection = DbService.getConnection();
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                if (connection != null)
-                {
-                    connection.Dispose();
-                    connection = null;
-                }
-            }
         }
 
         /**
