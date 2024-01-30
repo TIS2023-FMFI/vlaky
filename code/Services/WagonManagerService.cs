@@ -109,10 +109,11 @@ namespace code.Services
 		public async Task<List<WagonNote>> GetWagonNotesByWagonId(int wagonId)
         {
             string sql = @"
-                SELECT *
-                FROM wagon_comments
+                SELECT wagon_id, user_id, text, name
+                FROM wagon_comments LEFT JOIN users
+                ON wagon_comments.user_id = users.id
                 WHERE wagon_id = @p1
-                ORDER BY id";
+                ORDER BY wagon_comments.id";
 
             List<NpgsqlParameter> parameters = new List<NpgsqlParameter>
             {
@@ -128,7 +129,8 @@ namespace code.Services
                 {
                     WagonId = (int)reader["wagon_id"],
                     UserId = (int)reader["user_id"],
-                    Text = reader["text"].ToString()
+                    Text = reader["text"].ToString(),
+                    UserName = reader["name"].ToString()
                 };
                 wagonNotes.Add(note);
             }

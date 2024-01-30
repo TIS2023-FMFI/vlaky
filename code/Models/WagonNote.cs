@@ -5,6 +5,7 @@ namespace code.Models
 {
     public class WagonNote:Note{
         public int WagonId{get;set;}
+        public string UserName{get;set;}
         public WagonNote(){}
         public override async Task DeleteSelf(SQLService s){
             List<NpgsqlParameter> parameters = new List<NpgsqlParameter>
