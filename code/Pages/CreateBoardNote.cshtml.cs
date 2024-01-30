@@ -43,9 +43,12 @@ namespace code.Pages
             _userValidationService = userValidationService;
         }
 
-        public async void OnGetAsync(int? noteId)
+        public async Task<IActionResult> OnGetAsync(int? noteId)
         {
-            if (await _userValidationService.IsUserInvalid(HttpContext)) {return;}
+            if (await _userValidationService.IsUserInvalid(HttpContext)) 
+            {
+                return Redirect("/Login");
+            }
 
             ErrorMessage = null;
 
@@ -60,6 +63,7 @@ namespace code.Pages
                     Content = note.Text;
                 }
             }
+            return Page();
         }
 
         public async Task<IActionResult> OnPostAsync(string Title, int Priority, string Content)

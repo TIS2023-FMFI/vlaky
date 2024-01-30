@@ -13,7 +13,7 @@ namespace code.Models
                 new NpgsqlParameter("user_id",UserId), 
                 new NpgsqlParameter("wagon_id",WagonId)
             };
-            NpgsqlDataReader reader = await s.sqlCommand("DELETE FROM wagon_comments WHERE user_id = ($1) AND wagon_id = ($2)", parameters);
+            MyReader reader = await s.sqlCommand("DELETE FROM wagon_comments WHERE user_id = ($1) AND wagon_id = ($2)", parameters);
             reader.Close();
         }
         public override async Task UpdateText(string new_text,SQLService s)
@@ -24,7 +24,7 @@ namespace code.Models
                 new NpgsqlParameter("user_id",UserId),
                 new NpgsqlParameter("wagon_id",WagonId),
             };
-            NpgsqlDataReader reader = await s.sqlCommand("UPDATE wagon_comments SET text = ($1) WHERE user_id = ($2) AND wagon_id = ($3)", parameters);
+            MyReader reader = await s.sqlCommand("UPDATE wagon_comments SET text = ($1) WHERE user_id = ($2) AND wagon_id = ($3)", parameters);
             reader.Close();
         }
     }

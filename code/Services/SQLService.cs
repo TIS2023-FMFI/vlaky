@@ -24,12 +24,12 @@ namespace code.Services
             vystup vyberte nasledovne:
             NpgsqlDataReader reader = await sqlCommand(sql, parameters)
         */
-        public async Task<NpgsqlDataReader> sqlCommand(string sql, IEnumerable<NpgsqlParameter> parameters)
+        public async Task<MyReader> sqlCommand(string sql, IEnumerable<NpgsqlParameter> parameters)
         {
             refreshConnection();
 
-            Task<NpgsqlDataReader> task = null;
-            NpgsqlDataReader reader = null;
+            Task<MyReader> task = null;
+            MyReader reader = null;
 
             while (task == null || (task.IsFaulted && task.Exception.InnerException.GetType() == typeof(NpgsqlException)))
             {
@@ -40,23 +40,46 @@ namespace code.Services
             return reader;
         }
 
-        private async Task<NpgsqlDataReader> sqlExecuteCommandAsync(string sql, IEnumerable<NpgsqlParameter> parameters)
+        private async Task<MyReader> sqlExecuteCommandAsync(string sql, IEnumerable<NpgsqlParameter> parameters)
         {
             NpgsqlCommand cmd = new NpgsqlCommand(sql, connection);
             foreach (var parameter in parameters)
             {
                 cmd.Parameters.Add(parameter);
             }
-            return await cmd.ExecuteReaderAsync();
+            return new MyReader(connection, await cmd.ExecuteReaderAsync());
         }
 
         private void refreshConnection()
         {
             if (connection != null)
             {
-                connection.Dispose();
+                connection.Close();
             }
             connection = DbService.getConnection();
+        }
+    }
+
+    public class MyReader : IDisposable
+    {
+        private NpgsqlConnection Connection;
+        public NpgsqlDataReader Reader {get; private set;}
+
+        public MyReader(NpgsqlConnection connection, NpgsqlDataReader reader)
+        {
+            Connection = connection;
+            Reader = reader;
+        }
+
+        public void Close()
+        {
+            Reader.Close();
+            Connection.Close();
+        }
+
+        public void Dispose()
+        {
+            Close();
         }
     }
 }

@@ -24,7 +24,7 @@ namespace code.Services{
                     new NpgsqlParameter("p4", n.Pass)
                 };
 
-                NpgsqlDataReader reader = await s.sqlCommand("INSERT INTO users (name, mail, privileges, pass) VALUES ((@p1),(@p2),(@p3),sha256((@p4)::bytea))", parameters);
+                MyReader reader = await s.sqlCommand("INSERT INTO users (name, mail, privileges, pass) VALUES ((@p1),(@p2),(@p3),sha256((@p4)::bytea))", parameters);
                 reader.Close();
             }
 
@@ -33,14 +33,17 @@ namespace code.Services{
                 {
                     new NpgsqlParameter("p1", id)
                 };
-                NpgsqlDataReader reader = await s.sqlCommand("DELETE FROM users WHERE id = (@p1)", parameters);
+                MyReader reader = await s.sqlCommand("DELETE FROM users WHERE id = (@p1)", parameters);
                 reader.Close();
                 userValidation.AddChange(id);
             }
 
             public async Task<List<Account>> GetAccounts(){
                 IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
-                NpgsqlDataReader reader = await s.sqlCommand("SELECT * FROM users", parameters);
+
+                MyReader myreader = await s.sqlCommand("SELECT * FROM users", parameters);
+                NpgsqlDataReader reader = myreader.Reader;
+
                 List<Account>Accounts = new List<Account>();
                 while(reader.Read()){
                     var a = new Account
@@ -53,7 +56,8 @@ namespace code.Services{
                     };
                     Accounts.Add(a);
                 }
-                reader.Close();
+
+                myreader.Close();
                 return Accounts;
             }
 
@@ -63,9 +67,12 @@ namespace code.Services{
                     new NpgsqlParameter("p1", mail),
                     new NpgsqlParameter("p2", Encoding.UTF8.GetBytes(pass))
                 };
-                NpgsqlDataReader reader = await s.sqlCommand(
+
+                MyReader myreader = await s.sqlCommand(
                     "SELECT * FROM users WHERE mail = (@p1) AND pass::bytea = sha256((@p2))", 
                     parameters);
+                NpgsqlDataReader reader = myreader.Reader;
+
                 List<Account>Accounts = new List<Account>();
                 while(reader.Read()){
                     var a = new Account
@@ -78,7 +85,7 @@ namespace code.Services{
                     };
                     Accounts.Add(a);
                 }
-                reader.Close();
+                myreader.Close();
                 return Accounts;
             }
 
@@ -100,16 +107,17 @@ namespace code.Services{
                     new NpgsqlParameter("p1", userId)
                 };
 
-                NpgsqlDataReader reader = await s.sqlCommand("SELECT name FROM users WHERE id = (@p1)", parameters);
+                MyReader myreader = await s.sqlCommand("SELECT name FROM users WHERE id = (@p1)", parameters);
+                NpgsqlDataReader reader = myreader.Reader;
 
                 if (reader.Read())
                 {
                     string userName = (string)reader[0];
-                    reader.Close();
+                    myreader.Close();
                     return userName;
                 }
                 
-                reader.Close();
+                myreader.Close();
                 return null;
             }
         }

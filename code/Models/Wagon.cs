@@ -18,7 +18,7 @@ namespace code.Models
                 new NpgsqlParameter("train_id",TrainId),
                 new NpgsqlParameter("id",Id),
             ];
-            NpgsqlDataReader reader = await s.sqlCommand("UPDATE wagons SET n_order = ($1) WHERE train_id = ($2) AND id = ($3)", parameters);
+            MyReader reader = await s.sqlCommand("UPDATE wagons SET n_order = ($1) WHERE train_id = ($2) AND id = ($3)", parameters);
             reader.Close();
         }
 
@@ -30,7 +30,7 @@ namespace code.Models
                 new NpgsqlParameter("train_id",TrainId),
                 new NpgsqlParameter("id",Id),
             ];
-            NpgsqlDataReader reader = await s.sqlCommand("UPDATE wagons SET state = ($1) WHERE train_id = ($2) AND id = ($3)", parameters);
+            MyReader reader = await s.sqlCommand("UPDATE wagons SET state = ($1) WHERE train_id = ($2) AND id = ($3)", parameters);
             reader.Close();
         }
     }

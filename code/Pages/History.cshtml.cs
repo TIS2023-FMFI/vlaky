@@ -127,7 +127,7 @@ namespace code.Pages
                 foreach (var train in dayTrains)
                 {
                     var dateString = $"{train.Date.Day:D2}/{train.Date.Month:D2}/{train.Date.Year}";
-                    string line = $"{dateString},{train.Name},{GetTrainStatus(train.Status)},{train.Wagons.Count},{train.Wagons.Count(w => w.State == 3)}";
+                    string line = $"\"{dateString}\",\"{train.Name}\",\"{GetTrainStatus(train.Status)}\",\"{train.Wagons.Count}\",\"{train.Wagons.Count(w => w.State == 3)}\"";
                     csvContent.AppendLine(line);
                 }
             }

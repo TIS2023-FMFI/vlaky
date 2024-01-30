@@ -24,10 +24,10 @@ public class BlackBoardService
         
         try
         {
-            await s.sqlCommand(
+            (await s.sqlCommand(
                 "INSERT INTO board_comments (user_id, text, date, priority, title) VALUES (@user_id, @text, @date, @priority, @title)",
                 parameters
-            );
+            )).Close();
         }
         catch (Exception ex)
         {
@@ -39,8 +39,9 @@ public class BlackBoardService
     {
         var notes = new List<BlackBoardNote>();
         var parameters = new List<NpgsqlParameter>();
-        using (var reader = await s.sqlCommand("SELECT * FROM board_comments", parameters))
+        using (MyReader myreader = await s.sqlCommand("SELECT * FROM board_comments", parameters))
         {
+            NpgsqlDataReader reader = myreader.Reader;
             while (reader.Read())
             {
                 var a = new BlackBoardNote
@@ -62,12 +63,13 @@ public class BlackBoardService
     {
         var parameters = new List<NpgsqlParameter> { new NpgsqlParameter("id", id) };
         using (
-            var reader = await s.sqlCommand(
+            MyReader myreader = await s.sqlCommand(
                 "SELECT * FROM board_comments WHERE id = @id",
                 parameters
             )
         )
         {
+            NpgsqlDataReader reader = myreader.Reader;
             if (reader.Read())
             {
                 var a = new BlackBoardNote
@@ -81,10 +83,7 @@ public class BlackBoardService
                 };
                 return a;
             }
-            else
-            {
-                return null;
-            }
+            return null;
         }
     }
 
@@ -92,7 +91,7 @@ public class BlackBoardService
     {
         var parameters = new List<NpgsqlParameter> { new NpgsqlParameter("id", noteId) };
 
-        await s.sqlCommand("DELETE FROM board_comments WHERE id = @id", parameters);
+        (await s.sqlCommand("DELETE FROM board_comments WHERE id = @id", parameters)).Close();
     }
 
     public async Task EditNote(BlackBoardNote updatedNote)
@@ -107,9 +106,9 @@ public class BlackBoardService
             new NpgsqlParameter("priority", updatedNote.Priority)
         };
 
-        await s.sqlCommand(
+        (await s.sqlCommand(
             "UPDATE board_comments SET title = @title, user_id = @user_id, date = @date, text = @text, priority = @priority WHERE id = @id",
             parameters
-        );
+        )).Close();
     }
 }
