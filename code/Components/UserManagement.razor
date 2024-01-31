@@ -15,6 +15,9 @@
     @if(Nevyplnil){
         <h6>Nevyplnili ste všetky položky, používateľ nebol pridaný.</h6>
     }
+    @if(chybaPridania){
+        <h6>Nastala chyba pri pridaní pouzivateľa, pravdepodobne sa snažíte pridať účet s už existujúcim menom alebo e-mailom</h6>
+    }
     <button class="note-form-button" @onclick="e => AddAccount()"
         data-toggle="modal" data-target="#productModal" data-bs-toggle="modal" data-bs-target="#productModal">
         Pridať
@@ -118,7 +121,7 @@
                     <input class="note-form-input" type="text" id="pass" name="pass" @bind="pass"><br>
                 </div>
             </div>
-            <button @onclick="e => SubmitNewAccount()"
+            <button @onclick="async e => await SubmitNewAccount()"
                 class="btn btn-success" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
                 Pridať
             </button>
@@ -214,6 +217,7 @@
     bool PassAcc = false;
     bool MailAcc = false;
     bool Nevyplnil = false;
+    bool chybaPridania = false;
     string name;
     string mail;
     bool[] privileges = new bool[7];
@@ -254,12 +258,13 @@
         }
         nullAll();
         AddAcc = true;
+        chybaPridania = false;
     }
 
-    void SubmitNewAccount(){
+    async Task<int> SubmitNewAccount(){
         if(name==null || mail==null || pass==null){
             Nevyplnil = true;
-            return;
+            return 0;
         }
         Acc = null;
         AddAcc = false;
@@ -269,10 +274,16 @@
                 p = AuthRequirementHandler.setBit(p,i);
             }
         }
-        manager.AddAccount(new Account(accounts.Count,name,mail,p,pass));
+        var a = await manager.AddAccount(new Account(accounts.Count,name,mail,p,pass));
+        if(!a){
+            name = mail = pass = null;
+            chybaPridania = true;
+            return 0;
+        }
         loggerService.writeUserNew(HttpContextAccessor.HttpContext, new Account(accounts.Count,name,mail,p,pass));
         name = mail = pass = null;
         uriHelper.NavigateTo(uriHelper.Uri, forceLoad: true);
+        return 1;
     }
 
 

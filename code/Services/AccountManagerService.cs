@@ -14,7 +14,7 @@ namespace code.Services{
                 s = ns;
             }
 
-            public async void AddAccount(Account n){
+            public async Task<bool> AddAccount(Account n){
 
                 IEnumerable<NpgsqlParameter> parameters = new List<NpgsqlParameter>
                 {
@@ -24,8 +24,13 @@ namespace code.Services{
                     new NpgsqlParameter("p4", n.Pass)
                 };
 
-                MyReader reader = await s.sqlCommand("INSERT INTO users (name, mail, privileges, pass) VALUES ((@p1),(@p2),(@p3),sha256((@p4)::bytea))", parameters);
-                reader.Close();
+                try{
+                    MyReader reader = await s.sqlCommand("INSERT INTO users (name, mail, privileges, pass) VALUES ((@p1),(@p2),(@p3),sha256((@p4)::bytea))", parameters);
+                    reader.Close();
+                    return true;
+                }catch(NpgsqlException){
+                    return false;
+                }
             }
 
             public async void RemoveAccount(int id){
