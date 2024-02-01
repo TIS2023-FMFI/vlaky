@@ -56,8 +56,11 @@ namespace code.Pages
             if (!string.IsNullOrEmpty(noteId))
             {
                 var note = await _blackBoardService.GetNoteById(Convert.ToInt32(noteId));
-                await _blackBoardService.RemoveNoteById(Convert.ToInt32(noteId));
-                _loggerService.writeCommDelete(HttpContext, note);
+                if (note != null)
+                {
+                    await _blackBoardService.RemoveNoteById(Convert.ToInt32(noteId));
+                    _loggerService.writeCommDelete(HttpContext, note);
+                }
             }
 
             var blackBoardNotes = await _blackBoardService.GetNotes();

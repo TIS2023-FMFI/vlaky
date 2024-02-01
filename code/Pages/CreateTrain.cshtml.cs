@@ -70,9 +70,12 @@ namespace code.Pages
             _userValidationService = userValidationService;
         }
 
-        public async void OnGet(int? trainId)
+        public async Task<IActionResult> OnGet(int? trainId)
         {
-            if (await _userValidationService.IsUserInvalid(HttpContext)) {return;}
+            if (await _userValidationService.IsUserInvalid(HttpContext)) 
+            {   
+                return Redirect("/Login");
+            }
 
             ErrorMessage = null;
 
@@ -114,6 +117,8 @@ namespace code.Pages
             {
                 Templates = new List<TrainTemplate>();
             }
+
+            return Page();
         }
 
         public async Task<IActionResult> OnPost()

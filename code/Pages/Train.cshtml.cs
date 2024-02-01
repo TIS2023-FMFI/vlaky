@@ -32,11 +32,16 @@ namespace code.Pages
             _userValidationService = userValidationService;
         }
 
-        public async void OnGet()
+        public async Task<IActionResult> OnGet()
         {
-            if (await _userValidationService.IsUserInvalid(HttpContext)) {return;}
+            if (await _userValidationService.IsUserInvalid(HttpContext)) 
+            {
+                return Redirect("/Login");
+            }
 
             UId = "helooo";
+
+            return Page();
         }
 
     }

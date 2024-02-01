@@ -36,9 +36,12 @@ namespace code.Pages
             _userValidationService = userValidationService;
         }
 
-        public async void OnGetAsync(int? templateId)
+        public async Task<IActionResult> OnGetAsync(int? templateId)
         {
-            if (await _userValidationService.IsUserInvalid(HttpContext)) {return;}
+            if (await _userValidationService.IsUserInvalid(HttpContext)) 
+            {
+                return Redirect("/Login");
+            }
 
             ErrorMessage = null;
 
@@ -52,9 +55,10 @@ namespace code.Pages
                 }
                 else
                 {
-                    RedirectToPage("/Templates");
+                    return Redirect("/Templates");
                 }
             }
+            return Page();
         }
 
         public async Task<IActionResult> OnPostAsync()
