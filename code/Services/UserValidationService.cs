@@ -27,6 +27,11 @@ namespace code.Services{
 
         public void AddChange(int id)
         {
+            if (ChangeTime.Keys.Contains(id))
+            {
+                ChangeTime[id] = DateTime.Now;
+                return;
+            }
             ChangeTime.Add(id, DateTime.Now);
         }
 
