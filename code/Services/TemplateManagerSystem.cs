@@ -22,7 +22,7 @@ namespace code.Services
 				new NpgsqlParameter("p2", tmp.Destination),
 			};
 			
-			NpgsqlDataReader reader = await s.sqlCommand(sql,parameters);
+			MyReader reader = await s.sqlCommand(sql,parameters);
 			reader.Close();
 			
 		}
@@ -33,7 +33,8 @@ namespace code.Services
 
 			List<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
 
-			NpgsqlDataReader reader = await s.sqlCommand(sql,parameters);
+			MyReader myreader = await s.sqlCommand(sql,parameters);
+			NpgsqlDataReader reader = myreader.Reader;
 
             List<TrainTemplate> templates = new List<TrainTemplate>();
 			while(reader.Read())
@@ -46,7 +47,7 @@ namespace code.Services
 				};
                 templates.Add(tmp);
 			}
-			reader.Close();
+			myreader.Close();
 			return templates;
 		}
 
@@ -61,7 +62,7 @@ namespace code.Services
 				new NpgsqlParameter("p3", tmp.Destination),
 			};
 
-			NpgsqlDataReader reader = await s.sqlCommand(sql,parameters);
+			MyReader reader = await s.sqlCommand(sql,parameters);
 
 			reader.Close();
 		}
@@ -75,7 +76,7 @@ namespace code.Services
 			new NpgsqlParameter("p1", tmp.Id)
 			};
 
-			NpgsqlDataReader reader = await s.sqlCommand(sql,parameters);
+			MyReader reader = await s.sqlCommand(sql,parameters);
 
 			reader.Close();
 		}
@@ -89,7 +90,8 @@ namespace code.Services
 				new NpgsqlParameter("p1", templateId)
 			};
 
-			NpgsqlDataReader reader = await s.sqlCommand(sql, parameters);
+			MyReader myreader = await s.sqlCommand(sql, parameters);
+			NpgsqlDataReader reader = myreader.Reader;
 
 			if (reader.Read())
 			{
@@ -101,7 +103,7 @@ namespace code.Services
 				};
 			}
 
-			reader.Close();
+			myreader.Close();
 			return null;
 		}
 
@@ -114,7 +116,7 @@ namespace code.Services
                 new NpgsqlParameter("p1", templateId)
             };
 
-            NpgsqlDataReader reader = await s.sqlCommand(sql, parameters);
+            MyReader reader = await s.sqlCommand(sql, parameters);
             reader.Close();
         }
 	

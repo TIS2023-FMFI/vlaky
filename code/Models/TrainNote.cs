@@ -17,7 +17,7 @@ namespace code.Models
                 new NpgsqlParameter("user_id", UserId),
                 new NpgsqlParameter("train_id", TrainId)
             };
-            await s.sqlCommand("UPDATE train_comments SET text = @text WHERE user_id = @user_id AND train_id = @train_id", parameters);
+            (await s.sqlCommand("UPDATE train_comments SET text = @text WHERE user_id = @user_id AND train_id = @train_id", parameters)).Close();
         }
 
         public override async Task DeleteSelf(SQLService s)
@@ -27,7 +27,7 @@ namespace code.Models
                 new NpgsqlParameter("user_id", UserId),
                 new NpgsqlParameter("train_id", TrainId)
             };
-            await s.sqlCommand("DELETE FROM train_comments WHERE user_id = @user_id AND train_id = @train_id", parameters);
+            (await s.sqlCommand("DELETE FROM train_comments WHERE user_id = @user_id AND train_id = @train_id", parameters)).Close();
         }
     }
 }

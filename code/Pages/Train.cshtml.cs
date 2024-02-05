@@ -14,21 +14,32 @@ namespace code.Pages
         private readonly TrainManagerService _TrainManagerService;
         private readonly WagonManagerService _WagonManagerService;
         private readonly ILogger<ScheduleModel> _logger;
+        private readonly LoggerService _loggerService;
+        private readonly UserValidationService _userValidationService;
 
         public string UId { get; private set; }
 
-
-        public TrainModel(TrainManagerService trainManagerService, WagonManagerService wagonManagerService, ILogger<ScheduleModel> logger)
+        public TrainModel(TrainManagerService trainManagerService, 
+            WagonManagerService wagonManagerService, 
+            ILogger<ScheduleModel> logger,
+            LoggerService loggerService,
+            UserValidationService userValidationService)
         {
             _TrainManagerService = trainManagerService;
             _WagonManagerService = wagonManagerService;
             _logger = logger;
+            _loggerService = loggerService;
+            _userValidationService = userValidationService;
         }
 
         public async Task<IActionResult> OnGet()
         {
-            UId = "helooo";
+            if (await _userValidationService.IsUserInvalid(HttpContext)) 
+            {
+                return Redirect("/Login");
+            }
 
+            UId = "helooo";
 
             return Page();
         }

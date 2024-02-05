@@ -5,13 +5,17 @@ using code.Services;
 using code.Models;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace code.Pages
 {
+    [Authorize(Policy = "TrainManagementPolicy")]
     public class CreateEditTemplateModel : PageModel
     {
         private readonly TemplateManagerService _templateManagerService;
         private readonly ILogger<CreateEditTemplateModel> _logger;
+        private readonly LoggerService _loggerService;
+        private readonly UserValidationService _userValidationService;
 
         [BindProperty]
         public string Name { get; set; }
@@ -21,20 +25,25 @@ namespace code.Pages
 
         public string ErrorMessage { get; set; }
 
-        public CreateEditTemplateModel(TemplateManagerService templateManagerService, ILogger<CreateEditTemplateModel> logger)
+        public CreateEditTemplateModel(TemplateManagerService templateManagerService, 
+            ILogger<CreateEditTemplateModel> logger,
+            LoggerService loggerService,
+            UserValidationService userValidationService)
         {
             _templateManagerService = templateManagerService;
             _logger = logger;
+            _loggerService = loggerService;
+            _userValidationService = userValidationService;
         }
 
         public async Task<IActionResult> OnGetAsync(int? templateId)
         {
-            ErrorMessage = null;
-
-            if (!HttpContext.User.Identity.IsAuthenticated)
+            if (await _userValidationService.IsUserInvalid(HttpContext)) 
             {
                 return Redirect("/Login");
             }
+
+            ErrorMessage = null;
 
             if (templateId.HasValue)
             {
@@ -46,16 +55,15 @@ namespace code.Pages
                 }
                 else
                 {
-                    return RedirectToPage("/Templates");
+                    return Redirect("/Templates");
                 }
             }
-
             return Page();
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
-            if (!HttpContext.User.Identity.IsAuthenticated)
+            if (await _userValidationService.IsUserInvalid(HttpContext))
             {
                 return Redirect("/Login");
             }

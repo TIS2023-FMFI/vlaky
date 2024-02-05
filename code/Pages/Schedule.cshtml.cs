@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using code.Services;
 using code.Models;
+using code.Auth;
 
 namespace code.Pages
 {
@@ -18,32 +19,37 @@ namespace code.Pages
     {
         private readonly TrainManagerService _TrainManagerService;
         private readonly ILogger<ScheduleModel> _logger;
+        private readonly LoggerService _loggerService;
+        private readonly UserValidationService _userValidationService;
 
         public List<DaySchedule> Schedule { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+        public bool HasTrainRights = false;
 
-        public ScheduleModel(TrainManagerService trainManagerService, ILogger<ScheduleModel> logger)
+        public ScheduleModel(TrainManagerService trainManagerService, 
+            ILogger<ScheduleModel> logger,
+            LoggerService loggerService,
+            UserValidationService userValidationService)
         {
             _TrainManagerService = trainManagerService;
             _logger = logger;
+            _loggerService = loggerService;
+            _userValidationService = userValidationService;
         }
 
         public async Task<IActionResult> OnGet(DateTime? startDate, DateTime? endDate)
         {
-            if (!HttpContext.User.Identity.IsAuthenticated)
+            if (await _userValidationService.IsUserInvalid(HttpContext))
             {
                 return Redirect("/Login");
-            }
-
-            if (!ModelState.IsValid)
-            {
-                return Page();
             }
 
             Schedule = new List<DaySchedule>();
             StartDate = startDate ?? DateTime.Today;
             EndDate = endDate ?? StartDate.AddDays(7);
+
+            HasTrainRights = AuthRequirementHandler.isBitSet(HttpContext.User.FindFirst("Privileges"), 4);
 
             var allTrainsByDate = await _TrainManagerService.GetTrainsByDate(StartDate, EndDate);
 

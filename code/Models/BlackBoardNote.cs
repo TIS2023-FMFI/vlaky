@@ -22,7 +22,7 @@ namespace code.Models
                 new NpgsqlParameter("id", Id),
             };
 
-            await s.sqlCommand("UPDATE board_comments SET text = @text, date = @date WHERE user_id = @user_id AND id = @id", parameters);
+            (await s.sqlCommand("UPDATE board_comments SET text = @text, date = @date WHERE user_id = @user_id AND id = @id", parameters)).Close();
         }
 
         public override async Task DeleteSelf(SQLService s)
@@ -32,7 +32,7 @@ namespace code.Models
                 new NpgsqlParameter("user_id", UserId),
                 new NpgsqlParameter("id", Id)
             };
-            await s.sqlCommand("DELETE FROM board_comments WHERE user_id = @user_id AND id = @id", parameters);
+            (await s.sqlCommand("DELETE FROM board_comments WHERE user_id = @user_id AND id = @id", parameters)).Close();
         }
 
         public async Task SetPriority(int newPriority, SQLService s)
@@ -44,7 +44,7 @@ namespace code.Models
                 new NpgsqlParameter("id", Id),
             };
             Priority = newPriority;
-            await s.sqlCommand("UPDATE board_comments SET priority = @priority WHERE user_id = @user_id AND id = @id", parameters);
+            (await s.sqlCommand("UPDATE board_comments SET priority = @priority WHERE user_id = @user_id AND id = @id", parameters)).Close();
         }
     }
 }
