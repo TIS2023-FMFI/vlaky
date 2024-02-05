@@ -68,16 +68,18 @@ CREATE TABLE IF NOT EXISTS public.wagons
 
 CREATE TABLE IF NOT EXISTS public.wagon_comments
 (
+    id serial,
     wagon_id integer,
     user_id integer,
-    text text NOT NULL
+    text text NOT NULL,
+    PRIMARY KEY (id)
 );
 
 ALTER TABLE IF EXISTS public.board_comments
     ADD FOREIGN KEY (user_id)
     REFERENCES public.users (id) MATCH SIMPLE
     ON UPDATE NO ACTION
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     NOT VALID;
 
 
@@ -85,7 +87,7 @@ ALTER TABLE IF EXISTS public.train_comments
     ADD FOREIGN KEY (train_id)
     REFERENCES public.trains (id) MATCH SIMPLE
     ON UPDATE NO ACTION
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     NOT VALID;
 
 
@@ -93,7 +95,7 @@ ALTER TABLE IF EXISTS public.wagons
     ADD FOREIGN KEY (train_id)
     REFERENCES public.trains (id) MATCH SIMPLE
     ON UPDATE NO ACTION
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     NOT VALID;
 
 
@@ -101,7 +103,7 @@ ALTER TABLE IF EXISTS public.wagon_comments
     ADD FOREIGN KEY (user_id)
     REFERENCES public.users (id) MATCH SIMPLE
     ON UPDATE NO ACTION
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     NOT VALID;
 
 
@@ -109,7 +111,7 @@ ALTER TABLE IF EXISTS public.wagon_comments
     ADD FOREIGN KEY (wagon_id)
     REFERENCES public.wagons (id) MATCH SIMPLE
     ON UPDATE NO ACTION
-    ON DELETE NO ACTION
+    ON DELETE CASCADE
     NOT VALID;
 
 END;

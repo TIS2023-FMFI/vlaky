@@ -21,7 +21,7 @@ namespace code.Services
 			parameters.Add(new NpgsqlParameter("p2", w.NOrder));
 			parameters.Add(new NpgsqlParameter("p3", w.State));
 			
-			NpgsqlDataReader reader = await s.sqlCommand(sql,parameters);
+			MyReader reader = await s.sqlCommand(sql,parameters);
 			reader.Close();
         }
 
@@ -33,7 +33,8 @@ namespace code.Services
 			List<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
 			parameters.Add(new NpgsqlParameter("p1", tid));
 
-			NpgsqlDataReader reader = await s.sqlCommand(sql,parameters);
+			MyReader myreader = await s.sqlCommand(sql,parameters);
+            NpgsqlDataReader reader = myreader.Reader;
 
 			List<Wagon> wagons = new List<Wagon>();
 			while(reader.Read())
@@ -47,7 +48,7 @@ namespace code.Services
                 };
 				wagons.Add(temp);
 			}
-			reader.Close();
+			myreader.Close();
 
 			return wagons;
 		}
@@ -62,7 +63,7 @@ namespace code.Services
 			parameters.Add(new NpgsqlParameter("p3", w.NOrder));
 			parameters.Add(new NpgsqlParameter("p4", w.State));
 		
-			NpgsqlDataReader reader = await s.sqlCommand(sql,parameters);
+			MyReader reader = await s.sqlCommand(sql,parameters);
 
 			reader.Close();
 		}
@@ -70,22 +71,12 @@ namespace code.Services
 
 		public async Task DeleteWagon(Wagon w)
         {
-            // First, delete all comments associated with the wagon
-            string deleteCommentsSql = "DELETE FROM wagon_comments WHERE wagon_id = (@p1)";
-
-            List<NpgsqlParameter> deleteCommentsParams = new List<NpgsqlParameter>();
-            deleteCommentsParams.Add(new NpgsqlParameter("p1", w.Id));
-
-            NpgsqlDataReader deleteCommentsReader = await s.sqlCommand(deleteCommentsSql, deleteCommentsParams);
-            deleteCommentsReader.Close();
-
-            // Then, delete the wagon
             string deleteWagonSql = "DELETE FROM wagons WHERE id = (@p2)";
 
             List<NpgsqlParameter> deleteWagonParams = new List<NpgsqlParameter>();
             deleteWagonParams.Add(new NpgsqlParameter("p2", w.Id));
 
-            NpgsqlDataReader deleteWagonReader = await s.sqlCommand(deleteWagonSql, deleteWagonParams);
+            MyReader deleteWagonReader = await s.sqlCommand(deleteWagonSql, deleteWagonParams);
 
             deleteWagonReader.Close();
         }
@@ -102,24 +93,26 @@ namespace code.Services
                 new NpgsqlParameter("p3", note.Text)
             };
 
-            NpgsqlDataReader reader = await s.sqlCommand(sql, parameters);
+            MyReader reader = await s.sqlCommand(sql, parameters);
             reader.Close();
         }
 
 		public async Task<List<WagonNote>> GetWagonNotesByWagonId(int wagonId)
         {
             string sql = @"
-                SELECT wagon_id, user_id, text 
-                FROM wagon_comments
+                SELECT wagon_id, user_id, text, name
+                FROM wagon_comments LEFT JOIN users
+                ON wagon_comments.user_id = users.id
                 WHERE wagon_id = @p1
-                ORDER BY id";
+                ORDER BY wagon_comments.id";
 
             List<NpgsqlParameter> parameters = new List<NpgsqlParameter>
             {
                 new NpgsqlParameter("p1", wagonId)
             };
 
-            NpgsqlDataReader reader = await s.sqlCommand(sql, parameters);
+            MyReader myreader = await s.sqlCommand(sql, parameters);
+            NpgsqlDataReader reader = myreader.Reader;
             
             List<WagonNote> wagonNotes = new List<WagonNote>();
             while(reader.Read())
@@ -128,11 +121,12 @@ namespace code.Services
                 {
                     WagonId = (int)reader["wagon_id"],
                     UserId = (int)reader["user_id"],
-                    Text = reader["text"].ToString()
+                    Text = reader["text"].ToString(),
+                    UserName = reader["name"].ToString()
                 };
                 wagonNotes.Add(note);
             }
-            reader.Close();
+            myreader.Close();
 
             return wagonNotes;
         }

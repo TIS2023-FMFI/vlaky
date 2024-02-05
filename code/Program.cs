@@ -46,13 +46,15 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddSingleton<IAuthorizationHandler, AuthRequirementHandler>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
+UserValidationService.ConfigureServise(builder.Configuration);
+builder.Services.AddSingleton<UserValidationService>();
+
 LoggerService.configureService(builder.Configuration);
 builder.Services.AddSingleton<LoggerService>();
 DbConnectionService.configureService(builder.Configuration);
 builder.Services.AddSingleton<DbConnectionService>();
 builder.Services.AddTransient<SQLService>();
 builder.Services.AddTransient<BlackBoardService>();
-
 
 builder.Services.AddRazorPages().AddSessionStateTempDataProvider();
 builder.Services.AddServerSideBlazor();

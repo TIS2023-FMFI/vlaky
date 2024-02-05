@@ -8,35 +8,32 @@ using code.Auth;
 using System.Data;
 using Microsoft.AspNetCore.Authorization;
 
-namespace code.Pages;
-
-[Authorize(Policy = "Ban")]
-[Authorize(Policy = "UserManagementPolicy")]
-
-public class ManageModel : PageModel
+namespace code.Pages
 {
-    private readonly ILogger<ManageModel> _logger;
-    
-    public bool allow;
-
-    public ManageModel(ILogger<ManageModel> logger)
+    [Authorize(Policy = "UserManagementPolicy")]
+    public class ManageModel : PageModel
     {
-        _logger = logger;
-        allow = false;
-    }
-    
+        private readonly ILogger<ManageModel> _logger;
+                private readonly LoggerService _loggerService;
+                private readonly UserValidationService _userValidationService;
+        
+        public bool allow;
 
-    public Account? Acc{get;private set;}
-    public async Task OnGet()
-    {
-
-        if (!HttpContext.User.Identity.IsAuthenticated)
+        public ManageModel(ILogger<ManageModel> logger,
+            LoggerService loggerService,
+            UserValidationService userValidationService)
         {
-            await HttpContext.ChallengeAsync();
+            _logger = logger;
+            _loggerService = loggerService;
+            _userValidationService = userValidationService;
+            allow = false;
         }
-
+        
+        public Account? Acc{get;private set;}
+        public async Task OnGet()
+        {
+            if (await _userValidationService.IsUserInvalid(HttpContext)) {return;}
+        }
     }
-
-
 }
 

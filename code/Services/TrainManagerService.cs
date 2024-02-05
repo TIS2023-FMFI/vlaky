@@ -32,12 +32,13 @@ namespace code.Services
             };
 
             int trainId = 0;
-            NpgsqlDataReader reader = await s.sqlCommand(sql, parameters);
+            MyReader myreader = await s.sqlCommand(sql, parameters);
+            NpgsqlDataReader reader = myreader.Reader;
             if (reader.Read())
             {
                 trainId = (int)reader[0];
             }
-            reader.Close();
+            myreader.Close();
 
             for (int i = 1; i <= trn.nWagons; i++)
             {
@@ -62,7 +63,8 @@ namespace code.Services
             parameters.Add(new NpgsqlParameter("p1", from));
             parameters.Add(new NpgsqlParameter("p2", to));
 
-            NpgsqlDataReader reader = await s.sqlCommand(sql, parameters);
+            MyReader myreader = await s.sqlCommand(sql, parameters);
+            NpgsqlDataReader reader = myreader.Reader;
 
             List<Train> trains = new List<Train>();
             while (reader.Read())
@@ -81,7 +83,7 @@ namespace code.Services
                 };
                 trains.Add(temp);
             }
-            reader.Close();
+            myreader.Close();
             foreach (Train train in trains)
             {
                 train.Wagons = await WMService.GetWagonsByTrainId(train.Id);
@@ -141,7 +143,7 @@ namespace code.Services
             List<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
             parameters.Add(new NpgsqlParameter("p1", trn.Id));
 
-            NpgsqlDataReader reader = await s.sqlCommand(sql, parameters);
+            MyReader reader = await s.sqlCommand(sql, parameters);
 
             reader.Close();
         }
@@ -191,7 +193,8 @@ namespace code.Services
             List<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
             parameters.Add(new NpgsqlParameter("p1", trainId));
 
-            NpgsqlDataReader reader = await s.sqlCommand(sql, parameters);
+            MyReader myreader = await s.sqlCommand(sql, parameters);
+            NpgsqlDataReader reader = myreader.Reader;
 
             Train train = null;
             if (reader.Read())
@@ -209,7 +212,7 @@ namespace code.Services
                     Lenght = (double)reader[8]
                 };
             }
-            reader.Close();
+            myreader.Close();
 
             if (train != null)
             {
@@ -234,7 +237,8 @@ namespace code.Services
             List<NpgsqlParameter> parameters = new List<NpgsqlParameter>();
             parameters.Add(new NpgsqlParameter("p1", trainId));
 
-            NpgsqlDataReader reader = await s.sqlCommand(sql, parameters);
+            MyReader myreader = await s.sqlCommand(sql, parameters);
+            NpgsqlDataReader reader = myreader.Reader;
 
             TrainNote trainNote = null;
             if (reader.Read())
@@ -246,7 +250,7 @@ namespace code.Services
                     Text = (string)reader[2],
                 };
             }
-            reader.Close();
+            myreader.Close();
 
             return trainNote;
         }

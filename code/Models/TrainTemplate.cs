@@ -10,7 +10,7 @@ namespace code.Models
         public TrainTemplate(){}
         public async void SetName(string nn,SQLService s){
             List<NpgsqlParameter> parameters = [new NpgsqlParameter("name",nn), new NpgsqlParameter("id",Id)];
-            NpgsqlDataReader reader = await s.sqlCommand("UPDATE templates SET name = ($1) WHERE id = ($2)", parameters);
+            MyReader reader = await s.sqlCommand("UPDATE templates SET name = ($1) WHERE id = ($2)", parameters);
             reader.Close();
         }
     }
