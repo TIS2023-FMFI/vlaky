@@ -81,17 +81,19 @@ namespace code.Pages
                 allTemplates = new List<TrainTemplate>();
             }
 
-
-            foreach (var tt in allTemplates)
+            var templateId = HttpContext.Request.Query["templateId"].ToString();
+            if (string.IsNullOrEmpty(templateId))
             {
-                if (tt.Name == Name)
+                foreach (var tt in allTemplates)
                 {
-                    ErrorMessage = "Šablóna s týmto názvom už existuje.";
-                    return Page();
+                    if (tt.Name == Name)
+                    {
+                        ErrorMessage = "Šablóna s týmto názvom už existuje.";
+                        return Page();
+                    }
                 }
             }
-
-            var templateId = HttpContext.Request.Query["templateId"].ToString();
+            
             var newTemplate = new TrainTemplate
             {
                 Name = Name,

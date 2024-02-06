@@ -157,27 +157,6 @@ namespace code.Services
                 return;
             }
 
-            // Delete related wagon comments
-            string deleteWagonCommentsSql = "DELETE FROM wagon_comments WHERE wagon_id IN (SELECT id FROM wagons WHERE train_id = @p1)";
-            List<NpgsqlParameter> wagonCommentsParameters = new List<NpgsqlParameter>();
-            wagonCommentsParameters.Add(new NpgsqlParameter("p1", trainId));
-            
-            await s.sqlCommand(deleteWagonCommentsSql, wagonCommentsParameters);
-
-            // Delete wagons
-            string deleteWagonsSql = "DELETE FROM wagons WHERE train_id = @p1";
-            List<NpgsqlParameter> wagonsParameters = new List<NpgsqlParameter>();
-            wagonsParameters.Add(new NpgsqlParameter("p1", trainId));
-            
-            await s.sqlCommand(deleteWagonsSql, wagonsParameters);
-
-            // Delete train comments
-            string deleteTrainCommentsSql = "DELETE FROM train_comments WHERE train_id = @p1";
-            List<NpgsqlParameter> trainCommentsParameters = new List<NpgsqlParameter>();
-            trainCommentsParameters.Add(new NpgsqlParameter("p1", trainId));
-            
-            await s.sqlCommand(deleteTrainCommentsSql, trainCommentsParameters);
-
             // Delete the train
             string deleteTrainSql = "DELETE FROM trains WHERE id = @p1";
             List<NpgsqlParameter> trainParameters = new List<NpgsqlParameter>();

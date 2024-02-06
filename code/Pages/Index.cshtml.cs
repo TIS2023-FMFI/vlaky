@@ -48,7 +48,7 @@ namespace code.Pages
                 UserName = User.FindFirst(ClaimTypes.Name)?.Value;
                 UserId = Convert.ToInt32(HttpContext.User.FindFirst("Id").Value);
                 int priv = Convert.ToInt32(HttpContext.User.FindFirst("Privileges").Value);
-                IsManager = (priv >> 1) % 2 == 1;
+                IsManager = (priv >> 2) % 2 == 1;
                 HasAddRights = (priv >> 6) % 2 == 1;
             }
 

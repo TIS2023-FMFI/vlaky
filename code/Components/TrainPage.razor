@@ -284,6 +284,7 @@
     <div class="train-first">
         <div class="train-state">
             <img src="@GetTrainStatusImage()" alt="Train State" />
+            @if (hasManageTrains) {
             <select value="@SelectedStatus" onchange="@OnStatusChanged" class="note-form-input select-center-text">
                 <option value="0">Naplánovaný</option>
                 <option value="1">V príprave</option>
@@ -291,6 +292,15 @@
                 <option value="3">Expedovaný</option>
                 <option value="4">Zrušený</option>
             </select>
+            } else {
+            <select value="@SelectedStatus" onchange="@OnStatusChanged" class="note-form-input select-center-text" disabled>
+                <option value="0">Naplánovaný</option>
+                <option value="1">V príprave</option>
+                <option value="2">Pripravený</option>
+                <option value="3">Expedovaný</option>
+                <option value="4">Zrušený</option>
+            </select>
+            }
         </div>
 
         <div class="train-info">
@@ -314,7 +324,7 @@
         <div class="train-note">
             <p style="margin-bottom: 10px;">Poznámka:</p>
             @{
-                if (hasAddNotes){
+                if (hasAddNotes || hasManageTrains){
                     <textarea class="custom-textarea" rows="4" bind="@editedNoteContent" value="@editedNoteContent" onchange="@OnNoteChanged"></textarea>
                 } else {
                     <textarea disabled class="custom-textarea" rows="4" bind="@editedNoteContent" value="@editedNoteContent" onchange="@OnNoteChanged"></textarea>
@@ -349,16 +359,23 @@
             @foreach (var wagon in train.Wagons.OrderBy(w => w.Id))
             {
                 <div class="wagon-container">
-                    @if (hasManageTrains) {
-                        <div class="wagon @($"wagon-status-{wagon.State}")" onclick="@(() => OnWagonClicked(wagon))">
-                            <label class="wagon-label">@wagon.NOrder</label>
-                        </div>
-                        <input class="wagon-checkbox" type="checkbox" id="@($"wagon-checkbox-{wagon.Id}")" onchange="@((ChangeEventArgs e) => SelectWagon(wagon, e))" />
+                    @if (hasManageTrains || hasAddNotes) {
+                        if (!hasManageTrains) {
+                            <div class="wagon @($"wagon-status-{wagon.State}")">
+                                <label class="wagon-label">@counter</label>
+                            </div>
+                            <input class="wagon-checkbox" type="checkbox" id="@($"wagon-checkbox-{wagon.Id}")" onchange="@((ChangeEventArgs e) => SelectWagon(wagon, e))" />
+                        } else {
+                            <div class="wagon @($"wagon-status-{wagon.State}")" onclick="@(() => OnWagonClicked(wagon))">
+                                <label class="wagon-label">@counter</label>
+                            </div>
+                            <input class="wagon-checkbox" type="checkbox" id="@($"wagon-checkbox-{wagon.Id}")" onchange="@((ChangeEventArgs e) => SelectWagon(wagon, e))" />
+                        }
                     } else {
                         <div class="wagon @($"wagon-status-{wagon.State}")">
                             <label class="wagon-label">@counter</label>
                         </div>
-                        //<input class="wagon-checkbox" type="checkbox" id="@($"wagon-checkbox-{wagon.Id}")" onchange="@((ChangeEventArgs e) => SelectWagon(wagon, e))" />
+                        <input class="wagon-checkbox" type="checkbox" style="z-index: -1000;"/>
                     }
                     @if (wagon.Notes != null && wagon.Notes.Count > 0)
                     {
@@ -397,7 +414,7 @@
     <div class="modal-backdrop fade show" onclick="@CancelDeleteTrain"></div>
 }
 
-@if (showAddNote && hasAddNotes)
+@if (showAddNote && (hasAddNotes || hasManageTrains))
 {
     <div class="modal fade show" id="showAddNote" style="display: block;" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-dialog-centered" role="document">
@@ -482,7 +499,7 @@
     <button class="btn btn-primary create-note-button second" onclick="@ShowDeleteConfirmation">Vymazať vlak</button>
 }
 
-@if (selectedWagons.Any() && hasManageTrains) {
+@if (selectedWagons.Any() && (hasAddNotes || hasManageTrains)) {
     <button class="btn btn-primary create-note-button third" onclick="@ShowAddNoteModal">Pridať poznámku</button>
 }
 
