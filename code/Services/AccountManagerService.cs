@@ -63,7 +63,7 @@ namespace code.Services{
                 }
 
                 myreader.Close();
-                return Accounts;
+                return Accounts.OrderBy(a => a.Id).ToList();
             }
 
             public async Task<List<Account>> GetAccounts(string mail, string pass){

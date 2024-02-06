@@ -16,7 +16,8 @@
         <h6>Nevyplnili ste všetky položky, používateľ nebol pridaný.</h6>
     }
     @if(chybaPridania){
-        <h6>Nastala chyba pri pridaní pouzivateľa, pravdepodobne sa snažíte pridať účet s už existujúcim menom alebo e-mailom</h6>
+        <h6 style="color: red;">Nastala chyba pri pridaní používateľa, pravdepodobne sa snažíte pridať účet s existujúcim menom alebo e-mailom.</h6>
+        <br>
     }
     <button class="note-form-button" @onclick="e => AddAccount()"
         data-toggle="modal" data-target="#productModal" data-bs-toggle="modal" data-bs-target="#productModal">
@@ -100,20 +101,18 @@
                 </div>
                 <br>
                 <div class = "inputs">
-                    Privilege to manage users:
+                    Prístup k stránke:
                     <input type="checkbox" id="privileges" name="privileges" @bind="privileges[0]"><br>
-                    Privilege to manage notes:
-                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[1]"><br>
-                    Privilege to create templates:
-                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[2]"><br>
-                    Privilege to manage trains:
-                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[3]"><br>
-                    Privilege to comment trains:
-                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[4]"><br>
-                    Privilege to write on blackboard:
-                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[5]"><br>
-                    Privilege to log into the site:
+                    Písanie na tabuľu poznámok:
                     <input type="checkbox" id="privileges" name="privileges" @bind="privileges[6]"><br>
+                    Manažment poznámok:
+                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[2]"><br>
+                    Komentovanie vlakov:
+                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[5]"><br>
+                    Manažment vlakov:
+                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[4]"><br>
+                    Manažment používateľov:
+                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[1]"><br>
                 </div>
                 <br>
                 <div class = "inputs">
@@ -139,18 +138,16 @@
                 <div class = "inputs">
                     Prístup k stránke:
                     <input type="checkbox" id="privileges" name="privileges" @bind="privileges[0]"><br>
-                    Manažment používateľov:
-                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[1]"><br>
-                    Manažmenť poznámok:
-                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[2]"><br>
-                    Vytváranie šablón:
-                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[3]"><br>
-                    Manažment vlakov:
-                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[4]"><br>
-                    Komentovanie vlakov:
-                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[5]"><br>
                     Písanie na tabuľu poznámok:
                     <input type="checkbox" id="privileges" name="privileges" @bind="privileges[6]"><br>
+                    Manažment poznámok:
+                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[2]"><br>
+                    Komentovanie vlakov:
+                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[5]"><br>
+                    Manažment vlakov:
+                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[4]"><br>
+                    Manažment používateľov:
+                    <input type="checkbox" id="privileges" name="privileges" @bind="privileges[1]"><br>
                 </div>
             </div>
             <button @onclick="e => SavePrivileges()"
