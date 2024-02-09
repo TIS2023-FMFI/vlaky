@@ -37,9 +37,17 @@ namespace code.Pages
             }
 
             var templateId = HttpContext.Request.Query["templateId"].ToString();
+            
             if (!string.IsNullOrEmpty(templateId))
             {
+                TrainTemplate tmp = await _TemplateManagerService.GetTemplateById(Convert.ToInt32(templateId));
+                if(tmp != null)
+                {
+                    _loggerService.writeTemplateDelete(HttpContext, tmp);
+                }
+                    
                 await _TemplateManagerService.RemoveTemplateById(Convert.ToInt32(templateId));
+                
             }
 
             Templates = await _TemplateManagerService.GetTemplates();

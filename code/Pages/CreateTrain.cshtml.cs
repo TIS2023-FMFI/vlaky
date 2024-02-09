@@ -60,7 +60,7 @@ namespace code.Pages
         public CreateTrainModel(TrainManagerService trainManagerService, 
             ILogger<CreateTrainModel> logger, 
             LoggerService loggerService, 
-            TemplateManagerService templateManagerService,
+            TemplateManagerService templateManagerService, 
             UserValidationService userValidationService)
         {
             _TrainManagerService = trainManagerService;
@@ -166,6 +166,16 @@ namespace code.Pages
                 newTrain.Status = currentTrain.Status;
                 await _TrainManagerService.UpdateTrain(newTrain);
 
+                var train = await _TrainManagerService.GetTrainById(newTrain.Id);
+                if(currentTrain.nWagons < newTrain.nWagons)
+                {
+                    for (int i = currentTrain.nWagons; i < newTrain.nWagons; i++)
+                    {
+                        Wagon w = train.Wagons[i];
+                        _loggerService.writeTrainAdd(HttpContext, train, w);
+                        _loggerService.writeWagonNew(HttpContext, w);
+                    }
+                }
                 var nn = await _TrainManagerService.GetTrainNoteByTrainId(newTrain.Id);
                 nn.Text = TrainNote;
                 nn.UserId = Convert.ToInt32(UId);
@@ -177,15 +187,22 @@ namespace code.Pages
                 await _TrainManagerService.UpdateTrainNote(nn);
                 
                 _loggerService.writeTrainChange(HttpContext, currentTrain, newTrain);
-                _loggerService.writeCommChange(HttpContext, nn);
 
             }
             else
             {
                 var idd = await _TrainManagerService.AddTrain(newTrain);
-
                 _loggerService.writeTrainNew(HttpContext, newTrain);
-
+                if (idd != null)
+                {
+                    Train train = await _TrainManagerService.GetTrainById(idd);
+                    
+                    foreach (Wagon w in train.Wagons)
+                    {
+                        _loggerService.writeTrainAdd(HttpContext, train, w);
+                        _loggerService.writeWagonNew(HttpContext, w);
+                    }
+                }
                 var nn = new TrainNote
                 {
                     TrainId = idd,
@@ -221,12 +238,12 @@ namespace code.Pages
                 }
                 if (!flag) {
                     await _TemplateManagerService.AddTemplate(t);
+                    _loggerService.writeTemplateNew(HttpContext, t);
                 }
             }
 
             if (!string.IsNullOrEmpty(trainId)) 
             {
-                Console.WriteLine(trainId);
                 string path = "/Train?trainId=" + trainId;
                 return Redirect(path);
             }

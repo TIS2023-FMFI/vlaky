@@ -31,6 +31,7 @@ namespace code.Services
         private static string CONF_TRAIN_NEW = "new";
         private static string CONF_TRAIN_ADD = "add";
         private static string CONF_TRAIN_CHANGE = "change";
+        private static string CONF_TRAIN_DELETE = "delete";
 
         private static string CONF_WAGON = "wagon";
         private static string CONF_WAGON_NEW = "new";
@@ -84,6 +85,8 @@ namespace code.Services
             CONF_TRAIN_NEW = trainConf["SecondaryLabelNew"] ?? CONF_TRAIN_NEW;
             CONF_TRAIN_ADD = trainConf["SecondaryLabelAdd"] ?? CONF_TRAIN_ADD;
             CONF_TRAIN_CHANGE = trainConf["SecondaryLabelChange"] ?? CONF_TRAIN_CHANGE;
+            CONF_TRAIN_DELETE = trainConf["SecondaryLabelDelete"] ?? CONF_TRAIN_DELETE;
+
 
             var wagonConf = conf.GetSection("WagonOptions");
             CONF_WAGON = wagonConf["PrimaryLabel"] ?? CONF_WAGON;
@@ -266,6 +269,14 @@ namespace code.Services
         {
             string str = CONF_COLUMN_SEPARATOR + 
             CONF_TRAIN_NEW;
+
+            writeTrain(context, train, str);
+        }
+
+        public void writeTrainDelete(HttpContext context, Train train)
+        {
+            string str = CONF_COLUMN_SEPARATOR + 
+            CONF_TRAIN_DELETE;
 
             writeTrain(context, train, str);
         }

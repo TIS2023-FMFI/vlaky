@@ -95,8 +95,20 @@
     private async Task OnStatusChanged(ChangeEventArgs e)
     {
         SelectedStatus = int.Parse(e.Value.ToString());
+        Train currentTrain = new Train
+        {
+            Name = train.Name,
+            Coll = train.Coll,
+            Destination = train.Destination,
+            MaxLength = train.MaxLength,
+            Lenght = train.Lenght,
+            Status = train.Status,
+            Date = train.Date
+
+        };
         train.Status = SelectedStatus;
         await TrainManager.UpdateTrainStatus(train.Id, SelectedStatus);
+        loggerService.writeTrainChange(HttpContextAccessor.HttpContext, currentTrain, train);
     }
 
     private async Task OnNoteChanged(ChangeEventArgs e)
@@ -107,13 +119,19 @@
             note.Text = editedNoteContent;
             note.UserId = uid;
             await TrainManager.UpdateTrainNote(note);
+            loggerService.writeCommChange(HttpContextAccessor.HttpContext, note);
         }
     }
 
     private async Task OnWagonClicked(Wagon wagon)
     {
-        var tempWagon = new Wagon();
-        tempWagon.State = wagon.State;
+        Wagon tempWagon = new Wagon
+        {
+            State = wagon.State,
+            NOrder = wagon.NOrder,
+            TrainId = wagon.TrainId
+        };
+
         wagon.State += 1;
         wagon.State %= 4;
         
@@ -126,7 +144,12 @@
             foreach (var w in selectedWagons) 
             {
                 if (w.State != wagon.State) {
-                    tempWagon.State = w.State;
+                    tempWagon = new Wagon
+                    {
+                        State = w.State,
+                        NOrder = w.NOrder,
+                        TrainId = w.TrainId
+                    };
                     w.State = wagon.State;
                     await WagonManager.UpdateWagon(w);
                     loggerService.writeWagonChange(HttpContextAccessor.HttpContext, tempWagon, w);
@@ -150,13 +173,12 @@
             if (!selectedWagons.Contains(wagon))
             {
                 selectedWagons.Add(wagon);
-                loggerService.writeWagonNew(HttpContextAccessor.HttpContext, wagon);
+                
             }
         }
         else
         {
             selectedWagons.Remove(wagon);
-            loggerService.writeWagonDelete(HttpContextAccessor.HttpContext, wagon);
         }
 
         StateHasChanged();
@@ -170,6 +192,7 @@
     private async Task ConfirmDeleteTrain()
     {
         showDeleteConfirmationModal = false;
+        loggerService.writeTrainDelete(HttpContextAccessor.HttpContext, train);
         await TrainManager.DeleteTrainById(trainId);
         StateHasChanged();
         NavigationManager.NavigateTo("/Schedule", true);
@@ -261,7 +284,7 @@
         foreach (var wagon in selectedWagons)
         {
             await WagonManager.DeleteWagon(wagon);
-            //loggerService na vymazanie vagonov
+            loggerService.writeWagonDelete(HttpContextAccessor.HttpContext, wagon);
         }
 
         selectedWagons.Clear();

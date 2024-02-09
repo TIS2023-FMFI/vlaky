@@ -307,7 +307,7 @@
         tempAcc = new Account();
         tempAcc.Privileges = p;
         Acc.UpdatePrivileges(p,s, userValidation);
-        loggerService.writeUserPrivilegesChange(HttpContextAccessor.HttpContext, tempAcc, Acc);
+        loggerService.writeUserPrivilegesChange(HttpContextAccessor.HttpContext, Acc, tempAcc);
         Acc = null;
         tempAcc = null;
         uriHelper.NavigateTo(uriHelper.Uri, forceLoad: true);
@@ -335,10 +335,9 @@
 
     void ChangeEmail(){
         tempAcc = new Account();
-        tempAcc.Mail = Acc.Mail;
-        tempAcc.Name = Acc.Name;
+        tempAcc.Mail = mail;
         Acc.UpdateMail(mail,s, userValidation);
-        loggerService.writeUserMailChange(HttpContextAccessor.HttpContext, tempAcc, Acc);
+        loggerService.writeUserMailChange(HttpContextAccessor.HttpContext, Acc, tempAcc);
         Acc = null;
         tempAcc = null;
         MailAcc = false;
