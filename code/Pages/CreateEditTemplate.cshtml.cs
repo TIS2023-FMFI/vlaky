@@ -104,10 +104,13 @@ namespace code.Pages
             {
                 newTemplate.Id = Convert.ToInt32(templateId);
                 await _templateManagerService.UpdateTemplate(newTemplate);
+                _loggerService.writeTemplateChange(HttpContext, newTemplate);
+
             }
             else
             {
                 await _templateManagerService.AddTemplate(newTemplate);
+                _loggerService.writeTemplateNew(HttpContext, newTemplate);
             }
 
             return RedirectToPage("/Templates");

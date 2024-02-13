@@ -42,12 +42,13 @@ namespace code.Services
 
             for (int i = 1; i <= trn.nWagons; i++)
             {
-                await WMService.AddWagon(new Wagon
+                Wagon w = new Wagon
                 {
                     TrainId = trainId,
                     NOrder = i,
                     State = 0
-                });
+                };
+                await WMService.AddWagon(w);
             }
 
             return trainId;

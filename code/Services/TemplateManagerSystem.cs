@@ -83,7 +83,7 @@ namespace code.Services
 
 		public async Task<TrainTemplate> GetTemplateById(int templateId)
 		{
-			string sql = "SELECT * FROM templates WHERE id = @p1";
+			string sql = "SELECT * FROM templates WHERE id = (@p1)";
 
 			List<NpgsqlParameter> parameters = new List<NpgsqlParameter>
 			{
@@ -93,9 +93,10 @@ namespace code.Services
 			MyReader myreader = await s.sqlCommand(sql, parameters);
 			NpgsqlDataReader reader = myreader.Reader;
 
+			TrainTemplate t = null;
 			if (reader.Read())
 			{
-				return new TrainTemplate
+				t = new TrainTemplate
 				{
 					Id = (int)reader["id"],
 					Name = (string)reader["name"],
@@ -104,7 +105,7 @@ namespace code.Services
 			}
 
 			myreader.Close();
-			return null;
+			return t;
 		}
 
 		public async Task RemoveTemplateById(int templateId)
